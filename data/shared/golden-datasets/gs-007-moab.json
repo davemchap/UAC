@@ -1,0 +1,93 @@
+{
+  "scenario_id": "gs-007",
+  "scenario_name": "Moab, UT — Moderate Danger (2026-03-09)",
+  "description": "Real UAC forecast, NWS weather, and SNOTEL snowpack for Moab zone",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Moab",
+    "center": "UAC",
+    "state": "UT",
+    "coordinates": {
+      "latitude": 38.44,
+      "longitude": -109.27
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "advisories": [
+        {
+          "advisory": {
+            "date_issued": "Monday, March 9, 2026 - 7:10am",
+            "date_issued_timestamp": "1773061823",
+            "special_announcement": "Geyser Pass Road Conditions:&nbsp;The road was not plowed after the last storm. Expect a little snow and ice up high, and muddy conditions as the day heats up.&nbsp;\r\rGrooming: No grooming is scheduled. Expect a few inches of fresh snow on trails.&nbsp;\r\rMountain Film on Tour&nbsp;returns to Star Hall in Moab on Saturday, March 14. Tickets are available online and all proceeds benefit UAC Moab. Look forward to seeing you all there!&nbsp;\r\rAll four&nbsp;accident reports are completed from the deadly mid-February week in northern Utah. Our sincerest condolences to all of those affected.&nbsp;\r",
+            "general_announcements": "This forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions and local variations always occur.&nbsp;\r",
+            "current_conditions": "\r\r24 Hour Snow:&nbsp;0\"&nbsp;72 Hour Snow:&nbsp;3\"&nbsp;Season Total Snow:&nbsp;75\"&nbsp;Depth at Gold Basin:&nbsp;33\"\r\rWinds on Pre-Laurel Peak: SW&nbsp;5-10&nbsp;Temp:&nbsp;25°F\r\rWeather\r\rExpect a sunny, breezy spring day. Under clear skies, winds shifted to the southwest overnight and will increase throughout the day to 15-20 mph, gusting into the 40s. Mountain highs in the La Sals will reach the mid-40s F as more corn forms on solars.\r\rGeneral Conditions\r\rThe 5 inches of fresh snow that fell on Friday looked to be \"winter's last gasp\" as Eric put it, as we enter a hot and dry period with temperatures reaching near record-breaking highs this week. Eric and I made the most of it yesterday in Middle Cirque, finding soft turns in fresh snow over a firm, supportable crust with mild wind effect up high. The new snow took some heat in recent days, and southerly slopes like those Dave and Travis skied on Saturday will have a melt-freeze crust this morning.&nbsp;\r\rMaggie Nielsen sent in this observation with an excellent pit profile that clearly details our persistent weak layer problem. The greatest threat from avalanches continues to be on northerly aspects near and above treeline, where hard slabs exist over layers of weak, dry, faceted snow. While Eric and I found the weak layer to be gaining strength yesterday, we concluded it was not stable yet. This is a notoriously unpredictable setup that offers little to no warning before failing. It’s a familiar pattern for seasoned La Sal skiers and riders, and the safest approach remains the same: avoid steep terrain on the north half of the compass.\r\r\r\rEric making the most of winter's last gasp high in Middle Cirque.&nbsp;\r\rSee all Moab&nbsp;observations here.&nbsp;\r\rSnowpack and Weather Data\r\r\r\rNEW! Gold Basin webcam storm stake&nbsp;\r\rGold Basin Storm Stake (10,000')\r\rGold Basin SNOTEL site (10,000')\r\rSNOTEL site near&nbsp;Geyser Pass Winter Trailhead (9600')\r\r\r\rWind Station on Pre-Laurel Peak (11,400')\r\rNWS forecast for the La Sal Mountains.&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+            "mountain_weather": "\r\r&nbsp;\r\r\r&nbsp;\r\r\r&nbsp;\r",
+            "recent_activity": "No recent avalanches have been observed. The avalanche database has been updated to include all observed avalanches from the last cycle. These are all great examples of the type of avalanche that are possible to trigger.&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+            "avalanche_problem_1": "Wet Snow",
+            "avalanche_problem_1_description": "Temperatures are forecast to increase to record-breaking highs throughout the week with strong sunshine. While the breeze may help keep snow surfaces cooler today, be aware of warming snow on slopes that face the sun. If you're seeing roller balls or pin wheels, wet loose slides are on the menu. These are most likely on steep slopes facing the sun, near rocks, and will increase in likelihood into the afternoon.\r",
+            "avalanche_problem_2": "Persistent Weak Layer",
+            "avalanche_problem_2_description": "It's been two weeks since the last significant storm and avalanche cycle. Our buried persistent weak layers (PWLs) are now more stubborn to trigger as they gain strength. While you likely won't see any red flags like cracking and collapsing, the snowpack structure is still poor. MODERATE danger with a PWL is a tricky place to be: possible&nbsp;avalanches are that are more than likely to kill you.\r\rOn northerly aspects near and above treeline, thick hard slabs—2 to 4 feet deep—rest on top of these persistent weak layers. This is a highly unpredictable setup, and committing to steep slopes with this structure is a gamble. If triggered, avalanches could step down and take out the entire season’s snowpack.\r\rThin, rocky areas, steep convex rollovers, and slab margins remain likely trigger points. When the payoff for riding steep terrain is minimal, it’s hard to justify the risk. Our approach continues to be simple: avoid steep slopes in this terrain altogether.\r\rEric and I shot this video yesterday where we found the weak layer to be gaining strength, but not yet stable.&nbsp;\r\r\r",
+            "avalanche_problem_3_description": "&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+            "bottom_line": "The avalanche danger is MODERATE&nbsp;on steep slopes near and above treeline that face NW–N–E.&nbsp; Hard slab, human-triggered avalanches 2–4 feet deep failing on a buried persistent weak layer remain POSSIBLE&nbsp;here. If released, they could step down to involve the entire season’s snowpack and bury you.&nbsp;\r\rAlthough the odds of triggering an avalanche have decreased,&nbsp;the consequences remain the same. Personally, I'll be continuing to avoid steep, northerly aspects near and above treeline.\r\r&nbsp;\r\r&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+            "danger_rose_1": "14,14,16,16,16,16,16,14,14,14,16,16,16,16,16,14,16,16,16,16,16,16,16,16",
+            "danger_rose_2": "16,16,16,14,14,14,14,16,16,16,16,14,14,14,14,16,14,14,14,14,14,14,14,14",
+            "danger_rose_3": "14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "overall_danger_rose": "4,4,4,2,2,2,2,4,4,4,4,2,2,2,2,4,2,2,2,2,2,2,2,2",
+            "overall_danger_rose_image": "<img src=\"https://utahavalanchecenter.org/sites/default/files/forecast/202603/20260309-071146-0.png\">",
+            "overall_danger_rating": "Moderate",
+            "region": "Moab",
+            "Nid": "102705"
+          }
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/GJT/59,89/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-06:00",
+        "endTime": "2026-03-09T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 39,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 0
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -7.777777777777778
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 42
+        },
+        "windSpeed": "5 mph",
+        "windDirection": "NNE",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Low", "level": 1 }
+    },
+    "avalanche_problems": [
+      "Wet Slab",
+      "Persistent Slab"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "description": "Unified avalanche forecast schema — the target format for normalizing CAIC and UAC Native data into a common structure. This is what avalanche.org essentially does behind the scenes.",
+  "example": {
+    "id": "unified-001",
+    "source_center": "UAC",
+    "source_region": "Salt Lake",
+    "issued_at": "2026-03-06T07:10:00-07:00",
+    "valid_until": "2026-03-07T07:10:00-07:00",
+    "overall_danger": {
+      "rating": 3,
+      "name": "Considerable",
+      "color": "#F7941E"
+    },
+    "danger_by_elevation": {
+      "above_treeline": { "rating": 3, "name": "Considerable" },
+      "near_treeline": { "rating": 3, "name": "Considerable" },
+      "below_treeline": { "rating": 2, "name": "Moderate" }
+    },
+    "avalanche_problems": [
+      {
+        "type": "Wind Slab",
+        "likelihood": "Likely",
+        "aspects": ["N", "NE", "E", "NW"],
+        "elevation_bands": ["above_treeline", "near_treeline"],
+        "size": { "min": 1.5, "max": 2.5 },
+        "description": "Plain text description of the problem"
+      }
+    ],
+    "confidence": "Moderate",
+    "bottom_line": "Plain text summary of conditions and travel advice",
+    "weather_summary": "Plain text weather conditions",
+    "snowpack_summary": "Plain text snowpack discussion"
+  },
+  "field_definitions": {
+    "id": "Unique identifier — format: {center}-{region}-{date}",
+    "source_center": "Originating avalanche center code",
+    "source_region": "Region/zone name from the source center",
+    "issued_at": "ISO 8601 datetime with timezone",
+    "valid_until": "ISO 8601 datetime with timezone",
+    "overall_danger.rating": "Integer 1-5 per North American Avalanche Danger Scale",
+    "overall_danger.name": "Standard danger name: Low, Moderate, Considerable, High, Extreme",
+    "overall_danger.color": "Standard hex color per NAPADS",
+    "danger_by_elevation": "Danger rating broken out by elevation band (above/near/below treeline)",
+    "avalanche_problems[].type": "Standard problem name per avalanche.org taxonomy",
+    "avalanche_problems[].likelihood": "Likelihood string: Unlikely, Possible, Likely, Very Likely, Almost Certain",
+    "avalanche_problems[].aspects": "Array of cardinal/intercardinal aspects: N, NE, E, SE, S, SW, W, NW",
+    "avalanche_problems[].elevation_bands": "Array of elevation band IDs",
+    "avalanche_problems[].size": "Destructive size range as decimal numbers",
+    "avalanche_problems[].description": "Plain text (no HTML) description",
+    "confidence": "Forecast confidence: Low, Moderate, High",
+    "bottom_line": "Plain text (no HTML) summary",
+    "weather_summary": "Plain text weather discussion",
+    "snowpack_summary": "Plain text snowpack discussion"
+  }
+}

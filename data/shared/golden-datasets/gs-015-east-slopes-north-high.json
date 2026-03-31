@@ -1,0 +1,256 @@
+{
+  "scenario_id": "gs-015",
+  "scenario_name": "East Slopes North, WA — High Danger (2026-02-27)",
+  "description": "NWAC forecast via avalanche.org with historical weather for East Slopes North",
+  "source": "avalanche.org product 181498, historical data from 2026-02-27",
+  "zone": {
+    "name": "East Slopes North",
+    "center": "NWAC",
+    "state": "WA",
+    "coordinates": {
+      "latitude": 48.40,
+      "longitude": -120.35
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 181498,
+      "published_time": "2026-02-27T02:03:00+00:00",
+      "expires_time": "2026-02-28T02:00:00+00:00",
+      "created_at": "2026-02-27T00:33:14+00:00",
+      "updated_at": "2026-02-27T03:15:02+00:00",
+      "author": "Josh Hirshberg",
+      "product_type": "forecast",
+      "bottom_line": "<p>Stay off and out from under wind-loaded slopes, and pay attention to warning signs like natural avalanches, cracking, and collapsing. Stick to wind-sheltered terrain at low elevations, well out from under overhead avalanche paths. Very strong west winds are overloading the weak snowpack, causing very large and deadly natural avalanches.</p>",
+      "hazard_discussion": "<p>Ongoing westerly winds will dominate the weather at least through Friday. This wind event is so significant that the drifted slabs are adding stress to the weak, underlying snowpack. Stay diligent to look for recent avalanches, blowing snow, and give yourself greater margins of safety.</p>\n<p>Since midweek, there's been a widespread cycle of natural and triggered avalanches in the Washington Pass area, and possibly near Hart's Pass. On the 26th, observers reported numerous natural avalanches on leeward, wind-loaded slopes near Cutthroat Lake and in Cedar Creek. Many were large to very large, and some had wide crowns deep enough to have run on a suspected persistent weak layer. Some avalanches were shallower, more typical of wind slabs at the base of cliffs.&nbsp;</p>\n<p>A decent share of the recent avalanches are confirmed or suspected to have run within weak, faceted snow and surface hoar over the 2/7 crust. Over the weekend, there was a report of a widely propagating, but shallow avalanche near Heather Pass. &nbsp;On the 22nd, observers near Harts Pass triggered an avalanche on surface hoar, buried 8-10\" below the surface. As of the 25th, wind-drifted snow began to stress these weak layers, bury them deeper, and create very dangerous conditions.</p>\n<p>1-2 feet below the surface is a weak layer over a crust (February 7th). Immediately above the crust are weak faceted grains and, in some places, surface hoar. The January 28th crust is thicker and another 6-12\" deeper. &nbsp;On southerly aspects, there are more crusts and less dry, weak snow on the surface. West of Washington Pass, overall, the layers will be deeper, with thicker crusts and more snow between them. Farther east, in places like the Chewuch and Twisp River drainages, the snowpack is shallower and weaker. We have little recent information in the eastern mountains and suspect a very weak snowpack.</p>",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": [
+        {
+          "id": 1,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Poster%20Bowl_699e676fe2d0c-large.JPG",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Poster%20Bowl_699e676fe2d0c-medium.JPG",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Poster%20Bowl_699e676fe2d0c.JPG",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Poster%20Bowl_699e676fe2d0c-thumbnail.JPG"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p>Natural slab avalanche with wide propagation in the Hairpin Valley. We suspect this avalanche failed within weak snow over the 2/7 crust.&nbsp;<br><br>SS-R2-D1.5</p>",
+          "favorite": true
+        },
+        {
+          "id": 2,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_101220_698e739461bb6-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_101220_698e739461bb6-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_101220_698e739461bb6.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_101220_698e739461bb6-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/12/2026) <p>Wind crusts and wind affected surfaces were widespread in terrain above 6000ft. But wind slabs were unreactive to ski tests.&nbsp;</p> Photo: NCH",
+          "favorite": false
+        },
+        {
+          "id": 3,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_115615_698e73891fdbf-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_115615_698e73891fdbf-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_115615_698e73891fdbf.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_115615_698e73891fdbf-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/12/2026) <p>Weak near surface facets on the snow surface are highlighted by the crystal card. [Cedar Creek Drainage, ESE aspect, 7000ft]</p> Photo: NCH",
+          "favorite": true
+        },
+        {
+          "id": 4,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_9147_698fd4db7edd9-large.jpeg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_9147_698fd4db7edd9-medium.jpeg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_9147_698fd4db7edd9.jpeg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_9147_698fd4db7edd9-thumbnail.jpeg"
+          },
+          "type": "image",
+          "title": "faceted crusts",
+          "caption": "(2/13/2026) <p>In some open, mid-elevation terrain, the various melt-freeze crusts had completely faceted out, leaving a mid-pack of cohesionless sugar.&nbsp;&nbsp;</p> Photo: Drew Lovell",
+          "favorite": false
+        },
+        {
+          "id": 5,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_120524_698e7391e7573-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_120524_698e7391e7573-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_120524_698e7391e7573.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260212_120524_698e7391e7573-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/12/2026) <p>The 2/7 interface is buried 15-20cm deep and, in many locations, has small, faceted snow below.&nbsp;</p> Photo: NCH",
+          "favorite": true
+        },
+        {
+          "id": 6,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20261213_Burgett_698fd4a53a86e-large.jpeg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20261213_Burgett_698fd4a53a86e-medium.jpeg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20261213_Burgett_698fd4a53a86e.jpeg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20261213_Burgett_698fd4a53a86e-thumbnail.jpeg"
+          },
+          "type": "image",
+          "title": "Burgett profile",
+          "caption": "(2/13/2026) <p>A profile on a NE aspect @ 6950' had a total snow depth of 190cm, with very weak, faceted grains preserved between the 2/7 and 1/28 melt-freeze crusts.</p> Photo: Drew Lovell",
+          "favorite": false
+        },
+        {
+          "id": 7,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026171_698530df5af7d-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026171_698530df5af7d-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026171_698530df5af7d.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026171_698530df5af7d-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/5/2026) <p>Large cornices loom above Lewis Lake.</p> Photo: NCH",
+          "favorite": false
+        }
+      ],
+      "weather_data": null,
+      "avalanche_center": {
+        "id": "NWAC",
+        "name": "Northwest Avalanche Center",
+        "url": "https://www.nwac.us/",
+        "city": "Seattle",
+        "state": "WA"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 2800152,
+          "forecast_id": 181498,
+          "avalanche_problem_id": 4,
+          "rank": 1,
+          "likelihood": "very likely",
+          "discussion": "<p>Avalanches in wind-loaded terrain will be very dangerous and will run naturally. They could break widely across terrain and be very large, even unsurvivable. If you venture into the mountains, be sure of your ability to avoid avalanche terrain, including any overhead, wind-loaded slopes and avalanche paths. Put a wide buffer of terrain between yourself and any wind-loaded slope steeper than 30 degrees. You could trigger avalanches from far away, and they could come down from above.&nbsp;</p>\n<p>The most dangerous areas will be above 5,000ft where the wind is depositing snow and forming stiff slabs. Weak faceted snow and surface hoar are resting on a crust, about 1.5-2 feet below the surface. Strong westerly and swirling winds will continue to stress these weak layers as slabs form on lee aspects, even well-below ridgelines. At low elevations, these avalanches may act more like your average storm or wind slab, but you may be able to trigger them longer than normal.</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Cutthroat_ESE_7k_69a0fe8630782-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Cutthroat_ESE_7k_69a0fe8630782-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Cutthroat_ESE_7k_69a0fe8630782.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Cutthroat_ESE_7k_69a0fe8630782-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "<p>(2/26/2026)</p>\n<p>A couple of large, natural avalanches on a leeward slope. Note blowing snow and crowns well below the ridgeline. This likely ran on a weak layer above the 2/7 crust, ~2 feet below the surface. Cutthroat Lake. ESE, 7,000ft</p>\n<p>Photo: NCH</p>"
+          },
+          "location": [
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "northwest upper",
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle",
+            "west middle",
+            "northwest middle",
+            "north lower",
+            "northeast lower",
+            "east lower",
+            "southeast lower",
+            "south lower",
+            "southwest lower",
+            "west lower",
+            "northwest lower"
+          ],
+          "size": [
+            "1.5",
+            "2.5"
+          ],
+          "name": "Persistent Slab",
+          "problem_description": "Persistent Slab avalanches are the release of a cohesive layer of snow (a slab) in the middle to upper snowpack, when the bond to an underlying persistent weak layer breaks. Persistent layers include: surface hoar, depth hoar, near-surface facets, or faceted snow. Persistent weak layers can continue to produce avalanches for days, weeks or even months, making them especially dangerous and tricky. As additional snow and wind events build a thicker slab on top of the persistent weak layer, this avalanche problem may develop into a Deep Persistent Slab.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/PersistentSlab.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": 3,
+          "upper": 4,
+          "middle": 4,
+          "valid_day": "current"
+        },
+        {
+          "lower": 3,
+          "upper": 4,
+          "middle": 4,
+          "valid_day": "tomorrow"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 1654,
+          "name": "East Slopes North",
+          "url": "http://www.nwac.us/avalanche-forecast/#/east-slopes-north",
+          "state": "WA",
+          "zone_id": "7",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS-format (converted from NOAA archive data)",
+      "api_endpoint": null,
+      "data": {
+        "number": 8,
+        "name": "",
+        "startTime": "2026-02-27T07:00:00-08:00",
+        "endTime": "2026-02-27T08:00:00-08:00",
+        "isDaytime": true,
+        "temperature": 33,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 0
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -1.39
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 88
+        },
+        "windSpeed": "4 mph",
+        "windDirection": "SW",
+        "icon": "",
+        "shortForecast": "Cloudy",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "High",
+    "danger_level": 4,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "High", "level": 4 },
+      "near_treeline": { "rating": "High", "level": 4 },
+      "below_treeline": { "rating": "Considerable", "level": 3 }
+    },
+    "avalanche_problems": [
+      "Persistent Slab"
+    ],
+    "alert_action": "auto_send",
+    "alert_reasoning": "High danger (level 4) at upper and middle elevations triggers automatic alert dispatch"
+  }
+}

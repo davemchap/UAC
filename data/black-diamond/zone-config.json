@@ -1,0 +1,92 @@
+[
+  {
+    "zone_id": 1738,
+    "name": "Salt Lake",
+    "slug": "salt-lake",
+    "lat": 40.65,
+    "lon": -111.51,
+    "snotel": ["766:UT:SNTL", "366:UT:SNTL"],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/salt-lake",
+    "api_url": "https://utahavalanchecenter.org/forecast/salt-lake/json"
+  },
+  {
+    "zone_id": 1737,
+    "name": "Ogden",
+    "slug": "ogden",
+    "lat": 41.25,
+    "lon": -111.80,
+    "snotel": ["393:UT:SNTL"],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/ogden",
+    "api_url": "https://utahavalanchecenter.org/forecast/ogden/json"
+  },
+  {
+    "zone_id": 1739,
+    "name": "Provo",
+    "slug": "provo",
+    "lat": 40.35,
+    "lon": -111.60,
+    "snotel": ["828:UT:SNTL"],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/provo",
+    "api_url": "https://utahavalanchecenter.org/forecast/provo/json"
+  },
+  {
+    "zone_id": 1736,
+    "name": "Logan",
+    "slug": "logan",
+    "lat": 41.90,
+    "lon": -111.50,
+    "snotel": ["1194:UT:SNTL"],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/logan",
+    "api_url": "https://utahavalanchecenter.org/forecast/logan/json"
+  },
+  {
+    "zone_id": 1740,
+    "name": "Uintas",
+    "slug": "uintas",
+    "lat": 40.70,
+    "lon": -110.90,
+    "snotel": ["1014:UT:SNTL"],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/uintas",
+    "api_url": "https://utahavalanchecenter.org/forecast/uintas/json"
+  },
+  {
+    "zone_id": 1741,
+    "name": "Skyline",
+    "slug": "skyline",
+    "lat": 39.60,
+    "lon": -111.30,
+    "snotel": [],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/skyline",
+    "api_url": "https://utahavalanchecenter.org/forecast/skyline/json"
+  },
+  {
+    "zone_id": 1742,
+    "name": "Moab",
+    "slug": "moab",
+    "lat": 38.70,
+    "lon": -109.55,
+    "snotel": [],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/moab",
+    "api_url": "https://utahavalanchecenter.org/forecast/moab/json"
+  },
+  {
+    "zone_id": 1743,
+    "name": "Southwest",
+    "slug": "southwest",
+    "lat": 37.70,
+    "lon": -112.35,
+    "snotel": [],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/southwest",
+    "api_url": "https://utahavalanchecenter.org/forecast/southwest/json"
+  },
+  {
+    "zone_id": 1744,
+    "name": "Abajos",
+    "slug": "abajos",
+    "lat": 37.85,
+    "lon": -109.45,
+    "snotel": [],
+    "forecast_url": "https://utahavalanchecenter.org/forecast/abajos",
+    "api_url": "https://utahavalanchecenter.org/forecast/abajos/json"
+  }
+]

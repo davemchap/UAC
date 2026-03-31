@@ -1,0 +1,242 @@
+{
+  "scenario_id": "gs-009",
+  "scenario_name": "Grand Mesa, CO — Moderate Danger (2026-03-09)",
+  "description": "Real CAIC AVID forecast and NWS weather for Grand Mesa",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Grand Mesa",
+    "center": "CAIC",
+    "state": "CO",
+    "coordinates": {
+      "latitude": 39.05,
+      "longitude": -107.85
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": "5859e9d3-72b1-43c7-b911-3923561411e7",
+      "publicName": "105-106-107-97",
+      "type": "avalancheforecast",
+      "polygons": [
+        "1EAF86F5-A2D8-44B7-A485-CF625FC37C72",
+        "3302D495-0B02-4C2B-B7E2-04A5BC6B732E",
+        "35FB8EF6-E22C-48A4-89FA-6FCD49920345",
+        "6AFB830C-8B2B-4293-AA7A-C872944C2263"
+      ],
+      "areaId": "f88c4e828678f4ea25fee51b27cf666aabb89e55b0cb177db25224f5d902df29",
+      "forecaster": "Ben Pritchett",
+      "issueDateTime": "2026-03-08T22:30:00Z",
+      "expiryDateTime": "2026-03-09T22:30:00Z",
+      "isTranslated": false,
+      "isAutoTranslated": false,
+      "isMultiDay": false,
+      "timezone": "America/Denver",
+      "weatherSummary": {
+        "days": []
+      },
+      "snowpackSummary": {
+        "days": []
+      },
+      "avalancheSummary": {
+        "days": [
+          {
+            "date": "2026-03-09T22:30:00Z",
+            "content": "<p>You can still trigger a large slab avalanche on some northerly and east-facing slopes where you find a stiff slab resting on weak snow in the lower snowpack. You can also trigger a small avalanche in freshly wind-drifted snow that runs above the shallowly buried frozen crusts. Move away from steep slopes with wet snow later in the day.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 to 3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report&nbsp;<a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+          }
+        ]
+      },
+      "terrainAndTravelAdvice": {
+        "days": [
+          [],
+          [],
+          []
+        ]
+      },
+      "communication": {
+        "headline": "",
+        "sms": ""
+      },
+      "media": {
+        "Images": [
+          {
+            "id": "a8fdd9ca-ab2e-44b1-80ed-4dd97800c9d0",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1773006094/AvIDfx/eq7fshmzy3m6wpedw3op.webp",
+            "width": 2500,
+            "height": 1875,
+            "credit": "",
+            "caption": "<p>Steep wind-drifted, easterly-facing terrain like this slope remain the most dangerous spots.</p>",
+            "tag": "avalanche",
+            "altText": "A corniced ridgeline with an avalanche below it.",
+            "dateTaken": "2026-03-07T22:41:41.536Z",
+            "isArchived": false
+          },
+          {
+            "id": "305ecaee-7130-4c60-ae54-5c9d1b1b39e9",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772230138/AvIDfx/tclvpvo9tk6lc9jjoyau.webp",
+            "width": 2500,
+            "height": 1875,
+            "credit": "",
+            "caption": "<p>This photo of steep, wind-drifted, easterly-facing terrain south of Monarch Pass is a perfect example of where you could trigger a deadly avalanche.</p>",
+            "tag": "avalanche",
+            "altText": "Snow blowing off a ridgeline into steep terrain.",
+            "dateTaken": "2026-02-26T18:49:37Z",
+            "isArchived": false
+          }
+        ]
+      },
+      "dangerRatings": {
+        "days": [
+          {
+            "position": 1,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "low",
+            "date": "2026-03-09T22:30:00Z"
+          },
+          {
+            "position": 2,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "low",
+            "date": "2026-03-10T22:30:00Z"
+          },
+          {
+            "position": 3,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "low",
+            "date": "2026-03-11T22:30:00Z"
+          }
+        ]
+      },
+      "avalancheProblems": {
+        "days": [
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "ne_alp",
+                "e_alp",
+                "ne_tln",
+                "n_alp",
+                "n_tln",
+                "nw_alp",
+                "nw_tln"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            },
+            {
+              "type": "windSlab",
+              "aspectElevations": [
+                "n_tln",
+                "n_alp",
+                "s_alp",
+                "s_tln",
+                "se_tln",
+                "se_alp",
+                "ne_alp",
+                "ne_tln",
+                "e_tln",
+                "e_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "1.5"
+              }
+            }
+          ],
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "ne_alp",
+                "e_alp",
+                "ne_tln",
+                "n_alp",
+                "n_tln",
+                "nw_alp",
+                "nw_tln"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            }
+          ],
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "ne_alp",
+                "e_alp",
+                "ne_tln",
+                "n_alp",
+                "n_tln",
+                "nw_alp",
+                "nw_tln"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            }
+          ]
+        ]
+      }
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/GJT/120,99/forecast/hourly",
+      "data": {
+        "number": 24,
+        "name": "",
+        "startTime": "2026-03-10T08:00:00-06:00",
+        "endTime": "2026-03-10T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 23,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 2
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -8.88888888888889
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 73
+        },
+        "windSpeed": "5 mph",
+        "windDirection": "SSW",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Low", "level": 1 }
+    },
+    "avalanche_problems": [
+      "Persistent Slab",
+      "Wind Slab"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger (level 2), inform but no urgent alert"
+  }
+}

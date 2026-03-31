@@ -1,0 +1,631 @@
+{
+  "scenario_id": "gs-001",
+  "scenario_name": "Salt Lake, UT — Moderate Danger (2026-03-09)",
+  "description": "Real UAC forecast, NWS weather, and SNOTEL snowpack for Salt Lake zone",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Salt Lake",
+    "center": "UAC",
+    "state": "UT",
+    "coordinates": {
+      "latitude": 40.65,
+      "longitude": -111.51
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "advisories": [
+        {
+          "advisory": {
+            "date_issued": "Monday, March 9, 2026 - 6:03am",
+            "date_issued_timestamp": "1773057790",
+            "general_announcements": "This information does not apply to developed ski areas or highways where avalanche control is normally done. This forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions and local variations always occur.\r\rObservations and Avalanches\r\rBackcountry Emergency Procedures\r\rSMS Notifications\r\rInstagram\r\rFacebook\r\rGet Forecast Email\r\rPrevious Forecasts\r\rContact via email\r\rSubmit Observation\r",
+            "current_conditions": "This morning: Skies are clear and temperatures are in the 30's °F. Winds are from the west and have increased overnight, gusting 25-35 mph, with 11,000 foot gusts over 50 mph.\r\rToday: Sunshine with temperatures warming into the upper 30's and low 40's °F.&nbsp; Winds will be from the west/southwest, gusting 25-35 mph along exposed mid and upper elevation ridges, with 11,000 foot gusts in the 50's mph.\r\rA dry cold front moves in overnight and into Tuesday, bringing an increase in clouds and cooler temperatures for Tuesday and Wednesday. There are no storms in sight for the next 7-10 days.\r\rAlthough there was plenty of sun this weekend, temperatures stayed cool enough to preserve cold, dry snow on northerly aspects.\r\r&nbsp;\r\r&nbsp;\r",
+            "mountain_weather": "&nbsp;\r\r&nbsp;\r",
+            "recent_activity": "Minor wet, loose avalanches were common on Sunday as the snow surface warmed from the strong March sunshine, with a small skier-triggered avalanche involving wet snow on an easterly aspect in the Meadows. An avalanche on a northwest aspect at 10,000 feet in Scottie's Bowl was triggered by snowboarders. This avalanche was 18 inches deep and 25 feet wide, and the slope was likely wind-loaded.\r\r&nbsp;\r\r&nbsp;\r",
+            "avalanche_problem_1": "Wind Drifted Snow",
+            "avalanche_problem_1_description": "Winds blowing from the west increased overnight and will remain elevated throughout the day, creating pockets of wind-drifted snow at the upper elevations, including some exposed mid-elevation slopes. These fresh wind drifts may be sensitive and 6-12 inches deep, possibly deeper in upper elevation terrain in the alpine.\r\r&nbsp;\r",
+            "avalanche_problem_2": "Wet Snow",
+            "avalanche_problem_2_description": "I'm uncertain the extent of today's wet snow activity. Although temperatures will be warm with strong sunshine, westerly winds may keep the snow surface cool today and limit avalanche activity involving wet-loose snow on solar/southerly aspects. Today's warm temperatures will affect low-elevation northerly slopes where wet snow avalanches are possible.\r\rWatch for wet rollerballs and soggy snow as a sign the snow surface is taking on heat and switch to a different aspect.\r\r\r\rAvalanche involving wet snow on Sunday in the Meadows (photo: B. Wick)\r",
+            "avalanche_problem_3": "Persistent Weak Layer",
+            "avalanche_problem_3_description": "The Dry January Layer (DJL) of faceted snow is 2-4 feet deep and buried by a strong slab and supportable crusts, with the last reported human-triggered avalanche failing on the DJL on February 26. Triggering an avalanche failing on the DJL is unlikely and this problem is moving toward dormancy.\r\rThe suspect terrain where you can still trigger a deep, hard slab avalanche failing on the DJL will be on a northerly aspect at the upper elevations where there is a thinner snowpack, such as a \"repeater slope\" that avalanched during our mid-February avalanche cycle.&nbsp;\r",
+            "bottom_line": "The overall avalanche danger is MODERATE. Watch for fresh soft slabs of wind-drifted snow 6-12 inches deep at the mid and upper elevations. Although winds may keep the snow surface cool enough, there is also a potential for avalanches involving wet snow on aspects facing east, south, and west, and low-elevation northerly slopes.\r",
+            "danger_rose_1": "16,16,16,16,16,16,16,16,16,16,16,14,14,14,14,16,14,14,14,14,14,14,14,14",
+            "danger_rose_2": "14,14,16,16,16,16,16,14,14,14,16,16,16,16,16,14,16,16,16,16,16,16,16,16",
+            "danger_rose_3": "16,16,16,14,14,14,16,16,16,16,16,14,14,14,14,16,14,14,14,14,14,14,14,14",
+            "overall_danger_rose": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+            "overall_danger_rose_image": "<img src=\"https://utahavalanchecenter.org/sites/default/files/forecast/202603/20260309-064045-0.png\">",
+            "overall_danger_rating": "Moderate",
+            "region": "Salt Lake",
+            "Nid": "102702"
+          }
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/SLC/113,169/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-06:00",
+        "endTime": "2026-03-09T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 34,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 2
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -5.555555555555555
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 61
+        },
+        "windSpeed": "8 mph",
+        "windDirection": "SSW",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": [
+      {
+        "stationTriplet": "766:UT:SNTL",
+        "data": [
+          {
+            "stationElement": {
+              "elementCode": "SNWD",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 0,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "2002-07-31 06:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 75
+              },
+              {
+                "date": "2026-03-03",
+                "value": 75
+              },
+              {
+                "date": "2026-03-04",
+                "value": 74
+              },
+              {
+                "date": "2026-03-05",
+                "value": 85
+              },
+              {
+                "date": "2026-03-06",
+                "value": 93
+              },
+              {
+                "date": "2026-03-07",
+                "value": 88
+              },
+              {
+                "date": "2026-03-08",
+                "value": 82
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "TOBS",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "degF",
+              "originalUnitCode": "degF",
+              "beginDate": "2001-12-19 13:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 27.7
+              },
+              {
+                "date": "2026-03-03",
+                "value": 30.9
+              },
+              {
+                "date": "2026-03-04",
+                "value": 22.8
+              },
+              {
+                "date": "2026-03-05",
+                "value": 20.3
+              },
+              {
+                "date": "2026-03-06",
+                "value": 18.0
+              },
+              {
+                "date": "2026-03-07",
+                "value": 26.4
+              },
+              {
+                "date": "2026-03-08",
+                "value": 40.1
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "WTEQ",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1988-10-01 00:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 23.1
+              },
+              {
+                "date": "2026-03-03",
+                "value": 23.5
+              },
+              {
+                "date": "2026-03-04",
+                "value": 23.6
+              },
+              {
+                "date": "2026-03-05",
+                "value": 24.5
+              },
+              {
+                "date": "2026-03-06",
+                "value": 25.5
+              },
+              {
+                "date": "2026-03-07",
+                "value": 25.5
+              },
+              {
+                "date": "2026-03-08",
+                "value": 25.5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stationTriplet": "366:UT:SNTL",
+        "data": [
+          {
+            "stationElement": {
+              "elementCode": "SNWD",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 0,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1997-10-07 12:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 46
+              },
+              {
+                "date": "2026-03-03",
+                "value": 44
+              },
+              {
+                "date": "2026-03-04",
+                "value": 43
+              },
+              {
+                "date": "2026-03-05",
+                "value": 48
+              },
+              {
+                "date": "2026-03-06",
+                "value": 50
+              },
+              {
+                "date": "2026-03-07",
+                "value": 47
+              },
+              {
+                "date": "2026-03-08",
+                "value": 44
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "TOBS",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "degF",
+              "originalUnitCode": "degF",
+              "beginDate": "2006-07-24 08:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 26.1
+              },
+              {
+                "date": "2026-03-03",
+                "value": 23.7
+              },
+              {
+                "date": "2026-03-04",
+                "value": 22.3
+              },
+              {
+                "date": "2026-03-05",
+                "value": 18.5
+              },
+              {
+                "date": "2026-03-06",
+                "value": 12.4
+              },
+              {
+                "date": "2026-03-07",
+                "value": 20.7
+              },
+              {
+                "date": "2026-03-08",
+                "value": 34.0
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "WTEQ",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1986-10-01 00:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 15.4
+              },
+              {
+                "date": "2026-03-03",
+                "value": 15.6
+              },
+              {
+                "date": "2026-03-04",
+                "value": 15.7
+              },
+              {
+                "date": "2026-03-05",
+                "value": 16.0
+              },
+              {
+                "date": "2026-03-06",
+                "value": 16.3
+              },
+              {
+                "date": "2026-03-07",
+                "value": 16.4
+              },
+              {
+                "date": "2026-03-08",
+                "value": 16.5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stationTriplet": "814:UT:SNTL",
+        "data": [
+          {
+            "stationElement": {
+              "elementCode": "SNWD",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 0,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1997-09-30 07:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 48
+              },
+              {
+                "date": "2026-03-03",
+                "value": 47
+              },
+              {
+                "date": "2026-03-04",
+                "value": 47
+              },
+              {
+                "date": "2026-03-05",
+                "value": 50
+              },
+              {
+                "date": "2026-03-06",
+                "value": 50
+              },
+              {
+                "date": "2026-03-07",
+                "value": 49
+              },
+              {
+                "date": "2026-03-08",
+                "value": 48
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "TOBS",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "degF",
+              "originalUnitCode": "degF",
+              "beginDate": "2003-06-26 14:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 24.1
+              },
+              {
+                "date": "2026-03-03",
+                "value": 28.0
+              },
+              {
+                "date": "2026-03-04",
+                "value": 20.1
+              },
+              {
+                "date": "2026-03-05",
+                "value": 17.1
+              },
+              {
+                "date": "2026-03-06",
+                "value": 12.9
+              },
+              {
+                "date": "2026-03-07",
+                "value": 22.8
+              },
+              {
+                "date": "2026-03-08",
+                "value": 37.0
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "WTEQ",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1988-06-21 00:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 13.2
+              },
+              {
+                "date": "2026-03-03",
+                "value": 13.5
+              },
+              {
+                "date": "2026-03-04",
+                "value": 13.5
+              },
+              {
+                "date": "2026-03-05",
+                "value": 13.9
+              },
+              {
+                "date": "2026-03-06",
+                "value": 14.3
+              },
+              {
+                "date": "2026-03-07",
+                "value": 14.3
+              },
+              {
+                "date": "2026-03-08",
+                "value": 14.3
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stationTriplet": "628:UT:SNTL",
+        "data": [
+          {
+            "stationElement": {
+              "elementCode": "SNWD",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 0,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "2004-06-21 12:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 37
+              },
+              {
+                "date": "2026-03-03",
+                "value": 36
+              },
+              {
+                "date": "2026-03-04",
+                "value": 35
+              },
+              {
+                "date": "2026-03-05",
+                "value": 43
+              },
+              {
+                "date": "2026-03-06",
+                "value": 47
+              },
+              {
+                "date": "2026-03-07",
+                "value": 43
+              },
+              {
+                "date": "2026-03-08",
+                "value": 38
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "TOBS",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "degF",
+              "originalUnitCode": "degF",
+              "beginDate": "2004-06-21 12:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 24.8
+              },
+              {
+                "date": "2026-03-03",
+                "value": 26.2
+              },
+              {
+                "date": "2026-03-04",
+                "value": 20.3
+              },
+              {
+                "date": "2026-03-05",
+                "value": 18.0
+              },
+              {
+                "date": "2026-03-06",
+                "value": 14.0
+              },
+              {
+                "date": "2026-03-07",
+                "value": 21.9
+              },
+              {
+                "date": "2026-03-08",
+                "value": 36.5
+              }
+            ]
+          },
+          {
+            "stationElement": {
+              "elementCode": "WTEQ",
+              "ordinal": 1,
+              "durationName": "DAILY",
+              "dataPrecision": 1,
+              "storedUnitCode": "in",
+              "originalUnitCode": "in",
+              "beginDate": "1988-10-01 00:00",
+              "endDate": "2100-01-01 00:00",
+              "derivedData": false
+            },
+            "values": [
+              {
+                "date": "2026-03-02",
+                "value": 11.8
+              },
+              {
+                "date": "2026-03-03",
+                "value": 12.4
+              },
+              {
+                "date": "2026-03-04",
+                "value": 12.4
+              },
+              {
+                "date": "2026-03-05",
+                "value": 13.1
+              },
+              {
+                "date": "2026-03-06",
+                "value": 13.8
+              },
+              {
+                "date": "2026-03-07",
+                "value": 13.8
+              },
+              {
+                "date": "2026-03-08",
+                "value": 13.7
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Moderate", "level": 2 }
+    },
+    "avalanche_problems": [
+      "Wind Slab",
+      "Wet Slab",
+      "Persistent Slab"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+  }
+}

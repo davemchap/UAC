@@ -1,0 +1,183 @@
+{
+  "scenario_id": "gs-018",
+  "scenario_name": "Salt River/Wyoming Ranges, WY — Extreme Danger (2017-02-09)",
+  "description": "BTAC forecast via avalanche.org with historical weather for Salt River and Wyoming Ranges during February 2017 extreme event",
+  "source": "avalanche.org product 173322, historical data from 2017-02-09",
+  "zone": {
+    "name": "Salt River and Wyoming Ranges",
+    "center": "BTAC",
+    "state": "WY",
+    "coordinates": {
+      "latitude": 42.99,
+      "longitude": -110.73
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 173322,
+      "published_time": "2017-02-09T13:49:00+00:00",
+      "expires_time": "2017-02-09T18:59:00+00:00",
+      "created_at": "2017-02-09T13:49:00+00:00",
+      "updated_at": "2017-02-09T13:49:00+00:00",
+      "author": "BTAC Forecaster",
+      "product_type": "forecast",
+      "bottom_line": "The avalanche danger will rise from High to Extreme today.  VERY DANGEROUS AVALANCHE CONDITIONS EXIST AND ALL AVALANCHE TERRAIN SHOULD BE AVOIDED TODAY. As a warm and wet system brings increasing temperatures and constant snow and rain to the area today, the avalanche hazard will continue to rapidly increase. Snowfall at the higher elevations will continue to load existing wind slabs, making them both larger and increasing the likelyhood of them releasing naturally. Below 8500 feet, rain will quickly weaken the snowpack, allowing for wet slabs to occur. These avalanches will release naturally today and given the above average snowpack, are likely to entrain large volumes of snow. One such slide has already occurred this morning in the Snake River Canyon near Wolf Creek, closing Snake River Canyon. Teton Pass remains closed as WYDOT continues to clean up debris from several slides that occurred two days ago. Also of note is that two snowmobilers were both uninjured after being caught in a slide at Togwotee yesterday.  One was fully buried with the exception of a visible part of his airbag that he had deployed. Beware of run out zones at lower elevations and use cautions around buildings as roofs will also be sliding. An avalanche warning has been issued by the center effective 1am this morning and continuing through at least 1am Friday.",
+      "hazard_discussion": "( Discussion is generated from the previous day's afternoon forecast. )A major warm and wet system is to impact the area tonight into Friday.  Precipitation should start this evening as snow at all elevations.  The snow is to turn to rain in the valleys with the rain/snow line rising to 8000 feet Thursday afternoon.  Winds from the southwest are to have 25 to 35 mph averages.   Over a foot of snow is expected at the higher elevations by Thursday evening. An avalanche warning has been issued for the area from 1am Thursday until 1am Friday.  The avalanche hazard will be HIGH. Rapid loading from wind and snow will further load existing slabs at higher leeward terrain.  Rain will quickly weaken the snowpack at lower elevations.  Natural avalanche activity is likely as wind slabs in higher terrain and as wet slabs in lower terrain.  These slides could entrain significant amounts of snow and impact highways and roads.  Also beware of the serious threat posed by roof slides. ",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": null,
+      "weather_data": null,
+      "avalanche_center": {
+        "id": "BTAC",
+        "name": "Bridger-Teton Avalanche Center",
+        "url": "http://bridgertetonavalanchecenter.org/",
+        "city": "Jackson",
+        "state": "WY"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 2447937,
+          "forecast_id": 173322,
+          "avalanche_problem_id": 3,
+          "rank": 1,
+          "likelihood": "very likely",
+          "discussion": "Very strong southwest to west winds over the past week have formed slabs and continue to load slabs in the backcountry. These slabs could release on density breaks throughout the storm cycle with depths of six inches to as much as four feet at the higher elevations. These slabs will be very sensitive to human triggers and are likely to release naturally today at the mid and high elevations and once triggered could run long distances and entrain the wet snow at the lower elevations. Continued snowfall and the rising snow/rain line will increase their likelyhood of failure today.  Above 9000 feet in northerly terrain a slight chance exists for these slides to cause failure to the base of the snowpack.",
+          "media": null,
+          "location": [
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "northwest upper",
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle",
+            "west middle",
+            "northwest middle",
+            "north lower",
+            "northeast lower",
+            "east lower",
+            "southeast lower",
+            "south lower",
+            "southwest lower",
+            "west lower",
+            "northwest lower"
+          ],
+          "size": [
+            "1",
+            "2"
+          ],
+          "name": "Wind Slab",
+          "problem_description": "Wind Slab avalanches are the release of a cohesive layer of snow (a slab) formed by the wind. Wind typically transports snow from the upwind sides of terrain features and deposits snow on the downwind side. Wind slabs are often smooth and rounded and sometimes sound hollow, and can range from soft to hard. Wind slabs that form over a persistent weak layer (surface hoar, depth hoar, or near-surface facets) may be termed Persistent Slabs or may develop into Persistent Slabs.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/WindSlab.png"
+        },
+        {
+          "id": 2447938,
+          "forecast_id": 173322,
+          "avalanche_problem_id": 7,
+          "rank": 2,
+          "likelihood": "certain",
+          "discussion": "The snowpack at the mid and low elevations will be quickly weakened by rain. Avalanche activity in the form of wet slab and wet loose is activity is certain.",
+          "media": null,
+          "location": [
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle",
+            "west middle",
+            "northwest middle",
+            "north lower",
+            "northeast lower",
+            "east lower",
+            "southeast lower",
+            "south lower",
+            "southwest lower",
+            "west lower",
+            "northwest lower"
+          ],
+          "size": [
+            "1",
+            "2"
+          ],
+          "name": "Wet Slab",
+          "problem_description": "Wet Slab avalanches are the release of a cohesive layer of snow (a slab) that is generally moist or wet when the flow of liquid water weakens the bond between the slab and the surface below (snow or ground). They often occur during prolonged warming events and/or rain-on-snow events. Wet Slabs can be very unpredictable and destructive.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/WetSlab.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": 5,
+          "upper": 5,
+          "middle": 5,
+          "valid_day": "current"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 2856,
+          "name": "Salt River and Wyoming Ranges",
+          "url": "https://bridgertetonavalanchecenter.org/forecasts/#/salt-river-and-wyoming-ranges/",
+          "state": "WY",
+          "zone_id": "grey",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS-format (converted from NOAA archive data)",
+      "api_endpoint": null,
+      "data": {
+        "number": 8,
+        "name": "",
+        "startTime": "2017-02-09T07:00:00-06:00",
+        "endTime": "2017-02-09T08:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 29,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 90
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -1.72
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 100
+        },
+        "windSpeed": "3 mph",
+        "windDirection": "SW",
+        "icon": "",
+        "shortForecast": "Heavy Snow",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Extreme",
+    "danger_level": 5,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Extreme", "level": 5 },
+      "near_treeline": { "rating": "Extreme", "level": 5 },
+      "below_treeline": { "rating": "Extreme", "level": 5 }
+    },
+    "avalanche_problems": [
+      "Wind Slab",
+      "Wet Slab"
+    ],
+    "alert_action": "auto_send_urgent",
+    "alert_reasoning": "Extreme danger (level 5) at all elevations triggers urgent automatic alert dispatch; widespread natural avalanches expected"
+  }
+}

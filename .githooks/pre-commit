@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Pre-commit hook: lint and typecheck staged TypeScript files
+#
+# Defense in depth: catches lint/type errors before they reach the pipeline.
+# The CI pipeline still runs full checks (outer loop), but this hook provides
+# fast feedback in the inner loop so developers and agents fix issues immediately.
+#
+# Target: <10 seconds on staged files only.
+#
+# Setup: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+# --- Collect staged TypeScript/JavaScript files ---
+staged_ts_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' '*.js' '*.jsx' || true)
+
+if [ -z "$staged_ts_files" ]; then
+  # No TypeScript/JavaScript files staged -- nothing to lint
+  exit 0
+fi
+
+# --- Run full check suite (same gates as CI, including tests) ---
+if ! bun run check; then
+  echo ""
+  echo "========================================="
+  echo "  Pre-commit check FAILED"
+  echo "========================================="
+  echo ""
+  echo "Fix biome issues: bun run lint:biome -- --write (or bunx --bun @biomejs/biome@1.9.4 format --write .)"
+  echo "Fix lint issues:  bun run lint:fix"
+  echo "Fix type errors:  Review the errors above and fix the types"
+  echo ""
+  echo "Then stage your fixes and commit again."
+  exit 1
+fi

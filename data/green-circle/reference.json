@@ -1,0 +1,14 @@
+{
+  "region": "Salt Lake",
+  "center_id": "UAC",
+  "zone_id": 1738,
+  "coordinates": { "latitude": 40.65, "longitude": -111.51 },
+  "snotel_stations": ["766:UT:SNTL", "366:UT:SNTL", "814:UT:SNTL", "628:UT:SNTL"],
+  "api_endpoints": {
+    "avalanche_forecast": "https://utahavalanchecenter.org/forecast/salt-lake/json",
+    "weather_points": "https://api.weather.gov/points/40.65,-111.51",
+    "weather": "https://api.weather.gov/gridpoints/SLC/113,169/forecast/hourly",
+    "snotel": "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/data?stationTriplets=766:UT:SNTL&elements=SNWD,WTEQ,TOBS&duration=DAILY"
+  },
+  "description": "Park City / Wasatch Range, Utah — primary reference location for the Avalanche Field Guide"
+}

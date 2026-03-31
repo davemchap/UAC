@@ -1,0 +1,94 @@
+{
+  "scenario_id": "gs-004",
+  "scenario_name": "Logan, UT — Considerable Danger (2026-03-09)",
+  "description": "Real UAC forecast, NWS weather, and SNOTEL snowpack for Logan zone",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Logan",
+    "center": "UAC",
+    "state": "UT",
+    "coordinates": {
+      "latitude": 41.83,
+      "longitude": -111.57
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "advisories": [
+        {
+          "advisory": {
+            "date_issued": "Monday, March 9, 2026 - 7:29am",
+            "date_issued_timestamp": "1773062984",
+            "general_announcements": "\r\rCLICK HERE FOR MORE GENERAL INFO AND FAQ\r\r\r\rThis information does not apply to developed ski areas or highways where avalanche control is normally done. This forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions and local variations always occur.\r\r\r\r&nbsp;\r\rObservations and Avalanches\r\rBackcountry Emergency Procedures\r\rSMS Notifications\r\rInstagram\r\rFacebook\r\rGet Forecast Email\r\rPrevious Forecasts\r\rContact via email\r\rSubmit Observation\r",
+            "current_conditions": "Temperatures warmed significantly yesterday, turning the nice powder into mashed potatoes, even with a nice breeze and afternoon clouds. We observed rollerball swarms and loose wet avalanches entraining last week's fresh snow on many slopes across the Bear River Mountains. We found excellent powder riding this weekend, and people will still find nice soft riding conditions today, especially in northerly, upper-elevation terrain.&nbsp; Despite ventilation from an increasing, incessant breeze from the southwest,&nbsp;the danger of wet avalanches will be elevated by a high sun angle and very warm temperatures, especially in sheltered terrain.&nbsp; Natural and human-triggered wet avalanches will become likely.\r\rThe UAC Card Canyon weather station&nbsp;at 8700 feet reports 35°F and 63 inches of total snow. The Tony Grove Snotel, located at 8400 feet, reports 38°F with 75 inches of total snow.&nbsp; At 9700 feet on Logan Peak, winds are blowing from the southwest around 30mph, with gusts close to 50 mph.&nbsp; It's a cool 26°F on Paris Peak at 9500 feet, and the wind is blowing 30 to 40 mph from the south-southwest.\r\rMountain weather today includes 8500' highs around 44°F, strong and increasing winds blowing from the west, and skies will be mostly sunny. Wind gusts are expected to reach 50+ mph starting around noon and lasting into the evening. Tomorrow will be a bit cooler, and strong winds&nbsp;will continue to blow from the west.&nbsp; &nbsp;\r",
+            "mountain_weather": "\r\tTravel with a partner, and cross or ride slopes steeper than 30 degrees&nbsp;one at a time while the rest of your group watches from a safe spot.\r\tEnsure that everyone in the&nbsp;group has avalanche rescue equipment (a transceiver, probe, and shovel)&nbsp;and knows how to use it.\r\r\r-----------------------------------------------------------------------------------------------------------------------------------------------------------------\r\rJoin the UAC for the first \"Stay and Play Avalanche Course\" at Bear River Lodge in the Uintas, March 19th-22nd. This course is designed for snowmobilers by snowmobilers, where you will learn avalanche rescue, riding skills, and how to survive in the backcountry. Come enjoy all the luxury offerings at Bear River Lodge and improve your skills along the way.\r\rFor all questions on forecasts, education, Know Before You Go, events, online purchases, or fundraising, call&nbsp;801-365-5522.\r\rDid you know the UAC hosts a podcast?&nbsp;Episode 2 of Season IX is just out -&nbsp;AI, Machine Learning, and the Value of Expert Intuition at the Utah Avalanche Center.\r\rAre you interested in learning more about avalanches? Visit our education page for details on all our classes.&nbsp;\r\rFor more information, visit the UAC weather page here:&nbsp;UAC Weather Page&nbsp; &nbsp;For Logan-specific weather, go here:&nbsp;Logan Mountain Weather&nbsp;\r\r-Remember, the information you provide could save lives, especially if you see or trigger an avalanche. To report an avalanche or submit an observation from the backcountry, go HERE\r\r-Receive forecast region-specific text message alerts to receive messages about changing avalanche conditions, watches, and warnings. Sign up and update your preferences HERE\r\rThis forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions and local variations always occur.\r",
+            "recent_activity": "Rollerball swarms and loose wet avalanches were observed yesterday. Find observations in the Logan zone and from across the state HERE.&nbsp;\r\r\r\r&nbsp;\r",
+            "avalanche_problem_1": "Wind Drifted Snow",
+            "avalanche_problem_1_description": "It is possible to trigger hard slab avalanches of wind-drifted snow. Moderate winds in the past few days formed drifts in starting zones near ridgelines and around terrain features such as gullies, rocks, rollovers, and sub-ridges. Today's kick-up in wind speeds will continue to build hard slabs of wind-drifted snow.&nbsp; Wind slabs are often recognizable as rounded pillows of snow that can feel hollow or drum-like underfoot. You may see shooting cracks out in front of your skis or sled, but some harder slabs may allow you to get well out onto them before suddenly releasing.\r\r\r\tCollapsing or shooting cracks are clear signs of instability—but their absence does not mean the slope is safe.\r\tAvalanches of wind-drifted snow could step down into the buried January persistent weak layer, producing larger and more dangerous avalanches.\r\r",
+            "avalanche_problem_2": "Wet Snow",
+            "avalanche_problem_2_description": "Watch for and avoid being on or under steep slopes with saturated snow. Natural and human-triggered wet avalanches will become likely in the heat of the day.&nbsp; This problem will be most pronounced on sheltered sunny slopes, but low and mid-elevation polars will also become wet with today's warm temperatures.\r\r\r\tIf you notice rollerballs or pinwheels and/or you are sinking deeply into mushy, wet snow, move to a cooler aspect or elevation, or lower-angle terrain.&nbsp;\r\r\r\r\rThe natural wet avalanche on Mt.Magog occurred March 2.\r",
+            "avalanche_problem_3": "Persistent Weak Layer",
+            "avalanche_problem_3_description": "A persistent weak layer of faceted snow from January is now buried about 2–4 ft deep on mid- and upper-elevation slopes facing the north half of the compass. While avalanches breaking into this layer are unlikely, any that do occur will be large, destructive, and dangerous.\r\r\r\tAvalanches failing on buried facets can propagate widely and may be triggered remotely—from the side or below.\r\tSlopes with a shallower overall snowpack are most&nbsp;suspect.\r\tRed flags are often absent when these avalanches occur.\r\r\rWe found good stability in areas where the strengthening sugary, persistent weak layer from January is buried deeply by recent snow. video below&nbsp; &nbsp;\r\r\r\r&nbsp;\r",
+            "bottom_line": "Heightened avalanche conditions exist in the backcountry, and very warm mountain temperatures will elevate the danger to CONSIDERABLE,&nbsp;especially&nbsp;in sheltered terrain.&nbsp;Wet avalanches entraining saturated snow are likely&nbsp;on slopes steeper than 30 degrees.&nbsp;\r\rEvaluate the snow and terrain carefully, and make conservative decisions. Avoid being on or under steep slopes with saturated snow.\r\r&nbsp;\r",
+            "danger_rose_1": "16,16,16,16,16,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "danger_rose_2": "14,14,16,16,16,16,14,14,16,16,16,16,16,16,16,16,16,16,14,14,14,14,14,16",
+            "danger_rose_3": "16,16,16,14,14,14,16,16,16,16,16,14,14,14,16,16,14,14,14,14,14,14,14,14",
+            "overall_danger_rose": "4,4,6,6,6,6,4,4,6,6,6,6,6,6,6,6,6,6,0,0,0,0,0,6",
+            "overall_danger_rose_image": "<img src=\"https://utahavalanchecenter.org/sites/default/files/forecast/202603/20260309-075723-0.png\">",
+            "overall_danger_rating": "Considerable",
+            "region": "Logan",
+            "Nid": "102714"
+          }
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/SLC/120,225/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-06:00",
+        "endTime": "2026-03-09T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 31,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 3
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -5
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 72
+        },
+        "windSpeed": "14 mph",
+        "windDirection": "WSW",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Considerable",
+    "danger_level": 3,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Considerable", "level": 3 },
+      "near_treeline": { "rating": "Considerable", "level": 3 },
+      "below_treeline": { "rating": "Considerable", "level": 3 }
+    },
+    "avalanche_problems": [
+      "Wind Slab",
+      "Wet Slab",
+      "Persistent Slab"
+    ],
+    "alert_action": "human_review",
+    "alert_reasoning": "Considerable danger, alert drafted and queued for human review before dispatch"
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "scenario_id": "gs-016",
+  "scenario_name": "Togwotee Pass, WY — High Danger (2026-02-25)",
+  "description": "BTAC forecast via avalanche.org with historical weather for Togwotee Pass",
+  "source": "avalanche.org product 181320, historical data from 2026-02-25",
+  "zone": {
+    "name": "Togwotee Pass",
+    "center": "BTAC",
+    "state": "WY",
+    "coordinates": {
+      "latitude": 43.69,
+      "longitude": -110.23
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 181320,
+      "published_time": "2026-02-25T14:05:00+00:00",
+      "expires_time": "2026-02-26T07:00:00+00:00",
+      "created_at": "2026-02-24T22:18:10+00:00",
+      "updated_at": "2026-02-25T14:28:48+00:00",
+      "author": "Alex Drinkard",
+      "product_type": "forecast",
+      "bottom_line": "<p>Very dangerous conditions exist as human triggered avalanches are very likely while remotely triggered avalanches are possible. Fast moving avalanches 1-2 feet deep and touchy conditions are expected as new snow lies on well connected bed surfaces. Larger avalanches are also capable of breaking deeper on buried weak layers. Travel in and around avalanche terrain today is not advised.&nbsp;</p>\n<p><em>A Winter Storming Warning is in effect from February 24, 5:00am until February 25, 5:00pm.</em></p>",
+      "hazard_discussion": "<p>The storm yesterday came in fiercely with rapid rates of snowfall of 1-2 inches per hour during the daytime and consistent, strong southwest/west wind. Snowfall totals range from 7-10 inches yesterday on Togwotee with an additional 3-6 inches possible today. Numerous avalanches were reported during the early part of the day as conditions were touchy (meaning the highest sensitivity in avalanche terminology). New snow moved easily and swiftly on any terrain over 30&deg; steep, including both sheltered and wind-loaded slopes. This is due to the well connected new to old snow interface consisting of melt freeze crusts on the southern half and preserved stellars on the north half of the compass rose. Warming temperatures yesterday and overnight will make the snow upside-down. The new snow is very unstable. If you do decide to travel into the backcountry, watch your slope angle carefully and avoid overhead exposure to steep terrain above you.&nbsp;</p>\n<p>Deeper in the snowpack, the January drought layers are being stressed by rapid loading of heavy, dense snow. Hard slabs are actively forming above the buried weak layers of facets and surface hoar. Avalanches stepping down to these weak layers will be destructive. Stay safe out there and let&rsquo;s hope this last pulse of snow comes in cleaner to create good riding conditions through the week as avalanche danger decreases.</p>",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": [
+        {
+          "id": 1,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/88CC9B7A-93D4-4E7D-960C-6E2CDD411AFB_699b1b7ee5e0b-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/88CC9B7A-93D4-4E7D-960C-6E2CDD411AFB_699b1b7ee5e0b-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/88CC9B7A-93D4-4E7D-960C-6E2CDD411AFB_699b1b7ee5e0b.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/88CC9B7A-93D4-4E7D-960C-6E2CDD411AFB_699b1b7ee5e0b-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": "Public Observation: French spy bowl, main east facing steep run from the top of the ridge",
+          "caption": "<p>A recent wind slab in north facing terrain off Breccia. Trigger unknown.</p>\n<p>(2/21/2026) Photo: Pete Mumford</p>",
+          "favorite": false
+        },
+        {
+          "id": 2,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/WhatsApp%20Image%202026-02-20%20at%206_69990734a54f8.13_69990734a54f8.36%20PM_69990734a54f8-large.jpeg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/WhatsApp%20Image%202026-02-20%20at%206_69990734a54f8.13_69990734a54f8.36%20PM_69990734a54f8-medium.jpeg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/WhatsApp%20Image%202026-02-20%20at%206_69990734a54f8.13_69990734a54f8.36%20PM_69990734a54f8.jpeg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/WhatsApp%20Image%202026-02-20%20at%206_69990734a54f8.13_69990734a54f8.36%20PM_69990734a54f8-thumbnail.jpeg"
+          },
+          "type": "image",
+          "title": "Public Observation: Togwotee Pass",
+          "caption": "(2/20/2026) Naturally occurring sloughing Photo: Pixie Herbert",
+          "favorite": false
+        },
+        {
+          "id": 3,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog2_6997a0fe0c875-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog2_6997a0fe0c875-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog2_6997a0fe0c875.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog2_6997a0fe0c875-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p>Periods of sun and light snow showers today. Good visibility did not reveal much natural activity in steep north facing terrain.</p> Photo: Bridger-Teton Avalanche Center",
+          "favorite": false
+        },
+        {
+          "id": 4,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Two%20Ocean%20NW%2010k-23-Feb_699cc73914896-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Two%20Ocean%20NW%2010k-23-Feb_699cc73914896-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Two%20Ocean%20NW%2010k-23-Feb_699cc73914896.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Two%20Ocean%20NW%2010k-23-Feb_699cc73914896-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/23/2026) <p>Shallow and weak snowpack at 10k feet on NW aspect. ECTP15 on the January drought layer, down 12 inches (30 cm)</p> Photo: Bridger-Teton Avalanche Center",
+          "favorite": false
+        },
+        {
+          "id": 5,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog1_6997a0fe33094-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog1_6997a0fe33094-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog1_6997a0fe33094.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Tog1_6997a0fe33094-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p>An interesting sandwich of preserved surface hoar found down about 40cm from the surface.</p>\n<p>Angle Mountain north facing at 10,100'</p> Photo: Bridger-Teton Avalanche Center",
+          "favorite": false
+        },
+        {
+          "id": 6,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/2026-02-19_1328_angle%20north_6997a0f2c3b72-large.png",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/2026-02-19_1328_angle%20north_6997a0f2c3b72-medium.png",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/2026-02-19_1328_angle%20north_6997a0f2c3b72.png",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/2026-02-19_1328_angle%20north_6997a0f2c3b72-thumbnail.png"
+          },
+          "type": "image",
+          "title": null,
+          "caption": " Photo: Bridger-Teton Avalanche Center",
+          "favorite": false
+        },
+        {
+          "id": 7,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_0134_69913b135e8b9-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_0134_69913b135e8b9-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_0134_69913b135e8b9.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_0134_69913b135e8b9-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": "Public Observation: Dry Lake",
+          "caption": "(2/14/2026) ",
+          "favorite": false
+        },
+        {
+          "id": 8,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/avy%20activity_6997203e47145-large.png",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/avy%20activity_6997203e47145-medium.png",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/avy%20activity_6997203e47145.png",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/avy%20activity_6997203e47145-thumbnail.png"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p dir=\"ltr\">The distribution of avalanche activity since the return of snow on February 8th. Nearly all activity has occurred on the north half of the compass with N and NE aspects containing the majority of events. Also worth noting that most events have occurred in the 8,000'-9,500' elevation band.</p> Photo: Bridger-Teton Avalanche Center",
+          "favorite": false
+        }
+      ],
+      "weather_data": {
+        "weather_product_id": 181380
+      },
+      "avalanche_center": {
+        "id": "BTAC",
+        "name": "Bridger-Teton Avalanche Center",
+        "url": "http://bridgertetonavalanchecenter.org/",
+        "city": "Jackson",
+        "state": "WY"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 2789694,
+          "forecast_id": 181320,
+          "avalanche_problem_id": 2,
+          "rank": 1,
+          "likelihood": "likely",
+          "discussion": "<p>Unstable storm slabs around a foot deep will be widespread today. Human triggered avalanches are almost certain across all aspects, with varying slab depths based on elevation and snow totals. New snow sits above crusts and small facets where avalanches will break wide and run fast/far downslope. Any slopes above 30&deg; steep could avalanche. Natural and remotely triggered avalanches from gentle terrain above, below, or beside steep slopes are possible.&nbsp;</p>\n<p><strong>Wind slabs: </strong>Strong, consistent W/SW wind has formed touchy wind slabs 2 feet deep above ~8,000&rsquo;. Wind loaded terrain will also make persistent slabs more likely on slopes that harbor buried weak layers. Travel on steep, wind loaded slopes is not advised.</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_7669_699e143fd9662-large.jpeg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_7669_699e143fd9662-medium.jpeg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_7669_699e143fd9662.jpeg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_7669_699e143fd9662-thumbnail.jpeg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "<p>Unstable new snow was easy to trigger yesterday and&nbsp; willremain reactive today.&nbsp;</p>\n<p>Photo: Bridger-Teton Avalanche Center</p>"
+          },
+          "location": [
+            "northwest upper",
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "west middle",
+            "northwest middle",
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle"
+          ],
+          "size": [
+            "1",
+            "2"
+          ],
+          "name": "Storm Slab",
+          "problem_description": "Storm Slab avalanches are the release of a cohesive layer (a slab) of new snow that breaks within new snow or on the old snow surface. Storm-slabs typically last between a few hours and few days (following snowfall). Storm-slabs that form over a persistent weak layer (surface hoar, depth hoar, or near-surface facets) may be termed Persistent Slabs or may develop into Persistent Slabs.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/StormSlab.png"
+        },
+        {
+          "id": 2789695,
+          "forecast_id": 181320,
+          "avalanche_problem_id": 4,
+          "rank": 2,
+          "likelihood": "likely",
+          "discussion": "<p>Rapid loading of new snow and wind will add stress to buried weak layers formed during the month-long dry period in January. <strong>Triggering hard slab avalanches up to 3 feet deep will be possible and more likely on N-NE aspects above 9,000' where we have seen the most avalanche activity.</strong> Both wind-loaded and sheltered terrain should warrant caution due to the spotty distribution of the buried surface hoar and weak facets. Natural avalanches on these layers are possible during peak loading. Travel in or around avalanche terrain where these layers could be remotely triggered is not recommended. Avoid large avalanche runout zones and be aware of terrain overhead.</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/C07F3D14-DEB8-4D91-8F05-0801D9C7105E_6990a70e4721c-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/C07F3D14-DEB8-4D91-8F05-0801D9C7105E_6990a70e4721c-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/C07F3D14-DEB8-4D91-8F05-0801D9C7105E_6990a70e4721c.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/C07F3D14-DEB8-4D91-8F05-0801D9C7105E_6990a70e4721c-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": "Public Observation: Slide 5.8miles north east grouse mountain on a north east/east aspect around 9,200 feet",
+            "caption": "<p>These slabs were triggered by snowmobilers near Grouse Mountain.&nbsp; Similar, but deeper, avalanche activity is possible on very steep, shaded slopes today.</p>\n<p>2/12/2026</p>"
+          },
+          "location": [
+            "west middle",
+            "west upper",
+            "northwest upper",
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "northwest middle",
+            "north middle",
+            "northeast middle",
+            "east middle"
+          ],
+          "size": [
+            "1",
+            "2"
+          ],
+          "name": "Persistent Slab",
+          "problem_description": "Persistent Slab avalanches are the release of a cohesive layer of snow (a slab) in the middle to upper snowpack, when the bond to an underlying persistent weak layer breaks. Persistent layers include: surface hoar, depth hoar, near-surface facets, or faceted snow. Persistent weak layers can continue to produce avalanches for days, weeks or even months, making them especially dangerous and tricky. As additional snow and wind events build a thicker slab on top of the persistent weak layer, this avalanche problem may develop into a Deep Persistent Slab.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/PersistentSlab.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": null,
+          "upper": 4,
+          "middle": 3,
+          "valid_day": "current"
+        },
+        {
+          "lower": null,
+          "upper": 3,
+          "middle": 3,
+          "valid_day": "tomorrow"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 2852,
+          "name": "Togwotee Pass",
+          "url": "https://bridgertetonavalanchecenter.org/forecasts/#/togwotee-pass",
+          "state": "WY",
+          "zone_id": "tog",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS-format (converted from NOAA archive data)",
+      "api_endpoint": null,
+      "data": {
+        "number": 8,
+        "name": "",
+        "startTime": "2026-02-25T07:00:00-06:00",
+        "endTime": "2026-02-25T08:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 27,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 0
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -3.17
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 98
+        },
+        "windSpeed": "18 mph",
+        "windDirection": "WSW",
+        "icon": "",
+        "shortForecast": "Cloudy",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "High",
+    "danger_level": 4,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "High", "level": 4 },
+      "near_treeline": { "rating": "Considerable", "level": 3 },
+      "below_treeline": null
+    },
+    "avalanche_problems": [
+      "Storm Slab",
+      "Persistent Slab"
+    ],
+    "alert_action": "auto_send",
+    "alert_reasoning": "High danger (level 4) at upper elevations triggers automatic alert dispatch; lower elevation not rated"
+  }
+}

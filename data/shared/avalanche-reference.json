@@ -1,0 +1,126 @@
+{
+  "danger_scale": [
+    {
+      "level": 1,
+      "name": "Low",
+      "color": "#50B848",
+      "travel_advice": "Generally safe avalanche conditions. Watch for unstable snow on isolated terrain features."
+    },
+    {
+      "level": 2,
+      "name": "Moderate",
+      "color": "#FFF200",
+      "travel_advice": "Heightened avalanche conditions on specific terrain features. Evaluate snow and terrain carefully; identify features of concern."
+    },
+    {
+      "level": 3,
+      "name": "Considerable",
+      "color": "#F7941E",
+      "travel_advice": "Dangerous avalanche conditions. Careful snowpack evaluation, cautious route-finding and conservative decision-making essential."
+    },
+    {
+      "level": 4,
+      "name": "High",
+      "color": "#ED1C24",
+      "travel_advice": "Very dangerous avalanche conditions. Travel in avalanche terrain not recommended."
+    },
+    {
+      "level": 5,
+      "name": "Extreme",
+      "color": "#231F20",
+      "travel_advice": "Avoid all avalanche terrain."
+    }
+  ],
+  "avalanche_problems": [
+    {
+      "id": 1,
+      "name": "Dry Loose",
+      "description": "Release of dry unconsolidated snow; point-release sluff",
+      "duration": "Hours"
+    },
+    {
+      "id": 2,
+      "name": "Storm Slab",
+      "description": "Cohesive layer of new snow breaking within storm snow or at old snow interface",
+      "duration": "Hours to days"
+    },
+    {
+      "id": 3,
+      "name": "Wind Slab",
+      "description": "Cohesive layer of wind-deposited snow; smooth, rounded, sometimes hollow-sounding",
+      "duration": "Hours to days"
+    },
+    {
+      "id": 4,
+      "name": "Persistent Slab",
+      "description": "Cohesive layer over a persistent weak layer (surface hoar, depth hoar, facets)",
+      "duration": "Days to months"
+    },
+    {
+      "id": 5,
+      "name": "Deep Persistent Slab",
+      "description": "Thick hard slab over a deep persistent weak layer; very destructive, hard to trigger",
+      "duration": "Weeks to months"
+    },
+    {
+      "id": 6,
+      "name": "Wet Loose",
+      "description": "Release of wet unconsolidated snow or slush; common during warming",
+      "duration": "Hours"
+    },
+    {
+      "id": 7,
+      "name": "Wet Slab",
+      "description": "Release of moist or wet cohesive slab; triggered by warming or rain-on-snow",
+      "duration": "Hours to days"
+    },
+    {
+      "id": 8,
+      "name": "Cornice Fall",
+      "description": "Release of overhanging snow mass from a ridge; can trigger slab avalanches below",
+      "duration": "Variable"
+    },
+    {
+      "id": 9,
+      "name": "Glide Avalanche",
+      "description": "Release of entire snow cover gliding over ground; preceded by glide cracks",
+      "duration": "Days to weeks"
+    }
+  ],
+  "aspects": ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
+  "elevation_bands": [
+    {
+      "id": "above_treeline",
+      "label": "Above Treeline",
+      "abbreviation": "ATL",
+      "description": "Alpine; open, exposed terrain with few or no trees"
+    },
+    {
+      "id": "near_treeline",
+      "label": "Near Treeline",
+      "abbreviation": "NTL",
+      "description": "Transitional zone; sparse glades"
+    },
+    {
+      "id": "below_treeline",
+      "label": "Below Treeline",
+      "abbreviation": "BTL",
+      "description": "Forested elevation band"
+    }
+  ],
+  "trigger_codes": [
+    { "code": "N", "label": "Natural" },
+    { "code": "AS", "label": "Skier" },
+    { "code": "AR", "label": "Snowboarder" },
+    { "code": "AM", "label": "Snowmobile" },
+    { "code": "AE", "label": "Explosive" },
+    { "code": "AF", "label": "Foot (hiker)" }
+  ],
+  "size_destructive": [
+    { "level": "D1", "description": "Relatively harmless to people" },
+    { "level": "D2", "description": "Could bury, injure, or kill a person" },
+    { "level": "D3", "description": "Could destroy a car or small building" },
+    { "level": "D4", "description": "Could destroy a railway car or large truck" },
+    { "level": "D5", "description": "Could gouge the landscape; largest known" }
+  ]
+}

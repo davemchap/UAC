@@ -1,0 +1,44 @@
+# Dependencies (will be installed in container)
+node_modules/
+
+# Build output
+dist/
+
+# Environment files (secrets should not be in image)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.gitlab-ci.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Test
+coverage/
+*.test.ts
+*.spec.ts
+
+# Temporary
+tmp/
+temp/

@@ -1,0 +1,51 @@
+{
+  "alert_thresholds": [
+    {
+      "danger_level": 1,
+      "name": "Low",
+      "action": "no_alert",
+      "description": "No alert generated"
+    },
+    {
+      "danger_level": 2,
+      "name": "Moderate",
+      "action": "no_alert",
+      "description": "No alert generated — heightened awareness only"
+    },
+    {
+      "danger_level": 3,
+      "name": "Considerable",
+      "action": "human_review",
+      "description": "Alert drafted, requires human review before dispatch"
+    },
+    {
+      "danger_level": 4,
+      "name": "High",
+      "action": "auto_send",
+      "description": "Alert auto-dispatched, human notified"
+    },
+    {
+      "danger_level": 5,
+      "name": "Extreme",
+      "action": "auto_send_urgent",
+      "description": "Urgent alert auto-dispatched immediately"
+    }
+  ],
+  "escalation_rules": [
+    {
+      "condition": "multi_problem_combination",
+      "description": "Two or more avalanche problems on same aspect/elevation",
+      "action": "escalate_one_level"
+    },
+    {
+      "condition": "rapid_change",
+      "description": "Danger level increased by 2+ in 24 hours",
+      "action": "escalate_one_level"
+    },
+    {
+      "condition": "data_gap",
+      "description": "Missing data from any source for 12+ hours",
+      "action": "flag_for_review"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "scenario_id": "gs-008",
+  "scenario_name": "Southern Sawatch, CO — Low Danger (2026-03-09)",
+  "description": "Real CAIC AVID forecast and NWS weather for Southern Sawatch",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Southern Sawatch",
+    "center": "CAIC",
+    "state": "CO",
+    "coordinates": {
+      "latitude": 38.50,
+      "longitude": -106.25
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": "1ef2e820-ce34-4f51-a90a-e0cd3dc02120",
+      "publicName": "117-118-123-124-125",
+      "type": "avalancheforecast",
+      "polygons": [
+        "4765FB8A-C436-45FA-9684-6E79CF4C6ECD",
+        "5F219827-0BDB-4106-924F-2483CCFB5F51",
+        "80965A3A-9069-422B-BD91-E0EABDFD44FE",
+        "EC9276F5-8C4A-431C-882B-4BA90A9D8881",
+        "F2A935D9-8E28-4421-8382-837E3E0E99B7"
+      ],
+      "areaId": "48c9c00298a952f034d2f5f02d1730627951d85f5c9a84882c665396e9a80aee",
+      "forecaster": "Krista Beyer",
+      "issueDateTime": "2026-03-08T22:30:00Z",
+      "expiryDateTime": "2026-03-09T22:30:00Z",
+      "isTranslated": false,
+      "isAutoTranslated": false,
+      "isMultiDay": false,
+      "timezone": "America/Denver",
+      "weatherSummary": {
+        "days": []
+      },
+      "snowpackSummary": {
+        "days": []
+      },
+      "avalancheSummary": {
+        "days": [
+          {
+            "date": "2026-03-09T22:30:00Z",
+            "content": "<p>Most slopes remain generally safe. During times of LOW (1 of 5) avalanche danger, people often venture into larger terrain. Remember, even with \"Generally Safe Conditions,\" an avalanche can be triggered on isolated slopes and in extreme terrain. It's always a good idea to assess the slope you plan to ride and identify any hazards.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2-3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report<a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">&nbsp;</a><a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+          }
+        ]
+      },
+      "terrainAndTravelAdvice": {
+        "days": [
+          [],
+          [],
+          []
+        ]
+      },
+      "communication": {
+        "headline": "",
+        "sms": ""
+      },
+      "media": {
+        "Images": [
+          {
+            "id": "0da79675-66f1-46e2-936f-8035e9f1c6d6",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772397447/AvIDfx/rjjjgnvnwfzqx2m5in6s.webp",
+            "width": 2500,
+            "height": 1875,
+            "credit": "",
+            "caption": "<p>Warm weather and sun over the past week have fueled the rapid settlement of the mid-February snowfall. Water has already moved through most of the snowpack on south, east, and west slopes, decreasing the chance of wet avalanches and strengthening the snowpack with recent cooler temperatures. You can track the progress of meltwater by identifying percolation tubes like these ones pictured. As warm temperatures return we do not anticipate wet avalanches, but we do anticipate poor mushy snow and recommend moving off slopes with moist trap door conditions.</p>",
+            "tag": "avalanche",
+            "altText": "A crystal card sits behind narrow percolation tubes in a snowpack",
+            "dateTaken": "2026-02-28T20:26:48Z",
+            "isArchived": false
+          },
+          {
+            "id": "acd9c237-d0f3-4cd2-b25c-65ea572621a3",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1771627055/AvIDfx/eimdovhfqmxvjobestpd.webp",
+            "width": 2500,
+            "height": 1875,
+            "credit": "",
+            "caption": "<p>After warm weather and little snowfall, snow remains mostly on north-tilted slopes and in cross-loaded features. Isolated areas of firm snow on very steep slopes are the most likely place you may trigger a small slide.</p>",
+            "tag": "avalanche",
+            "altText": "A peak with drifted snow",
+            "dateTaken": "2026-02-19T21:45:10.8Z",
+            "isArchived": false
+          }
+        ]
+      },
+      "dangerRatings": {
+        "days": [
+          {
+            "position": 1,
+            "alp": "low",
+            "tln": "low",
+            "btl": "low",
+            "date": "2026-03-09T22:30:00Z"
+          },
+          {
+            "position": 2,
+            "alp": "low",
+            "tln": "low",
+            "btl": "low",
+            "date": "2026-03-10T22:30:00Z"
+          },
+          {
+            "position": 3,
+            "alp": "low",
+            "tln": "low",
+            "btl": "low",
+            "date": "2026-03-11T22:30:00Z"
+          }
+        ]
+      },
+      "avalancheProblems": {
+        "days": [
+          [],
+          [],
+          []
+        ]
+      }
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/PUB/39,80/forecast/hourly",
+      "data": {
+        "number": 24,
+        "name": "",
+        "startTime": "2026-03-10T08:00:00-06:00",
+        "endTime": "2026-03-10T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 32,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 4
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -10
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 47
+        },
+        "windSpeed": "15 mph",
+        "windDirection": "W",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Low",
+    "danger_level": 1,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Low", "level": 1 },
+      "near_treeline": { "rating": "Low", "level": 1 },
+      "below_treeline": { "rating": "Low", "level": 1 }
+    },
+    "avalanche_problems": [],
+    "alert_action": "no_alert",
+    "alert_reasoning": "All elevation bands at Low danger (level 1)"
+  }
+}

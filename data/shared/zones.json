@@ -1,0 +1,101 @@
+[
+  {
+    "zone_id": 1736,
+    "name": "Logan",
+    "center_id": "UAC",
+    "slug": "logan",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/logan",
+    "danger_level": 3,
+    "danger_name": "considerable",
+    "color": "#ff9933",
+    "travel_advice": "Dangerous avalanche conditions. Careful snowpack evaluation, cautious route-finding and conservative decision-making essential."
+  },
+  {
+    "zone_id": 1737,
+    "name": "Ogden",
+    "center_id": "UAC",
+    "slug": "ogden",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/ogden",
+    "danger_level": 2,
+    "danger_name": "moderate",
+    "color": "#f4e500",
+    "travel_advice": "Heightened avalanche conditions on specific terrain features. Evaluate snow and terrain carefully; identify features of concern."
+  },
+  {
+    "zone_id": 1738,
+    "name": "Salt Lake",
+    "center_id": "UAC",
+    "slug": "salt-lake",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/salt-lake",
+    "danger_level": 3,
+    "danger_name": "considerable",
+    "color": "#ff9933",
+    "travel_advice": "Dangerous avalanche conditions. Careful snowpack evaluation, cautious route-finding and conservative decision-making essential."
+  },
+  {
+    "zone_id": 1739,
+    "name": "Provo",
+    "center_id": "UAC",
+    "slug": "provo",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/provo",
+    "danger_level": 2,
+    "danger_name": "moderate",
+    "color": "#f4e500",
+    "travel_advice": "Heightened avalanche conditions on specific terrain features. Evaluate snow and terrain carefully; identify features of concern."
+  },
+  {
+    "zone_id": 1740,
+    "name": "Uintas",
+    "center_id": "UAC",
+    "slug": "uintas",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/uintas",
+    "danger_level": 2,
+    "danger_name": "moderate",
+    "color": "#f4e500",
+    "travel_advice": "Heightened avalanche conditions on specific terrain features. Evaluate snow and terrain carefully; identify features of concern."
+  },
+  {
+    "zone_id": 1741,
+    "name": "Skyline",
+    "center_id": "UAC",
+    "slug": "skyline",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/skyline",
+    "danger_level": 3,
+    "danger_name": "considerable",
+    "color": "#ff9933",
+    "travel_advice": "Dangerous avalanche conditions. Careful snowpack evaluation, cautious route-finding and conservative decision-making essential."
+  },
+  {
+    "zone_id": 1742,
+    "name": "Moab",
+    "center_id": "UAC",
+    "slug": "moab",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/moab",
+    "danger_level": 2,
+    "danger_name": "moderate",
+    "color": "#f4e500",
+    "travel_advice": "Heightened avalanche conditions on specific terrain features. Evaluate snow and terrain carefully; identify features of concern."
+  },
+  {
+    "zone_id": 1743,
+    "name": "Southwest",
+    "center_id": "UAC",
+    "slug": "southwest",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/southwest",
+    "danger_level": -1,
+    "danger_name": "no rating",
+    "color": "#888888",
+    "travel_advice": "Watch for signs of unstable snow such as recent avalanches, cracking in the snow, and audible collapsing. Avoid traveling on or under similar slopes."
+  },
+  {
+    "zone_id": 1744,
+    "name": "Abajos",
+    "center_id": "UAC",
+    "slug": "abajos",
+    "forecast_url": "https://utahavalanchecenter.org/forecast/abajos",
+    "danger_level": -1,
+    "danger_name": "no rating",
+    "color": "#888888",
+    "travel_advice": "Watch for signs of unstable snow such as recent avalanches, cracking in the snow, and audible collapsing. Avoid traveling on or under similar slopes."
+  }
+]

@@ -1,0 +1,25 @@
+{
+	"files": {
+		"ignore": [".claude/**", "data/**", "package.json", "tsconfig.json"]
+	},
+	"formatter": {
+		"lineWidth": 120
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	},
+	"overrides": [
+		{
+			"include": ["src/public/**"],
+			"linter": {
+				"enabled": false
+			},
+			"formatter": {
+				"enabled": false
+			}
+		}
+	]
+}

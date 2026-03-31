@@ -1,0 +1,243 @@
+{
+  "scenario_id": "gs-010",
+  "scenario_name": "Sawatch Range, CO — Moderate Danger (2026-03-09)",
+  "description": "Real CAIC AVID forecast and NWS weather for Sawatch Range",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Sawatch Range",
+    "center": "CAIC",
+    "state": "CO",
+    "coordinates": {
+      "latitude": 38.73,
+      "longitude": -106.59
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": "9ed8c3f1-b619-446f-a81f-901fe9c9b889",
+      "publicName": "21-24-38-39-9",
+      "type": "avalancheforecast",
+      "polygons": [
+        "0FAA4D28-2B56-40A5-A79C-E534A07D98ED",
+        "2D929612-B1FD-4AC4-BA12-494ADDCBB442",
+        "389E01FC-0600-42E2-82FF-BEF3B23C6105",
+        "B65805C7-DE42-4F35-BDEE-14E7D6B7605A",
+        "EEE05A8E-51CF-4AF4-9509-EC7C64D14D20"
+      ],
+      "areaId": "e828f0f1db0a4fc927c33ea4078cb2f4466a9fd8dcde6db4f28ddea15d07b742",
+      "forecaster": "Ian Fowler",
+      "issueDateTime": "2026-03-08T22:30:00Z",
+      "expiryDateTime": "2026-03-09T22:30:00Z",
+      "isTranslated": false,
+      "isAutoTranslated": false,
+      "isMultiDay": false,
+      "timezone": "America/Denver",
+      "weatherSummary": {
+        "days": []
+      },
+      "snowpackSummary": {
+        "days": []
+      },
+      "avalancheSummary": {
+        "days": [
+          {
+            "date": "2026-03-09T22:30:00Z",
+            "content": "<p>Avoid slopes where you find thick, rounded pillows of wind-drifted snow. You are most likely to find these on aspects facing the eastern half of the compass below ridgelines and in cross-loaded gullies. If these crack when weighted, you have found dangerous snow. You can find safer travel on slopes less than about 35 degrees and terrain sheltered from the wind.&nbsp;</p><p>Warm temperatures mean snow can shed off steep sunny aspects. Gullies with lots of exposed rocks to heat up will be the first to slide. If you are in steep terrain and see roller balls, or you are sinking into wet snow past your ankles, head to cooler slopes.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+          }
+        ]
+      },
+      "terrainAndTravelAdvice": {
+        "days": [
+          [],
+          [],
+          []
+        ]
+      },
+      "communication": {
+        "headline": "",
+        "sms": ""
+      },
+      "media": {
+        "Images": [
+          {
+            "id": "14b4fae2-228a-44fb-917d-ec19496d6163",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772646458/AvIDfx/yakdjmax2rq33mhrarrf.webp",
+            "width": 350,
+            "height": 263,
+            "credit": "",
+            "caption": "<p>Several avalanches were observed around the East Portal of the Moffat Tunnel from the late February wind and snow. </p>",
+            "tag": "avalanche",
+            "altText": "recent avalacnhes",
+            "dateTaken": "2026-03-02T17:48:24.427Z",
+            "isArchived": false
+          },
+          {
+            "id": "2be53a01-1b36-47da-a1e6-053118069101",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1773005153/AvIDfx/z2u60v8vtjtngjf5wgxh.webp",
+            "width": 1179,
+            "height": 2556,
+            "credit": "",
+            "caption": "<p>Over the weekend avalanches were reported in wind-drifted snow. Avoid rounded pillows of firm snow. </p>",
+            "tag": "avalanche",
+            "altText": "Avalanche",
+            "dateTaken": "2026-03-08T16:46:49.05Z",
+            "isArchived": false
+          }
+        ]
+      },
+      "dangerRatings": {
+        "days": [
+          {
+            "position": 1,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "moderate",
+            "date": "2026-03-09T22:30:00Z"
+          },
+          {
+            "position": 2,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "moderate",
+            "date": "2026-03-10T22:30:00Z"
+          },
+          {
+            "position": 3,
+            "alp": "moderate",
+            "tln": "low",
+            "btl": "low",
+            "date": "2026-03-11T22:30:00Z"
+          }
+        ]
+      },
+      "avalancheProblems": {
+        "days": [
+          [
+            {
+              "type": "windSlab",
+              "aspectElevations": [
+                "s_alp",
+                "s_tln",
+                "se_alp",
+                "se_tln",
+                "e_alp",
+                "e_tln",
+                "ne_tln",
+                "ne_alp",
+                "n_tln",
+                "n_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            },
+            {
+              "type": "wetLoose",
+              "aspectElevations": [
+                "sw_alp",
+                "s_alp",
+                "se_alp",
+                "se_tln",
+                "s_tln",
+                "sw_tln",
+                "w_btl",
+                "w_tln",
+                "w_alp",
+                "e_alp",
+                "e_tln",
+                "e_btl"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "1.5"
+              }
+            }
+          ],
+          [
+            {
+              "type": "windSlab",
+              "aspectElevations": [
+                "e_alp",
+                "e_tln",
+                "ne_tln",
+                "ne_alp",
+                "n_tln",
+                "n_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            }
+          ],
+          [
+            {
+              "type": "windSlab",
+              "aspectElevations": [
+                "e_alp",
+                "ne_alp",
+                "n_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            }
+          ]
+        ]
+      }
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/GJT/163,80/forecast/hourly",
+      "data": {
+        "number": 24,
+        "name": "",
+        "startTime": "2026-03-10T08:00:00-06:00",
+        "endTime": "2026-03-10T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 25,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 2
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -10
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 62
+        },
+        "windSpeed": "10 mph",
+        "windDirection": "W",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Moderate", "level": 2 }
+    },
+    "avalanche_problems": [
+      "Wind Slab",
+      "Wet Loose"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger (level 2), inform but no urgent alert"
+  }
+}

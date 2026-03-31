@@ -1,0 +1,101 @@
+[
+  {
+    "type": "avalanche",
+    "label": "Avalanche Observation",
+    "description": "Report of observed avalanche activity",
+    "required_fields": ["location_name", "aspect", "elevation_band", "avalanche_details"],
+    "optional_fields": ["photos", "weather_notes"],
+    "avalanche_detail_fields": {
+      "type": {
+        "options": ["L", "SS", "HS", "WS", "WL"],
+        "labels": ["Loose", "Soft Slab", "Hard Slab", "Wet Slab", "Wet Loose"]
+      },
+      "trigger": {
+        "options": ["N", "AS", "AR", "AM", "AE", "AF"],
+        "labels": ["Natural", "Skier", "Snowboarder", "Snowmobile", "Explosive", "Foot"]
+      },
+      "size_destructive": {
+        "options": ["D1", "D1.5", "D2", "D2.5", "D3", "D3.5", "D4", "D4.5", "D5"]
+      },
+      "size_relative": {
+        "options": ["R1", "R2", "R3", "R4", "R5"]
+      },
+      "weak_layer": {
+        "options": [
+          "Storm — new snow",
+          "Wind — wind slab",
+          "Persistent — facets/depth hoar",
+          "Persistent — surface hoar",
+          "Wet — melt/rain",
+          "Unknown"
+        ]
+      }
+    }
+  },
+  {
+    "type": "snowpack",
+    "label": "Snowpack Observation",
+    "description": "Snowpack structure and stability observations",
+    "required_fields": ["location_name", "aspect", "elevation_band"],
+    "optional_fields": ["snow_depth_inches", "new_snow_inches", "surface_conditions", "stability_tests", "photos", "weather_notes"],
+    "surface_conditions": {
+      "options": [
+        "Powder",
+        "Wind-affected",
+        "Crust — sun",
+        "Crust — rain",
+        "Faceted",
+        "Wet/moist",
+        "Variable"
+      ]
+    }
+  },
+  {
+    "type": "weather",
+    "label": "Weather Observation",
+    "description": "Current weather and travel conditions",
+    "required_fields": ["location_name"],
+    "optional_fields": ["temperature_f", "wind_speed", "wind_direction", "precipitation_type", "precipitation_rate", "sky_conditions", "visibility", "photos"],
+    "wind_speed": {
+      "options": ["Calm", "Light", "Moderate", "Strong", "Extreme"],
+      "codes": ["C", "L", "M", "S", "X"]
+    },
+    "sky_conditions": {
+      "options": ["Clear", "Few clouds", "Scattered", "Broken", "Overcast", "Obscured"],
+      "codes": ["CLR", "FEW", "SCT", "BKN", "OVC", "X"]
+    },
+    "precipitation_type": {
+      "options": ["None", "Rain", "Snow", "Mixed rain/snow", "Graupel", "Freezing rain"],
+      "codes": ["NO", "RA", "SN", "RS", "GR", "ZR"]
+    }
+  },
+  {
+    "type": "red_flag",
+    "label": "Red Flag / Signs of Instability",
+    "description": "Observed signs of avalanche danger",
+    "required_fields": ["location_name", "red_flags"],
+    "optional_fields": ["photos", "description"],
+    "red_flags": {
+      "options": [
+        "recent_avalanche_activity",
+        "shooting_cracks",
+        "collapsing",
+        "new_snow_gt_12in",
+        "wind_loading",
+        "rapid_warming",
+        "rain_on_snow",
+        "rollerballs"
+      ],
+      "labels": [
+        "Recent avalanche activity",
+        "Shooting cracks",
+        "Collapsing / whumpfing",
+        "Significant new snow (>12\")",
+        "Wind loading observed",
+        "Rapid temperature rise",
+        "Rain on snow",
+        "Rollerballs / pinwheels"
+      ]
+    }
+  }
+]

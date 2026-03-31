@@ -1,0 +1,294 @@
+{
+  "scenario_id": "gs-013",
+  "scenario_name": "Stevens Pass, WA — High Danger (2026-03-09)",
+  "description": "NWAC forecast via avalanche.org with NWS weather for Stevens Pass",
+  "source": "avalanche.org product 182375, NWS weather fetched 2026-03-09",
+  "zone": {
+    "name": "Stevens Pass",
+    "center": "NWAC",
+    "state": "WA",
+    "coordinates": {
+      "latitude": 47.72,
+      "longitude": -121.08
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 182375,
+      "published_time": "2026-03-09T01:30:00+00:00",
+      "expires_time": "2026-03-10T01:30:00+00:00",
+      "created_at": "2026-03-08T23:43:14+00:00",
+      "updated_at": "2026-03-09T01:51:41+00:00",
+      "author": "Josh Hirshberg",
+      "product_type": "forecast",
+      "bottom_line": "<p>Avoid traveling on or near avalanche paths or slopes steeper than 30 degrees at upper elevations, especially where you see the wind blowing snow. A lingering, persistent weak layer could produce very large and deadly avalanches on the highest slopes. Elswere you can also trigger avalanches in the new snow, especially on wind-loaded slopes near ridges and drifted features.</p>\n<p>&nbsp;&nbsp;</p>",
+      "hazard_discussion": "<p>Ongoing snow, wind, and dropping temperatures will be the story into Monday night. While temperatures were slower to cool than originally forecast, it looks like they will arrive. With it, we can expect very light, low-density snow that will be easily transported by moderate to strong winds.</p>\n<p>By Sunday evening, Stevens Pass picked up over 1\" of water equivalent. At middle and upper elevations, this was mostly snow, though moist at times. Temperatures cooled, and by midday, precipitation shifted to all snow at the pass level.&nbsp;</p>\n<p>At low elevations, you can still find moist snow just below the surface. While it may be weak, we don't expect enough instability to warrant concern for wet avalanches. On Saturday, <a href=\"https://nwac.us/observations/#/view/observations/4875bc58-c05f-49e1-808a-488f1b1e3904\" target=\"_blank\" rel=\"noopener\">an NWAC forecaster in the Skyline area</a> reported a moist upper snowpack. At 5,300ft, NW water had reached and weakened the mid-February weak layers (2/13 surface hoar and 2/18 facets) and underlying crusts. Once frozen, we can rule out instability on persistent weak layers at these elevations. On Friday and Saturday, observers reported triggering wet avalanches, and some ran naturally with light rain and warming temperatures. Most of these were small and ran in surface layers.</p>\n<p>This storm is the biggest load on the existing weak layers since they've formed. Just 10 days ago, a much smaller storm drove a<a href=\"https://nwac.us/observations/#/view/avalanches/c93f6960-0b92-4f23-9950-8419e68fe172\" target=\"_blank\" rel=\"noopener\"> cycle of widely breaking D2-2.5-sized avalanches</a>. Natural and human-triggered avalanches occurred on leeward and sun-exposed slopes following a major westerly wind event. Wumphing was still reported from near Lake Valhalla and Yodelin areas in the past week.</p>",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": [
+        {
+          "id": 1,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/null_69adefede5fde-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/null_69adefede5fde-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/null_69adefede5fde.jpg",
+            "video_id": "6K3e_Uv4TIs",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/null_69adefede5fde-thumbnail.jpg"
+          },
+          "type": "video",
+          "title": "Stevens Pass: 03-08-2026-Extended Column Test",
+          "caption": "(3/8/2026) <p>An extended column at 5300ft on a NW aspect on Skyline Ridge at Stevens Pass. It failed and propagated in wet, weak, faceted grains between the 2/8 and 2/7 melt freeze crusts.</p> Video: Katie Warren",
+          "favorite": true
+        },
+        {
+          "id": 2,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260308_104547_69adef7f8b4c4-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260308_104547_69adef7f8b4c4-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260308_104547_69adef7f8b4c4.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/20260308_104547_69adef7f8b4c4-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(3/8/2026) <p>Snow profile near Skyline Ridge. The snowpack was moist, including older persistent weak layers that showed unstable resulted in snowpack tests.&nbsp;</p> Photo: Katie Warren",
+          "favorite": true
+        },
+        {
+          "id": 3,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026863_69aa296d8c9c8-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026863_69aa296d8c9c8-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026863_69aa296d8c9c8.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026863_69aa296d8c9c8-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p>(3/5/2026)</p>\n<p>Wind texture surfaces and rimed trees. Mission Peak/East Central 6800ft.</p>\n<p>Photo: Josh Hirshberg</p>",
+          "favorite": false
+        },
+        {
+          "id": 4,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_4642_69a78e4a219b7-large.jpeg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_4642_69a78e4a219b7-medium.jpeg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_4642_69a78e4a219b7.jpeg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/IMG_4642_69a78e4a219b7-thumbnail.jpeg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "<p>(3/3/2026)</p>\n<p>A natural wet loose avalanche was observed on Tuesday in the Stevens Pass backcountry. North aspect at 4500 feet.&nbsp;</p>\n<p>Photo: Stevens Pass Ski Patrol</p>",
+          "favorite": false
+        },
+        {
+          "id": 5,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/BigChief_Profile_annot_5350_NW_20250227_69a712a6aa08c-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/BigChief_Profile_annot_5350_NW_20250227_69a712a6aa08c-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/BigChief_Profile_annot_5350_NW_20250227_69a712a6aa08c.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/BigChief_Profile_annot_5350_NW_20250227_69a712a6aa08c-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/27/2026) <p>A profile near an avalanche in Big Chief Bowl that resulted in a full-burial on February 27th. The avalanche is presumed to have failed &darr;37cm on 0.5mm rounding facets buried on Feb 18th. Stevens Pass Resort, NW, 5350ft</p> Photo: Josh Hirshberg",
+          "favorite": false
+        },
+        {
+          "id": 6,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026755_69a35aa08be95-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026755_69a35aa08be95-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026755_69a35aa08be95.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026755_69a35aa08be95-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/28/2026) <p>A wide crown (D2) above Crescent Lake, between the summit of Rock and Howard mountains. E, 6,300ft</p> Photo: Josh Hirshberg",
+          "favorite": false
+        },
+        {
+          "id": 7,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026766_69a35aa41b1e7-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026766_69a35aa41b1e7-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026766_69a35aa41b1e7.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026766_69a35aa41b1e7-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/28/2026) <p>Multiple widely breaking avalanches (D2) on Rock Mtn, South Peak, SE, 6,000-6,500ft</p> Photo: Josh Hirshberg",
+          "favorite": false
+        }
+      ],
+      "weather_data": null,
+      "avalanche_center": {
+        "id": "NWAC",
+        "name": "Northwest Avalanche Center",
+        "url": "https://www.nwac.us/",
+        "city": "Seattle",
+        "state": "WA"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 2854036,
+          "forecast_id": 182375,
+          "avalanche_problem_id": 3,
+          "rank": 1,
+          "likelihood": "very likely",
+          "discussion": "<p>Avoid being on or under steep, leeward slopes at upper-elevations. Significant new snow and wind will combine for natural avalanches, and some could be large to very large. It will be easy to trigger avalanches in wind-loaded slopes at all elevations.</p>\n<p>To manage the risk, stick to low-angle slopes and wind-sheltered terrain. Actively blowing snow and deeper drifts will point out where you can trigger avalanches. While you may be able to trigger avalanches at lower elevations and even on sheltered slopes, they will be small and more difficult to trigger.&nbsp;</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3E2FC936-F2AB-4E8F-BAC6-D89B1305C70B_69a2a45e89ae7-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3E2FC936-F2AB-4E8F-BAC6-D89B1305C70B_69a2a45e89ae7-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3E2FC936-F2AB-4E8F-BAC6-D89B1305C70B_69a2a45e89ae7.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3E2FC936-F2AB-4E8F-BAC6-D89B1305C70B_69a2a45e89ae7-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "<p>(2/27/2026)</p>\n<p>Blowing snow is a sign that you can trigger wind slab avalanches on leeward slopes. Whitepine Creek drainage. North Chiwaukum Mtn, 7,000ft</p>\n<p>Photo: Josh Hirshberg</p>"
+          },
+          "location": [
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "northwest upper",
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle",
+            "west middle",
+            "northwest middle",
+            "north lower",
+            "northeast lower",
+            "east lower",
+            "southeast lower",
+            "south lower",
+            "southwest lower",
+            "west lower",
+            "northwest lower"
+          ],
+          "size": [
+            "1.5",
+            "2"
+          ],
+          "name": "Wind Slab",
+          "problem_description": "Wind Slab avalanches are the release of a cohesive layer of snow (a slab) formed by the wind. Wind typically transports snow from the upwind sides of terrain features and deposits snow on the downwind side. Wind slabs are often smooth and rounded and sometimes sound hollow, and can range from soft to hard. Wind slabs that form over a persistent weak layer (surface hoar, depth hoar, or near-surface facets) may be termed Persistent Slabs or may develop into Persistent Slabs.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/WindSlab.png"
+        },
+        {
+          "id": 2854037,
+          "forecast_id": 182375,
+          "avalanche_problem_id": 4,
+          "rank": 2,
+          "likelihood": "possible",
+          "discussion": "<p>With the threat of natural avalanches, we can't rule out very large and deadly persistent slab avalanches at upper elevations. They could be big enough to destroy a car and can break widely across terrain features. Avoid being on or near upper elevation slopes steeper than 30 degrees. Put a wide buffer of terrain between you and any identifiable avalanche path.</p>\n<p>This remains a high-consequence problem. The same wind loading that's creating avalanche problems in the new snow is also stressing older weak layers. Whumphing or shooting cracks are red flag warning signs. The most suspect slopes above 5,800ft where the snowpack has remained mostly dry and lacking new crusts. You can find layers of facets and buried surface hoar just above a couple of crusts about 1.5-2.5 feet (50-80cm) below the surface.&nbsp; The easiest solution will be to avoid suspect slopes.&nbsp;</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026752_69a35aa1e80c1-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026752_69a35aa1e80c1-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026752_69a35aa1e80c1.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/1000026752_69a35aa1e80c1-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "(2/28/2026) <p>Multiple widely breaking avalanches (up to D2.5) on the southeast aspect of the South Peak of Rock Mtn. SE-S, 5,800ft-6,600ft</p> Photo: Josh Hirshberg"
+          },
+          "location": [
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "northwest upper"
+          ],
+          "size": [
+            "2",
+            "3"
+          ],
+          "name": "Persistent Slab",
+          "problem_description": "Persistent Slab avalanches are the release of a cohesive layer of snow (a slab) in the middle to upper snowpack, when the bond to an underlying persistent weak layer breaks. Persistent layers include: surface hoar, depth hoar, near-surface facets, or faceted snow. Persistent weak layers can continue to produce avalanches for days, weeks or even months, making them especially dangerous and tricky. As additional snow and wind events build a thicker slab on top of the persistent weak layer, this avalanche problem may develop into a Deep Persistent Slab.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/PersistentSlab.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": 2,
+          "upper": 4,
+          "middle": 3,
+          "valid_day": "current"
+        },
+        {
+          "lower": 2,
+          "upper": 3,
+          "middle": 3,
+          "valid_day": "tomorrow"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 1649,
+          "name": "Stevens Pass",
+          "url": "http://www.nwac.us/avalanche-forecast/#/stevens-pass",
+          "state": "WA",
+          "zone_id": "2",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/SEW/165,65/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-07:00",
+        "endTime": "2026-03-09T09:00:00-07:00",
+        "isDaytime": true,
+        "temperature": 20,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 71
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -7.777777777777778
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 91
+        },
+        "windSpeed": "10 mph",
+        "windDirection": "W",
+        "icon": "https://api.weather.gov/icons/land/day/snow,70?size=small",
+        "shortForecast": "Snow Showers Likely",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "High",
+    "danger_level": 4,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "High", "level": 4 },
+      "near_treeline": { "rating": "Considerable", "level": 3 },
+      "below_treeline": { "rating": "Moderate", "level": 2 }
+    },
+    "avalanche_problems": [
+      "Wind Slab",
+      "Persistent Slab"
+    ],
+    "alert_action": "auto_send",
+    "alert_reasoning": "High danger (level 4) at upper elevations triggers automatic alert dispatch"
+  }
+}

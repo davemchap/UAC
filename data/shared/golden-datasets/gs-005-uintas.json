@@ -1,0 +1,91 @@
+{
+  "scenario_id": "gs-005",
+  "scenario_name": "Uintas, UT — Moderate Danger (2026-03-09)",
+  "description": "Real UAC forecast, NWS weather, and SNOTEL snowpack for Uintas zone",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Uintas",
+    "center": "UAC",
+    "state": "UT",
+    "coordinates": {
+      "latitude": 40.68,
+      "longitude": -110.83
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "advisories": [
+        {
+          "advisory": {
+            "date_issued": "Monday, March 9, 2026 - 6:50am",
+            "date_issued_timestamp": "1773060604",
+            "general_announcements": "We have some upcoming classes and events that we'd be stoked to see you at -- Please reach out with any questions and check out below for more details!\r\rSee All Courses &amp; Events Here\r\rWe are always looking for snow and avalanche observations or just general riding conditions. Reach out to us with questions, concerns, or if you see anything in your travels! Contact us directly through the info below:\r\r\r\tCraig Gordon Craig@utahavalanchecenter.org&nbsp;801-231-2170.\r\tAndrew Nassetta Andy@utahavalanchecenter.org&nbsp;860-460-8142.\r\r\rThis forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions, and local variations always occur.&nbsp;This forecast was issued on Monday, March 09&nbsp;at 0600 and expires 24 hours after it was issued.&nbsp; We'll update this information by 07:00 AM tomorrow.\r",
+            "current_conditions": "Nowcast - After topping out at nearly 50°F yesterday in the heat of it, we have cooled back off and at 0500 trailhead temps at 7,500' are hovering around 25°F. Upper elevations report the same, however are chilled by winds blowing from the southwest, moderately, between 20-30 MPH.&nbsp;\r\rForecast -&nbsp;Today's ambient temperatures will be nearly the same as yesterday, with a hight near 35°F.&nbsp; The difference today? Westerly winds are going to ramp up ahead of a incoming cold front, blowing between 30 and 40 MPH along the high ridges by the days end.&nbsp;\r\rFuturecast - We cool down into tomorrow, then ramp right back up later this week ten degrees above normal averages. Any chances of a quick refresh have dwindled, and things stay sunny through most of the working week with continued wind and mild temperatures.\r\rCheck out the Uinta Weather Network here!\r\rTravel Conditions&nbsp;- Across the Uinta's snow depths range from no coverage at most of our trailheads to some of the best riding of the season in upper elevation terrain. The North Slope won last weeks storm and stacked up the most snow, with a settled 10-15\", and closer to 5-10\" down on the South Slope. Solar aspects and windward terrain are cooked and wind scoured leaving behind a mixed back of sastrugi, crusts, wind-board and wind-pack in exposed areas. But get high, orient yourself to the north, and you will be met with stellar riding conditions no matter where your off to today.&nbsp;\r\r\r\r&nbsp;\r\rLooking north, the hills are a bit whiter in the distance near the Mirror Lake Corridor, compared to that in the foreground. The lack of snow on the South Slope is beginning to show the past few days as the spring weather is putting a beatdown on mid and lower elevations -- Checkout more from out travels, here.\r\r\r\rA cool down can't save us now! Down south near Strawberry access is becoming challenging and I think we are getting close to the end of it, for tracked vehicles that is, as snow-packed roads turn to creek beds and the water makes its way to the rivers.&nbsp;\r",
+            "mountain_weather": "Join the UAC for the first \"Stay and Play Avalanche Course\" at Bear River Lodge in the Uintas, March 19th-22nd. This course is designed for snowmobilers by snowmobilers, where you will learn avalanche rescue, riding skills, and how to survive in the backcountry. Come enjoy all the luxury offerings at Bear River Lodge and improve your skills along the way.\r\rOur Avalanche Rescue Training Park is set-up and located at the top of Wolf Creek Pass, SR-35, and is waiting for you to come take it for a spin! Open up the control unit, flip a few switches, and dial in your avalanche rescue skills with this roadside attraction!\r\r\r",
+            "recent_activity": "Near Bald Mountain, multiple riders tracked up this northerly facing&nbsp; slope at 11,000' before triggering this meaty&nbsp; persistent slab under a rock band feature. It was a close call at the end of the day with one buried sled, but everyone got home safely where they needed to be.\r\r\r\rThis avalanche broked up to 3' deep on average and nearly 8' deep in a&nbsp; wind-drifted pocket, breaking out nearly 250' wide and stacking up a fair debris pile. Thanks to Jake and his crew for sharing their experience and the write-up, check it out, here. The \"Living Room\" near Bald Mountain and Reids peak is a popular zone and is north facing near 11,000' .\r\rView All Avalanches &amp; Observations Here\r",
+            "avalanche_problem_1": "Persistent Weak Layer",
+            "avalanche_problem_1_description": "\r\rYesterdays close call is a firm reminder that it is still winter in the high-country, and although the chances of triggering a big slide as a rider are going down but it is still possible. If you do trigger it, the consequences remain the same today as they were last week when we had high.\r\rThis past weeks storm was not enough to wake up our PWL in a widespread fashion, but a few recent avalanches have queued us in to where we are currently at with the snowpack structure and hazard. On northwest through east facing slopes, recent avalanche activity and tests suggest the likelihood of triggering this avalanche problem is going down and mid-elevations are nearly there -- This is good news. On the flip side, we are not out of the woods yet and poor structure exists in many upper elevation areas where a dense slab still sits atop stubborn, weak and sugary faceted snow from the January dry spell.\r\rIt's tricky because we can trench multiple sets of tracks on a slope without incident, but all we need to do is find a weakness where the slab and weak layer are susceptible to our weight, maybe around a rock or a bush, collapse the pack, and now we have triggered an avalanche big enough to ruin our day. With that in mind, I am still avoiding suspect areas where this avalanche dragon lives. Steep, rocky, shallow slopes on the north half of the compass that are complex and have a lot going on are still off the table -- I can not outsmart this problem, so avoidance is my go-to tool for this dragon.&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+            "avalanche_problem_2": "Wind Drifted Snow",
+            "avalanche_problem_2_description": "Westerly winds ramp up throughout the day, and I wouldn't be surprised if they find a little bit of snow to move around and transport throughout the day.&nbsp;Small in size and predictable, I expect wind-drifts to be stubborn, if not already settled out and bonded to the old snow surface. Remember, any avalanche triggered can step-down into buried weak layers within the snowpack, triggering a larger avalanche than we signed-up for.&nbsp;\r\rFortunately, this is a very manageable avalanche dragon to identify and an equally easy one to avoid. Simply steer clear and avoid fat, rounded pillows of snow, especially if they look textured and feel hollow.A testament to the strong winds coming from all directions over the past week that have carved and scoured their way around everything they can whittle out.\r",
+            "bottom_line": "Today,&nbsp;MODERATE avalanche danger&nbsp;exists in mid and upper elevation&nbsp;slopes facing northwest through east where human-triggered avalanches are POSSIBLE&nbsp;failing multiple feet deep into weak, faceted snow from the January dry-spell.&nbsp;\r\rAlthough the likelihood of triggering an avalanche as a rider is going down, the consequences remain the same if we do, with todays slides big enough to bury and kill us.\r",
+            "danger_rose_1": "16,16,16,14,14,14,16,16,16,16,16,14,14,14,14,16,14,14,14,14,14,14,14,14",
+            "danger_rose_2": "16,16,16,16,16,16,16,16,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "danger_rose_3": "14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "overall_danger_rose": "4,4,4,4,4,4,4,4,4,4,4,2,2,2,2,4,2,2,2,2,2,2,2,2",
+            "overall_danger_rose_image": "<img src=\"https://utahavalanchecenter.org/sites/default/files/forecast/202603/20260309-085123-0.png\">",
+            "overall_danger_rating": "Moderate",
+            "region": "Uintas",
+            "Nid": "102711"
+          }
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/SLC/134,169/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-06:00",
+        "endTime": "2026-03-09T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 25,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 1
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -9.444444444444445
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 65
+        },
+        "windSpeed": "12 mph",
+        "windDirection": "S",
+        "icon": "https://api.weather.gov/icons/land/day/few?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Low", "level": 1 }
+    },
+    "avalanche_problems": [
+      "Persistent Slab",
+      "Wind Slab"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+  }
+}

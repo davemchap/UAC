@@ -1,0 +1,87 @@
+{
+  "scenario_id": "gs-006",
+  "scenario_name": "Skyline, UT — Moderate Danger (2026-03-09)",
+  "description": "Real UAC forecast, NWS weather, and SNOTEL snowpack for Skyline zone",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Skyline",
+    "center": "UAC",
+    "state": "UT",
+    "coordinates": {
+      "latitude": 39.88,
+      "longitude": -111.22
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "advisories": [
+        {
+          "advisory": {
+            "date_issued": "Monday, March 9, 2026 - 5:15am",
+            "date_issued_timestamp": "1773054926",
+            "general_announcements": "This forecast is from the U.S.D.A. Forest Service, which is solely responsible for its content. This forecast describes general avalanche conditions and local variations always occur.\r",
+            "current_conditions": "General Conditions:&nbsp; Springtime conditions prevail.&nbsp; Temperatures were warm enough on Sunday to make the snow on almost all aspects at all elevations damp.&nbsp; There may be just a hint of dry powder on the steeper, higher, due-north-facing terrain.&nbsp; Temperatures were around 40°F on Sunday and dropped down to around freezing overnight.&nbsp; Wind has been light from the southwest.&nbsp; You'll find sun crusts on almost every aspect this morning.\r\rMountain Weather:&nbsp; Warm weather is in the forecast this week.&nbsp; This is going to take a big hit on the already shallow snowpack.&nbsp; Today we'll see high temperatures well into the 40s.&nbsp; Wind from the southwest starts out light and gradually increases in speed late this afternoon.&nbsp; Expect more of the same through the week with VERY warm temperatures by this weekend.\r\rPhoto below:&nbsp; Chris Magerl - The end of the winter seems imminent.&nbsp;&nbsp;FULL OBSERVATION HERE\r\r\r",
+            "mountain_weather": "\rSKYLINE AVALANCHES &amp; OBSERVATIONS\r\r&nbsp;\r\rCAMERAS &amp; WEATHER STATIONS\r\r&nbsp;\r\rINSTAGRAM: SKYLINE_AVALANCHE\r\r&nbsp;\r\rFACEBOOK: SKYLINE AVALANCHE\r\r&nbsp;\r\rFORECAST EMAIL\r\r&nbsp;\r\rPREVIOUS FORECASTS\r&nbsp;\r\r&nbsp;\r\r",
+            "avalanche_problem_1": "Persistent Weak Layer",
+            "avalanche_problem_1_description": "Basically, the only real threat out there right now is the chance that a person could trigger an avalanche that breaks into weak, faceted snow that formed in January.&nbsp; The weak layer is about two feet deep.&nbsp; It has been gaining strength.&nbsp; The slab on top of it is also quite strong.&nbsp; These two factors make the likelihood of triggering something not all that great.&nbsp; However, I find it difficult to trust a snowpack with a layer of buried facets.&nbsp;&nbsp;\r\r&nbsp;\r",
+            "bottom_line": "Under warm weather, the snowpack continues to settle and stabilize.\r\rIt is becoming less likely to trigger an avalanche but it is still possible that one could break into old, weak faceted snow.\r\rThe danger rating is&nbsp;MODERATE&nbsp;on steep slopes above 9500' that face northwest, north, northeast and east.\r\rI am still holding my cards tight and you won't see me in the described terrain.\r",
+            "danger_rose_1": "16,16,16,14,14,14,14,16,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "danger_rose_2": "14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14",
+            "danger_rose_3": "14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,0,14",
+            "overall_danger_rose": "4,4,4,2,2,2,2,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2",
+            "overall_danger_rose_image": "<img src=\"https://utahavalanchecenter.org/sites/default/files/forecast/202603/20260309-052416-0.png\">",
+            "overall_danger_rating": "Moderate",
+            "region": "Skyline",
+            "Nid": "102704"
+          }
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/SLC/114,121/forecast/hourly",
+      "data": {
+        "number": 1,
+        "name": "",
+        "startTime": "2026-03-09T08:00:00-06:00",
+        "endTime": "2026-03-09T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 29,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 0
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -10
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 53
+        },
+        "windSpeed": "9 mph",
+        "windDirection": "SW",
+        "icon": "https://api.weather.gov/icons/land/day/skc?size=small",
+        "shortForecast": "Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Moderate",
+    "danger_level": 2,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Moderate", "level": 2 },
+      "near_treeline": { "rating": "Low", "level": 1 },
+      "below_treeline": { "rating": "Low", "level": 1 }
+    },
+    "avalanche_problems": [
+      "Persistent Slab"
+    ],
+    "alert_action": "no_alert",
+    "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+  }
+}

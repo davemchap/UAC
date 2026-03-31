@@ -1,0 +1,300 @@
+{
+  "scenario_id": "gs-011",
+  "scenario_name": "Northern San Juan, CO — Considerable Danger (2026-03-09)",
+  "description": "Real CAIC AVID forecast and NWS weather for Northern San Juan",
+  "source": "Live API data fetched 2026-03-09",
+  "zone": {
+    "name": "Northern San Juan",
+    "center": "CAIC",
+    "state": "CO",
+    "coordinates": {
+      "latitude": 37.88,
+      "longitude": -107.65
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": "2d2973d2-d04d-4d81-9d8b-80848b4ff9a7",
+      "publicName": "72-73-83-84-85-86-96",
+      "type": "avalancheforecast",
+      "polygons": [
+        "1660315E-6000-4E83-BF42-36B71129C6B1",
+        "3194EF47-46C9-4132-83C1-D156F9B94123",
+        "977E9661-AE8E-45A5-9882-EC28C4B149AE",
+        "D5746397-17D6-4EE2-837F-6DA0AC4CD2D6",
+        "D892417F-5570-4940-A311-AA918B8A2AF7",
+        "DAFC9825-B67E-4FF5-8E6C-4D05CC20E554",
+        "E72F7052-876D-476F-89A0-9AEE369F0317"
+      ],
+      "areaId": "5f262a296fe4e0b4cf9837ee16bc3da3988c317cd2a1b4f5ee48388f82d706a0",
+      "forecaster": "Ben Pritchett",
+      "issueDateTime": "2026-03-08T22:30:00Z",
+      "expiryDateTime": "2026-03-09T22:30:00Z",
+      "isTranslated": false,
+      "isAutoTranslated": false,
+      "isMultiDay": false,
+      "timezone": "America/Denver",
+      "weatherSummary": {
+        "days": []
+      },
+      "snowpackSummary": {
+        "days": []
+      },
+      "avalancheSummary": {
+        "days": [
+          {
+            "date": "2026-03-09T22:30:00Z",
+            "content": "<p>You can easily trigger a slab avalanche on steep wind-drifted terrain features where you find more than about a foot of fresh snow on the now-buried rain crust from late February. The more worrisome situation is if an avalanche breaks through that crust, into deeper buried weak layers. You can find safer conditions in wind-sheltered, lower-angled terrain without steep terrain overhead. Move away from steep slopes with wet snow later in the day.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 to 3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report&nbsp;<a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+          }
+        ]
+      },
+      "terrainAndTravelAdvice": {
+        "days": [
+          [],
+          [],
+          []
+        ]
+      },
+      "communication": {
+        "headline": "",
+        "sms": ""
+      },
+      "media": {
+        "Images": [
+          {
+            "id": "162ece1e-70aa-4a22-9a3a-0007bc6efa7f",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772312314/AvIDfx/xghvsq7l2bxsz6sdsyyt.webp",
+            "width": 741,
+            "height": 1319,
+            "credit": "",
+            "caption": "<p>Skiers remotely triggered this large Persistent Slab avalanche on a southeast-facing slope last weekend.</p>",
+            "tag": "avalanche",
+            "altText": "A broad avaalnche that gouged to near the ground below a cliff.",
+            "dateTaken": "2026-02-28T20:58:38.435Z",
+            "isArchived": false
+          },
+          {
+            "id": "fdcdbeb8-4702-41cd-80b7-f08e68073bd2",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772571620/AvIDfx/minjl0wnfc2kiuctey99.webp",
+            "width": 2500,
+            "height": 1875,
+            "credit": "",
+            "caption": "<p>A recent natural avalanche in Capitol Creek that likely slid during last week's rain event.</p>",
+            "tag": "avalanche",
+            "altText": "An avalanche",
+            "dateTaken": "2026-03-01T21:00:27.213Z",
+            "isArchived": false
+          },
+          {
+            "id": "5093ff5f-2348-4fa8-8866-249aa7f45213",
+            "url": "http://res.cloudinary.com/dozsqvbas/image/upload/v1772312654/AvIDfx/sseui6mwx1btqpncthhh.webp",
+            "width": 1024,
+            "height": 768,
+            "credit": "",
+            "caption": "<p>This very large avalanche released naturally around February 25th above East Snowmass Creek.</p>",
+            "tag": "avalanche",
+            "altText": "A broad avalanche highlighted in the sun.",
+            "dateTaken": "2026-02-26T21:04:19.774Z",
+            "isArchived": false
+          }
+        ]
+      },
+      "dangerRatings": {
+        "days": [
+          {
+            "position": 1,
+            "alp": "considerable",
+            "tln": "moderate",
+            "btl": "moderate",
+            "date": "2026-03-09T22:30:00Z"
+          },
+          {
+            "position": 2,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "moderate",
+            "date": "2026-03-10T22:30:00Z"
+          },
+          {
+            "position": 3,
+            "alp": "moderate",
+            "tln": "moderate",
+            "btl": "moderate",
+            "date": "2026-03-11T22:30:00Z"
+          }
+        ]
+      },
+      "avalancheProblems": {
+        "days": [
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "nw_alp",
+                "nw_tln",
+                "n_tln",
+                "n_alp",
+                "ne_tln",
+                "ne_alp",
+                "e_alp",
+                "e_tln",
+                "nw_btl",
+                "n_btl",
+                "ne_btl",
+                "w_tln",
+                "w_alp",
+                "se_alp"
+              ],
+              "likelihood": "likely",
+              "expectedSize": {
+                "min": "2.0",
+                "max": "3.0"
+              }
+            },
+            {
+              "type": "windSlab",
+              "aspectElevations": [
+                "s_alp",
+                "s_tln",
+                "se_tln",
+                "se_alp",
+                "e_alp",
+                "e_tln",
+                "ne_tln",
+                "ne_alp",
+                "n_tln",
+                "n_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "2.0"
+              }
+            },
+            {
+              "type": "wetLoose",
+              "aspectElevations": [
+                "w_btl",
+                "w_tln",
+                "w_alp",
+                "e_alp",
+                "e_tln",
+                "e_btl",
+                "se_btl",
+                "s_btl",
+                "sw_btl",
+                "sw_tln",
+                "s_tln",
+                "se_tln",
+                "se_alp",
+                "s_alp",
+                "sw_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "1.0",
+                "max": "1.5"
+              }
+            }
+          ],
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "nw_alp",
+                "nw_tln",
+                "n_tln",
+                "n_alp",
+                "ne_tln",
+                "ne_alp",
+                "e_alp",
+                "e_tln",
+                "nw_btl",
+                "n_btl",
+                "ne_btl",
+                "w_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "2.0",
+                "max": "3.0"
+              }
+            }
+          ],
+          [
+            {
+              "type": "persistentSlab",
+              "aspectElevations": [
+                "nw_alp",
+                "nw_tln",
+                "n_tln",
+                "n_alp",
+                "ne_tln",
+                "ne_alp",
+                "e_alp",
+                "e_tln",
+                "nw_btl",
+                "n_btl",
+                "ne_btl",
+                "w_alp"
+              ],
+              "likelihood": "possible",
+              "expectedSize": {
+                "min": "2.0",
+                "max": "3.0"
+              }
+            }
+          ]
+        ]
+      }
+    },
+    "weather": {
+      "source": "NWS",
+      "api_endpoint": "https://api.weather.gov/gridpoints/GJT/122,46/forecast/hourly",
+      "data": {
+        "number": 24,
+        "name": "",
+        "startTime": "2026-03-10T08:00:00-06:00",
+        "endTime": "2026-03-10T09:00:00-06:00",
+        "isDaytime": true,
+        "temperature": 22,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 8
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -9.444444444444445
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 73
+        },
+        "windSpeed": "10 mph",
+        "windDirection": "SSW",
+        "icon": "https://api.weather.gov/icons/land/day/sct?size=small",
+        "shortForecast": "Mostly Sunny",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Considerable",
+    "danger_level": 3,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Considerable", "level": 3 },
+      "near_treeline": { "rating": "Moderate", "level": 2 },
+      "below_treeline": { "rating": "Moderate", "level": 2 }
+    },
+    "avalanche_problems": [
+      "Persistent Slab",
+      "Wind Slab",
+      "Wet Loose"
+    ],
+    "alert_action": "human_review",
+    "alert_reasoning": "Considerable danger (level 3) requires human review before alert dispatch"
+  }
+}

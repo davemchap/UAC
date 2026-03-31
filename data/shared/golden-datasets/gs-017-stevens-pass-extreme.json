@@ -1,0 +1,197 @@
+{
+  "scenario_id": "gs-017",
+  "scenario_name": "Stevens Pass, WA — Extreme Danger (2022-01-07)",
+  "description": "NWAC forecast via avalanche.org with historical weather for Stevens Pass during January 2022 extreme event",
+  "source": "avalanche.org product 104029, historical data from 2022-01-07",
+  "zone": {
+    "name": "Stevens Pass",
+    "center": "NWAC",
+    "state": "WA",
+    "coordinates": {
+      "latitude": 47.70,
+      "longitude": -121.04
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 104029,
+      "published_time": "2022-01-07T02:00:00+00:00",
+      "expires_time": "2022-01-08T02:00:00+00:00",
+      "created_at": "2022-01-07T00:48:55+00:00",
+      "updated_at": "2022-01-07T01:12:33+00:00",
+      "author": "Josh Hirshberg",
+      "product_type": "forecast",
+      "bottom_line": "<p>Avoid all avalanche terrain and backcountry travel. Expect unusually dangerous conditions with widespread very large and destructive avalanches starting at upper elevations. A uniquely potent storm will maintain concern for roof avalanches and slides in unusual locations near towns and in the valleys.</p>",
+      "hazard_discussion": "<p>Since January 5th, over 31 inches of snow has accumulated with 3\" of water equivalent. Another 2.5\" of precipitation will fall as snow above 4,000ft by late Friday.&nbsp; There is minimal access to most of the zone as Highway 2 is closed. On Thursday, WSDOT forecasters reported multiple avalanches at least D3 in size hitting the closed highway west of Stevens Pass. In a portion of Tumwater Canyon, they reported over 30 debris piles on the highway up to 15 feet deep. In the neighboring East Central zone, we've received a report of an avalanche damaging a house south of Entiat and multiple reports of dangerous roof avalanches.</p>\n<p>&nbsp;</p>",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": [
+        {
+          "id": 1,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07465_annotated-scaled_61d50ca016971.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07465_annotated-scaled_61d50ca016971.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07465_annotated-scaled_61d50ca016971.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07465_annotated-scaled_61d50ca016971.jpg"
+          },
+          "type": "image",
+          "caption": "<p>(1/4/2022) A profile of the upper snowpack featuring a lingering interface of small facets from Dec 29th, and the dormant Solstice crust and associated facets. Avalanches could involve older weak layers Skyline area, Stevens Pass, E, 5,150ft Photo: Josh Hirshberg</p>"
+        },
+        {
+          "id": 2,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Mastif_NE_MPrimomo_20211227_61ca6c81b5acf.JPG",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Mastif_NE_MPrimomo_20211227_61ca6c81b5acf.JPG",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Mastif_NE_MPrimomo_20211227_61ca6c81b5acf.JPG",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Mastif_NE_MPrimomo_20211227_61ca6c81b5acf.JPG"
+          },
+          "type": "image",
+          "caption": "<p>(12/27/2021)</p>\n<p>A very large natural avalanche propagated widely on Mt Mastif sometime between Dec 25-26th. Avalanches could involve older weak layers, especially in the eastern part of the Stevens Pass zone. NE, above treeline.</p>\n<p>Photo: Matt Primomo</p>"
+        },
+        {
+          "id": 3,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07473-scaled_61d50ca541ebe.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07473-scaled_61d50ca541ebe.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07473-scaled_61d50ca541ebe.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/DSC07473-scaled_61d50ca541ebe.jpg"
+          },
+          "type": "image",
+          "caption": "<p>(1/4/2022) The west faces of Rock and Howard mountains just prior to the current storm. Photo: Josh Hirshberg</p>"
+        }
+      ],
+      "weather_data": null,
+      "avalanche_center": {
+        "id": "NWAC",
+        "name": "Northwest Avalanche Center",
+        "url": "https://www.nwac.us/",
+        "city": "Seattle",
+        "state": "WA"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 66810,
+          "forecast_id": 104029,
+          "avalanche_problem_id": 2,
+          "rank": 1,
+          "likelihood": "certain",
+          "discussion": "<p>This is a day to avoid the mountains altogether. Avalanches are very likely to certain on slopes 30 degrees or steeper. Strong wind will drive very large avalanches at upper elevations which could run to below treeline. Avalanches could be destructive and big enough to bury cars or break trees. They could run on older layers in the top 3 feet of the snowpack. Even if traveling in vehicles or close to town, stay far out from under any avalanche paths and do not stop or linger in runout zones. Expect wet avalanches below 4,000ft.&nbsp;</p>\n<p>Access and travel is limited due to road closures. Impacts of avalanches include low elevation terrain where they are rarely a concern and roof avalanche hazards. Use caution around any large roofs and even small slopes holding snow. Make sure children and pets stay out from under areas of concern.</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3043246819433855068_5ffe4c848f128.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3043246819433855068_5ffe4c848f128.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3043246819433855068_5ffe4c848f128.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/3043246819433855068_5ffe4c848f128.jpg"
+            },
+            "type": "image",
+            "caption": "<p>(1/12/2021) An example from last season of the extent of natural storm slab avalanches we could expect.&nbsp; Rock Mountain, SE, 5400ft. Photo: Josh Hirshberg</p>"
+          },
+          "location": [
+            "north upper",
+            "northeast upper",
+            "east upper",
+            "southeast upper",
+            "south upper",
+            "southwest upper",
+            "west upper",
+            "northwest upper",
+            "north middle",
+            "northeast middle",
+            "east middle",
+            "southeast middle",
+            "south middle",
+            "southwest middle",
+            "west middle",
+            "northwest middle",
+            "southwest lower",
+            "west lower",
+            "northwest lower",
+            "north lower",
+            "northeast lower",
+            "east lower",
+            "southeast lower",
+            "south lower"
+          ],
+          "size": [
+            "2",
+            "3"
+          ],
+          "name": "Storm Slab",
+          "problem_description": "Storm Slab avalanches are the release of a cohesive layer (a slab) of new snow that breaks within new snow or on the old snow surface. Storm-slabs typically last between a few hours and few days (following snowfall). Storm-slabs that form over a persistent weak layer (surface hoar, depth hoar, or near-surface facets) may be termed Persistent Slabs or may develop into Persistent Slabs.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/StormSlab.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": 5,
+          "upper": 5,
+          "middle": 5,
+          "valid_day": "current"
+        },
+        {
+          "lower": 3,
+          "upper": 4,
+          "middle": 3,
+          "valid_day": "tomorrow"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 1649,
+          "name": "Stevens Pass",
+          "url": "http://www.nwac.us/avalanche-forecast/#/stevens-pass",
+          "state": "WA",
+          "zone_id": "2",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS-format (converted from NOAA archive data)",
+      "api_endpoint": null,
+      "data": {
+        "number": 8,
+        "name": "",
+        "startTime": "2022-01-07T07:00:00-08:00",
+        "endTime": "2022-01-07T08:00:00-08:00",
+        "isDaytime": true,
+        "temperature": 31,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 90
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -0.89
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 99
+        },
+        "windSpeed": "10 mph",
+        "windDirection": "SW",
+        "icon": "",
+        "shortForecast": "Snow",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "Extreme",
+    "danger_level": 5,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "Extreme", "level": 5 },
+      "near_treeline": { "rating": "Extreme", "level": 5 },
+      "below_treeline": { "rating": "Extreme", "level": 5 }
+    },
+    "avalanche_problems": [
+      "Storm Slab"
+    ],
+    "alert_action": "auto_send_urgent",
+    "alert_reasoning": "Extreme danger (level 5) at all elevations triggers urgent automatic alert dispatch; avoid all avalanche terrain"
+  }
+}

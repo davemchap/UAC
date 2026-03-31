@@ -1,0 +1,50 @@
+[
+  {
+    "station_triplet": "766:UT:SNTL",
+    "name": "Snowbird",
+    "latitude": 40.5605,
+    "longitude": -111.7378,
+    "elevation_ft": 9820,
+    "zone": "Salt Lake"
+  },
+  {
+    "station_triplet": "366:UT:SNTL",
+    "name": "Brighton",
+    "latitude": 40.5981,
+    "longitude": -111.5847,
+    "elevation_ft": 8755,
+    "zone": "Salt Lake"
+  },
+  {
+    "station_triplet": "814:UT:SNTL",
+    "name": "Thaynes Canyon",
+    "latitude": 40.6439,
+    "longitude": -111.5108,
+    "elevation_ft": 8400,
+    "zone": "Salt Lake"
+  },
+  {
+    "station_triplet": "628:UT:SNTL",
+    "name": "Mill D North",
+    "latitude": 40.6542,
+    "longitude": -111.5878,
+    "elevation_ft": 8900,
+    "zone": "Salt Lake"
+  },
+  {
+    "station_triplet": "393:UT:SNTL",
+    "name": "Ben Lomond Peak",
+    "latitude": 41.3517,
+    "longitude": -111.9486,
+    "elevation_ft": 7600,
+    "zone": "Ogden"
+  },
+  {
+    "station_triplet": "828:UT:SNTL",
+    "name": "Timpanogos Divide",
+    "latitude": 40.4167,
+    "longitude": -111.5500,
+    "elevation_ft": 8350,
+    "zone": "Provo"
+  }
+]

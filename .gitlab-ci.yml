@@ -1,0 +1,1057 @@
+# =============================================================================
+# Ship Summit Fullstack App - GitLab CI/CD Pipeline
+# =============================================================================
+# This pipeline builds and deploys your app to AWS ECS with PostgreSQL database.
+# It includes the full SecRel (Security Release) pipeline for automated
+# security scanning, gating, signing, and evidence collection.
+#
+# Pipeline stages:
+#   1. provision-db: Creates your database in the shared PostgreSQL instance
+#   2. lint: Code quality checks (Biome)
+#   3. test: SAST, secret detection, dependency scanning, unit tests
+#   4. build: Builds Docker image via CodeBuild and pushes to ECR
+#   5. scan: Trivy container/IaC scan, SBOM generation
+#   6. stig-check: CIS Docker Benchmark compliance
+#   7. gatecheck: Policy evaluation gate
+#   8. sign: Cosign image signing via AWS KMS
+#   9. deploy: Deploys to ECS Fargate via CloudFormation
+#  10. dast: OWASP ZAP dynamic scan (if enabled)
+#  11. evidence: Upload security artifacts to S3 (BOE)
+#  12. release: Create release notes
+#
+# SECURITY:
+#   Container builds use AWS CodeBuild (FedRAMP High / IL4 compliant)
+#   No privileged containers or root access required on runners
+#
+# CUSTOMIZATION:
+#   1. Change APP_NAME to your unique app name (e.g., "jsmith-notesapp")
+#   2. Adjust CONTAINER_PORT if your app uses a different port
+#   3. Modify HEALTH_CHECK_PATH if your health endpoint is different
+#
+# PREREQUISITES:
+#   - CodeBuild stack deployed (codebuild-container-builds-${ENVIRONMENT})
+#   - Your project must have a Dockerfile (included in this template)
+#   - AWS_ACCOUNT_ID — set as a GitLab instance-level variable by setup-gitlab-variables.sh
+#
+# For more details, see: infrastructure/gitlab-ci-templates/README.md
+# =============================================================================
+
+# =============================================================================
+# SECREL PIPELINE INCLUDE
+# =============================================================================
+# Pulls in the centralized SecRel template from the infrastructure project.
+# This adds: lint, SAST, secret detection, container scan, SBOM, gatecheck,
+# image signing, DAST, evidence upload, and release stages.
+# =============================================================================
+include:
+  - project: 'templates/ci-templates'
+    ref: main
+    file: '/shipsummit-secrel.yml'
+
+# =============================================================================
+# TEAM CUSTOMIZATION - CHANGE THESE VALUES!
+# =============================================================================
+variables:
+  # -------------------------------------------------------------------------
+  # YOUR APP NAME (REQUIRED - MUST CHANGE!)
+  # -------------------------------------------------------------------------
+  # Format: {yourname}-{appname} (lowercase, hyphens only)
+  # Examples: "jsmith-notesapp", "team-alpha-api", "alice-inventory"
+  # This must be unique across all Ship Summit participants!
+  APP_NAME: "black-3"
+
+  # -------------------------------------------------------------------------
+  # APPLICATION SETTINGS
+  # -------------------------------------------------------------------------
+  # Port your application listens on (default: 3000)
+  CONTAINER_PORT: "3000"
+
+  # Health check endpoint path (must return 200 for healthy)
+  HEALTH_CHECK_PATH: "/health"
+
+  # -------------------------------------------------------------------------
+  # DATABASE SETTINGS
+  # -------------------------------------------------------------------------
+  # Set to "true" to provision a PostgreSQL database (recommended)
+  # Set to "false" if your app doesn't need a database
+  PROVISION_DATABASE: "true"
+
+  # -------------------------------------------------------------------------
+  # BUILD SETTINGS (usually don't need to change)
+  # -------------------------------------------------------------------------
+  # Path to your Dockerfile (relative to repo root)
+  DOCKERFILE_PATH: "Dockerfile"
+
+  # Docker build context directory
+  BUILD_CONTEXT: "."
+
+  # -------------------------------------------------------------------------
+  # SECREL SETTINGS (usually don't need to change)
+  # -------------------------------------------------------------------------
+  # Language for lint/test routing (typescript | python)
+  LANGUAGE: "typescript"
+
+  # -------------------------------------------------------------------------
+  # INFRASTRUCTURE VARIABLES
+  # -------------------------------------------------------------------------
+  AWS_REGION: "us-east-1"
+  # Injected from GitLab instance-level CI/CD variable via setup-gitlab-variables.sh
+  ENVIRONMENT: "${ENVIRONMENT}"
+  ECR_REPO_NAME: "shipsummit-apps-${ENVIRONMENT}"
+  VPC_STACK_NAME: "software-factory-vpc-${ENVIRONMENT}"
+  ECR_STACK_NAME: "team-app-ecr-${ENVIRONMENT}"
+  ALB_STACK_NAME: "team-app-alb-${ENVIRONMENT}"
+  MASTER_SECRET_PREFIX: "shipsummit-db-credentials"
+  APP_SECRET_PREFIX: "shipsummit-app"
+  CODEBUILD_PROJECT: "container-builds-${ENVIRONMENT}"
+  SOURCE_BUCKET: "codebuild-sources-${AWS_ACCOUNT_ID}-${ENVIRONMENT}"
+  # Set ANTHROPIC_API_KEY_SECRET_ARN as a GitLab group-level CI/CD variable to inject
+  # the Anthropic API key into your deployed ECS container. Leave empty to omit.
+  # Set ANTHROPIC_API_KEY as a GitLab group-level CI/CD variable for eval harness tests.
+  ANTHROPIC_API_KEY_SECRET_ARN: ""
+
+# =============================================================================
+# PIPELINE STAGES
+# =============================================================================
+# The SecRel include defines all stages. We re-declare here for clarity.
+# =============================================================================
+stages:
+  - provision-db
+  - lint
+  - test
+  - build
+  - scan
+  - stig-check
+  - gatecheck
+  - sign
+  - deploy
+  - dast
+  - evidence
+  - release
+
+# =============================================================================
+# DATABASE PROVISIONING STAGE
+# =============================================================================
+# Creates your database in the shared PostgreSQL instance:
+#   - Database: {app_name}_db (e.g., jsmith_todoapp_db)
+#   - User: {app_name}_user (e.g., jsmith_todoapp_user)
+#   - Credentials stored in AWS Secrets Manager
+#
+# The DATABASE_URL will be automatically injected into your container.
+# =============================================================================
+provision-database:
+  stage: provision-db
+  image: amazon/aws-cli:2.15.0
+
+  rules:
+    - if: '$PROVISION_DATABASE == "true" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$PROVISION_DATABASE == "true" && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - if: '$PROVISION_DATABASE == "true"'
+      when: manual
+      allow_failure: true
+    - if: '$PROVISION_DATABASE != "true"'
+      when: never
+
+  before_script:
+    - |
+      echo "=============================================="
+      echo "Validating Configuration"
+      echo "=============================================="
+      if [ -z "${AWS_ACCOUNT_ID}" ]; then
+        echo "ERROR: AWS_ACCOUNT_ID not set. Contact infrastructure team."
+        exit 1
+      fi
+      if [ "${APP_NAME}" = "CHANGE-ME-yourname-appname" ]; then
+        echo "ERROR: You must change APP_NAME in .gitlab-ci.yml!"
+        echo "Example: APP_NAME: \"jsmith-notesapp\""
+        exit 1
+      fi
+      echo "App Name: ${APP_NAME}"
+      echo "Environment: ${ENVIRONMENT}"
+
+  script:
+    - |
+      echo "=============================================="
+      echo "Provisioning Database for ${APP_NAME}"
+      echo "=============================================="
+
+      # Get master credentials
+      MASTER_SECRET_NAME="${MASTER_SECRET_PREFIX}-${ENVIRONMENT}"
+      MASTER_SECRET=$(aws secretsmanager get-secret-value \
+        --secret-id "${MASTER_SECRET_NAME}" \
+        --region "${AWS_REGION}" \
+        --query 'SecretString' \
+        --output text)
+
+      MASTER_USER=$(echo "${MASTER_SECRET}" | jq -r '.username')
+      MASTER_PASSWORD=$(echo "${MASTER_SECRET}" | jq -r '.password')
+      DB_HOST=$(echo "${MASTER_SECRET}" | jq -r '.host')
+      DB_PORT=$(echo "${MASTER_SECRET}" | jq -r '.port // "5432"')
+
+      # Generate app-specific names
+      SANITIZED_NAME=$(echo "${APP_NAME}" | tr '-' '_' | tr '[:upper:]' '[:lower:]')
+      APP_DB_NAME="${SANITIZED_NAME}_db"
+      APP_DB_USER="${SANITIZED_NAME}_user"
+      APP_DB_PASSWORD=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32 || true)
+
+      echo "Database: ${APP_DB_NAME}"
+      echo "User: ${APP_DB_USER}"
+
+      # Create user and database
+      export PGPASSWORD="${MASTER_PASSWORD}"
+
+      USER_EXISTS=$(psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres -t \
+        -c "SELECT 1 FROM pg_roles WHERE rolname = '${APP_DB_USER}';" 2>/dev/null | tr -d ' ')
+
+      if [ -n "${USER_EXISTS}" ]; then
+        echo "Updating existing user..."
+        psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres \
+          -c "ALTER USER ${APP_DB_USER} WITH PASSWORD '${APP_DB_PASSWORD}';" > /dev/null 2>&1
+      else
+        echo "Creating user..."
+        psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres \
+          -c "CREATE USER ${APP_DB_USER} WITH PASSWORD '${APP_DB_PASSWORD}';" > /dev/null 2>&1
+      fi
+
+      DB_EXISTS=$(psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres -t \
+        -c "SELECT 1 FROM pg_database WHERE datname = '${APP_DB_NAME}';" 2>/dev/null | tr -d ' ')
+
+      if [ -z "${DB_EXISTS}" ]; then
+        echo "Creating database..."
+        psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres \
+          -c "CREATE DATABASE ${APP_DB_NAME} OWNER ${APP_DB_USER};" > /dev/null 2>&1
+      fi
+
+      # Grant privileges
+      psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d postgres \
+        -c "GRANT CONNECT ON DATABASE ${APP_DB_NAME} TO ${APP_DB_USER};" > /dev/null 2>&1
+
+      psql -h "${DB_HOST}" -p "${DB_PORT}" -U "${MASTER_USER}" -d "${APP_DB_NAME}" <<-EOSQL > /dev/null 2>&1
+        GRANT USAGE ON SCHEMA public TO ${APP_DB_USER};
+        GRANT CREATE ON SCHEMA public TO ${APP_DB_USER};
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${APP_DB_USER};
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${APP_DB_USER};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO ${APP_DB_USER};
+        ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO ${APP_DB_USER};
+      EOSQL
+
+      # Store credentials in Secrets Manager
+      APP_SECRET_NAME="${APP_SECRET_PREFIX}-${APP_NAME}-db-${ENVIRONMENT}"
+      CONNECTION_URL="postgresql://${APP_DB_USER}:${APP_DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${APP_DB_NAME}?sslmode=require"
+
+      SECRET_JSON=$(jq -n \
+        --arg username "${APP_DB_USER}" \
+        --arg password "${APP_DB_PASSWORD}" \
+        --arg host "${DB_HOST}" \
+        --arg port "${DB_PORT}" \
+        --arg dbname "${APP_DB_NAME}" \
+        --arg url "${CONNECTION_URL}" \
+        '{username: $username, password: $password, host: $host, port: $port, dbname: $dbname, url: $url, engine: "postgres"}')
+
+      if aws secretsmanager describe-secret --secret-id "${APP_SECRET_NAME}" --region "${AWS_REGION}" > /dev/null 2>&1; then
+        aws secretsmanager put-secret-value \
+          --secret-id "${APP_SECRET_NAME}" \
+          --secret-string "${SECRET_JSON}" \
+          --region "${AWS_REGION}" > /dev/null
+      else
+        aws secretsmanager create-secret \
+          --name "${APP_SECRET_NAME}" \
+          --description "Database credentials for ${APP_NAME}" \
+          --secret-string "${SECRET_JSON}" \
+          --tags "Key=AppName,Value=${APP_NAME}" "Key=Environment,Value=${ENVIRONMENT}" \
+          --region "${AWS_REGION}" > /dev/null
+      fi
+
+      DATABASE_SECRET_ARN=$(aws secretsmanager describe-secret \
+        --secret-id "${APP_SECRET_NAME}" \
+        --region "${AWS_REGION}" \
+        --query 'ARN' \
+        --output text)
+
+      echo ""
+      echo "=============================================="
+      echo "Database provisioned successfully!"
+      echo "=============================================="
+      echo "DATABASE_SECRET_ARN=${DATABASE_SECRET_ARN}" > database.env
+
+  artifacts:
+    reports:
+      dotenv: database.env
+    expire_in: 1 hour
+
+# =============================================================================
+# BUILD STAGE
+# =============================================================================
+# Builds your Docker image using AWS CodeBuild (IL4/FedRAMP compliant)
+# and pushes to Amazon ECR.
+# =============================================================================
+build-and-push:
+  stage: build
+  image: amazon/aws-cli:2.15.0
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: manual
+      allow_failure: true
+
+  # Ensure build cannot start until lint and test stages complete.
+  needs:
+    - job: provision-database
+      optional: true
+    - job: lint
+      optional: true
+    - job: sast
+      optional: true
+    - job: secret_detection
+      optional: true
+    - job: dependency_scanning
+      optional: true
+
+  before_script:
+    - |
+      if [ -z "${AWS_ACCOUNT_ID}" ]; then
+        echo "ERROR: AWS_ACCOUNT_ID not set"
+        exit 1
+      fi
+      if [ "${APP_NAME}" = "CHANGE-ME-yourname-appname" ]; then
+        echo "ERROR: You must change APP_NAME in .gitlab-ci.yml!"
+        exit 1
+      fi
+
+      export ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+      export SOURCE_KEY="${APP_NAME}/${CI_COMMIT_SHORT_SHA}.zip"
+
+  script:
+    - |
+      echo "=============================================="
+      echo "Building ${APP_NAME} via CodeBuild"
+      echo "=============================================="
+
+      # Step 1: Package source code
+      cd ${CI_PROJECT_DIR}
+      zip -r /tmp/source.zip ${BUILD_CONTEXT} \
+        -x "*.git*" -x "*node_modules*" -x "*.cache*"
+      echo "Source packaged: $(du -h /tmp/source.zip | cut -f1)"
+
+      # Step 2: Upload to S3
+      aws s3 cp /tmp/source.zip "s3://${SOURCE_BUCKET}/${SOURCE_KEY}"
+      echo "Uploaded to S3"
+
+      # Step 3: Start CodeBuild
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        LATEST_TAG="true"
+      else
+        LATEST_TAG=""
+      fi
+
+      BUILD_ID=$(aws codebuild start-build \
+        --project-name "${CODEBUILD_PROJECT}" \
+        --source-type-override S3 \
+        --source-location-override "${SOURCE_BUCKET}/${SOURCE_KEY}" \
+        --environment-variables-override \
+          "name=APP_NAME,value=${APP_NAME}" \
+          "name=IMAGE_TAG,value=${CI_COMMIT_SHORT_SHA}" \
+          "name=BRANCH_TAG,value=${CI_COMMIT_REF_SLUG}" \
+          "name=LATEST_TAG,value=${LATEST_TAG}" \
+          "name=DOCKERFILE_PATH,value=${DOCKERFILE_PATH}" \
+          "name=BUILD_CONTEXT,value=${BUILD_CONTEXT}" \
+        --query 'build.id' --output text)
+
+      echo "CodeBuild started: ${BUILD_ID}"
+      echo "View logs: https://${AWS_REGION}.console.aws.amazon.com/codesuite/codebuild/projects/${CODEBUILD_PROJECT}/build/${BUILD_ID}"
+
+      # Step 4: Wait for completion
+      while true; do
+        BUILD_STATUS=$(aws codebuild batch-get-builds --ids "${BUILD_ID}" \
+          --query 'builds[0].buildStatus' --output text)
+        PHASE=$(aws codebuild batch-get-builds --ids "${BUILD_ID}" \
+          --query 'builds[0].currentPhase' --output text)
+        echo "Status: ${BUILD_STATUS} | Phase: ${PHASE}"
+
+        case "${BUILD_STATUS}" in
+          SUCCEEDED) break ;;
+          FAILED|FAULT|STOPPED|TIMED_OUT)
+            echo "Build FAILED: ${BUILD_STATUS}"
+            exit 1 ;;
+          *) sleep 10 ;;
+        esac
+      done
+
+      echo ""
+      echo "Build complete! Image: ${ECR_REGISTRY}/${ECR_REPO_NAME}:${APP_NAME}-${CI_COMMIT_SHORT_SHA}"
+
+      # Cleanup
+      aws s3 rm "s3://${SOURCE_BUCKET}/${SOURCE_KEY}" || true
+
+      # Export for deploy stage
+      echo "IMAGE_TAG=${CI_COMMIT_SHORT_SHA}" > build.env
+      echo "IMAGE_URI=${ECR_REGISTRY}/${ECR_REPO_NAME}:${APP_NAME}-${CI_COMMIT_SHORT_SHA}" >> build.env
+
+  artifacts:
+    reports:
+      dotenv: build.env
+    expire_in: 1 hour
+
+# =============================================================================
+# DEPLOY STAGE
+# =============================================================================
+# Deploys your application to ECS Fargate via CloudFormation.
+# Your app will be accessible at: https://{APP_NAME}.dev.shipsummit.riseeight.us
+# =============================================================================
+deploy:
+  stage: deploy
+  image: amazon/aws-cli:2.15.0
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: always
+    - when: manual
+      allow_failure: true
+
+  needs:
+    - job: provision-database
+      optional: true
+    - job: build-and-push
+    - job: cosign-sign-image
+      optional: true
+
+  before_script:
+    - |
+      if [ -z "${AWS_ACCOUNT_ID}" ]; then
+        echo "ERROR: AWS_ACCOUNT_ID not set"
+        exit 1
+      fi
+
+      # Guard against stack name collisions with platform infrastructure
+      RESERVED_PREFIXES="team-app-ecr team-app-alb team-app-alb-http software-factory gitlab coder shipsummit-db"
+      STACK_NAME="${APP_NAME}-${ENVIRONMENT}"
+      for prefix in $RESERVED_PREFIXES; do
+        if echo "${STACK_NAME}" | grep -qE "^${prefix}"; then
+          echo "ERROR: APP_NAME '${APP_NAME}' produces a reserved stack name '${STACK_NAME}'"
+          echo "Stack names must not start with: $RESERVED_PREFIXES"
+          echo "Use a unique app name that identifies your team and project."
+          exit 1
+        fi
+      done
+
+  script:
+    - |
+      echo "=============================================="
+      echo "Deploying ${APP_NAME}"
+      echo "=============================================="
+
+      STACK_NAME="${APP_NAME}-${ENVIRONMENT}"
+      ECS_SVC_NAME="${APP_NAME}-${ENVIRONMENT}"
+      LOG_GROUP="/ecs/${ENVIRONMENT}/team-apps/${APP_NAME}"
+
+      # Resolve ECS cluster ARN from the shared ALB stack (used for fast-fail detection and error diagnostics)
+      CLUSTER_ARN=$(aws cloudformation describe-stacks \
+        --stack-name "${ALB_STACK_NAME}" \
+        --region "${AWS_REGION}" \
+        --query "Stacks[0].Outputs[?OutputKey=='ClusterArn'].OutputValue" \
+        --output text 2>/dev/null || echo "")
+
+      PARAMS="ParameterKey=AppName,ParameterValue=${APP_NAME}"
+      PARAMS="${PARAMS} ParameterKey=Environment,ParameterValue=${ENVIRONMENT}"
+      PARAMS="${PARAMS} ParameterKey=VpcStackName,ParameterValue=${VPC_STACK_NAME}"
+      PARAMS="${PARAMS} ParameterKey=ECRStackName,ParameterValue=${ECR_STACK_NAME}"
+      PARAMS="${PARAMS} ParameterKey=ALBStackName,ParameterValue=${ALB_STACK_NAME}"
+      PARAMS="${PARAMS} ParameterKey=ImageTag,ParameterValue=${IMAGE_TAG:-latest}"
+      PARAMS="${PARAMS} ParameterKey=ContainerPort,ParameterValue=${CONTAINER_PORT}"
+      PARAMS="${PARAMS} ParameterKey=HealthCheckPath,ParameterValue=${HEALTH_CHECK_PATH}"
+      PARAMS="${PARAMS} ParameterKey=DomainName,ParameterValue=${TEAM_APP_DOMAIN:-shipsummit.riseeight.us}"
+      PARAMS="${PARAMS} ParameterKey=DomainPrefix,ParameterValue=${DOMAIN_PREFIX-${ENVIRONMENT}.}"
+
+      if [ -n "${DATABASE_SECRET_ARN:-}" ]; then
+        PARAMS="${PARAMS} ParameterKey=DatabaseSecretArn,ParameterValue=${DATABASE_SECRET_ARN}"
+      fi
+
+      if [ -n "${ANTHROPIC_API_KEY_SECRET_ARN:-}" ]; then
+        PARAMS="${PARAMS} ParameterKey=AnthropicApiKeySecretArn,ParameterValue=${ANTHROPIC_API_KEY_SECRET_ARN}"
+      fi
+
+      TEMPLATE_URL="https://s3.${AWS_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}-cloudformation-templates/shipsummit/team-app-task.yaml"
+      CFN_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/shipsummit-cfn-team-app-deployer-${ENVIRONMENT}"
+
+      # =====================================================================
+      # Stack status recovery logic
+      # =====================================================================
+      # CloudFormation stacks can get stuck in failed states that block
+      # future deployments. This checks the current status and recovers
+      # automatically so teams don't need admin intervention.
+      # =====================================================================
+      ACTION="create-stack"
+      if aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --region "${AWS_REGION}" > /dev/null 2>&1; then
+        STACK_STATUS=$(aws cloudformation describe-stacks \
+          --stack-name "${STACK_NAME}" \
+          --region "${AWS_REGION}" \
+          --query "Stacks[0].StackStatus" \
+          --output text)
+        echo "Current stack status: ${STACK_STATUS}"
+
+        case "${STACK_STATUS}" in
+          CREATE_COMPLETE|UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE|IMPORT_COMPLETE|IMPORT_ROLLBACK_COMPLETE)
+            # Stack is in a stable state that accepts updates
+            ACTION="update-stack"
+            ;;
+
+          UPDATE_ROLLBACK_FAILED)
+            # Stack is stuck after a failed rollback -- attempt to continue the rollback
+            echo ""
+            echo "WARNING: Stack is in UPDATE_ROLLBACK_FAILED state."
+            echo "Attempting to continue rollback before deploying..."
+            # First attempt: standard continue-update-rollback
+            if ! aws cloudformation continue-update-rollback \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" \
+              --role-arn "${CFN_ROLE_ARN}" 2>&1; then
+              # ECS deployment circuit breaker leaves the ECSService stuck during rollback.
+              # Skip it so CloudFormation can reach UPDATE_ROLLBACK_COMPLETE; the next
+              # UpdateStack will replace the ECS service with the new image.
+              echo "Standard rollback failed. Retrying with ECSService skipped..."
+              aws cloudformation continue-update-rollback \
+                --stack-name "${STACK_NAME}" \
+                --region "${AWS_REGION}" \
+                --role-arn "${CFN_ROLE_ARN}" \
+                --resources-to-skip ECSService 2>&1 || true
+            fi
+            echo "Waiting for rollback to complete..."
+            if aws cloudformation wait stack-update-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Rollback completed. Proceeding with update."
+              ACTION="update-stack"
+            else
+              echo "ERROR: continue-update-rollback failed for stack '${STACK_NAME}'."
+              echo "The stack may have resources that cannot be rolled back."
+              echo "Manual intervention required: check the CloudFormation console for details."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          ROLLBACK_COMPLETE)
+            # Initial create failed and rolled back -- delete and recreate
+            echo ""
+            echo "WARNING: Stack is in ROLLBACK_COMPLETE state (initial creation failed)."
+            echo "Deleting failed stack before recreating..."
+            aws cloudformation delete-stack \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" \
+              --role-arn "${CFN_ROLE_ARN}" 2>&1
+            echo "Waiting for stack deletion..."
+            if aws cloudformation wait stack-delete-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Stack deleted. Will create fresh stack."
+              ACTION="create-stack"
+            else
+              echo "ERROR: Failed to delete stack '${STACK_NAME}' in ROLLBACK_COMPLETE state."
+              echo "Manual intervention required: check the CloudFormation console."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          ROLLBACK_FAILED)
+            # Initial create failed and rollback also failed -- force delete
+            echo ""
+            echo "WARNING: Stack is in ROLLBACK_FAILED state."
+            echo "Attempting to delete stack (some resources may be retained)..."
+            aws cloudformation delete-stack \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" \
+              --role-arn "${CFN_ROLE_ARN}" 2>&1 || true
+            echo "Waiting for stack deletion..."
+            if aws cloudformation wait stack-delete-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Stack deleted. Will create fresh stack."
+              ACTION="create-stack"
+            else
+              echo "ERROR: Failed to delete stack '${STACK_NAME}' in ROLLBACK_FAILED state."
+              echo "You may need to manually delete retained resources in the AWS console,"
+              echo "then delete the stack with --retain-resources."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          DELETE_IN_PROGRESS)
+            # Stack is being deleted -- wait for it, then create fresh
+            echo ""
+            echo "Stack is currently being deleted. Waiting for deletion to complete..."
+            if aws cloudformation wait stack-delete-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Stack deleted. Will create fresh stack."
+              ACTION="create-stack"
+            else
+              echo "ERROR: Stack deletion did not complete for '${STACK_NAME}'."
+              echo "Check the CloudFormation console for details."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_IN_PROGRESS|UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS)
+            # Stack has an operation in progress -- wait for it to settle.
+            # Poll every 15s and cancel immediately if the ECS circuit breaker fires,
+            # rather than waiting up to 60 min for AWS's built-in wait to time out.
+            echo ""
+            echo "Stack has an operation in progress (${STACK_STATUS}). Waiting for it to complete..."
+            PREFLIGHT_ELAPSED=0
+            while [ "${PREFLIGHT_ELAPSED}" -lt 600 ]; do
+              STACK_STATUS=$(aws cloudformation describe-stacks \
+                --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+                --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "UNKNOWN")
+              case "${STACK_STATUS}" in
+                UPDATE_COMPLETE|UPDATE_ROLLBACK_COMPLETE|CREATE_COMPLETE|IMPORT_COMPLETE|UPDATE_ROLLBACK_FAILED)
+                  break ;;
+                UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS)
+                  # Cancel immediately if the ECS deployment circuit breaker has fired
+                  if [ -n "${CLUSTER_ARN}" ]; then
+                    ROLLOUT_STATE=$(aws ecs describe-services \
+                      --cluster "${CLUSTER_ARN}" --services "${ECS_SVC_NAME}" \
+                      --region "${AWS_REGION}" \
+                      --query "services[0].deployments[0].rolloutState" \
+                      --output text 2>/dev/null || echo "")
+                    if [ "${ROLLOUT_STATE}" = "FAILED" ]; then
+                      echo "ECS deployment circuit breaker fired (rolloutState=FAILED). Cancelling stuck stack update..."
+                      aws cloudformation cancel-update-stack \
+                        --stack-name "${STACK_NAME}" --region "${AWS_REGION}" || true
+                    fi
+                  fi
+                  ;;
+              esac
+              echo "  Still waiting... (${PREFLIGHT_ELAPSED}s, stack=${STACK_STATUS})"
+              sleep 15
+              PREFLIGHT_ELAPSED=$((PREFLIGHT_ELAPSED + 15))
+            done
+            # Re-check status after waiting
+            STACK_STATUS=$(aws cloudformation describe-stacks \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" \
+              --query "Stacks[0].StackStatus" \
+              --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+            echo "Stack status after waiting: ${STACK_STATUS}"
+            if [ "${STACK_STATUS}" = "UPDATE_COMPLETE" ] || [ "${STACK_STATUS}" = "UPDATE_ROLLBACK_COMPLETE" ] || [ "${STACK_STATUS}" = "CREATE_COMPLETE" ]; then
+              ACTION="update-stack"
+            else
+              echo "ERROR: Stack '${STACK_NAME}' is in unexpected state '${STACK_STATUS}' after waiting."
+              echo "Manual intervention required: check the CloudFormation console."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          CREATE_IN_PROGRESS)
+            # Stack creation in progress -- wait for it
+            echo ""
+            echo "Stack creation is in progress. Waiting..."
+            if aws cloudformation wait stack-create-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Stack creation completed. Proceeding with update."
+              ACTION="update-stack"
+            else
+              echo "ERROR: Stack creation did not complete successfully for '${STACK_NAME}'."
+              echo "Check the CloudFormation console for details."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          DELETE_FAILED)
+            # Stack deletion failed -- try again
+            echo ""
+            echo "WARNING: Stack is in DELETE_FAILED state. Retrying deletion..."
+            aws cloudformation delete-stack \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" \
+              --role-arn "${CFN_ROLE_ARN}" 2>&1 || true
+            echo "Waiting for stack deletion..."
+            if aws cloudformation wait stack-delete-complete \
+              --stack-name "${STACK_NAME}" \
+              --region "${AWS_REGION}" 2>&1; then
+              echo "Stack deleted. Will create fresh stack."
+              ACTION="create-stack"
+            else
+              echo "ERROR: Failed to delete stack '${STACK_NAME}'."
+              echo "Manual intervention required: check the CloudFormation console."
+              echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+              exit 1
+            fi
+            ;;
+
+          *)
+            echo "ERROR: Stack '${STACK_NAME}' is in unrecognized state '${STACK_STATUS}'."
+            echo "Manual intervention required: check the CloudFormation console."
+            echo "  https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+            exit 1
+            ;;
+        esac
+      fi
+
+      DEPLOY_ATTEMPT=0
+      DEPLOY_MAX_ATTEMPTS=5
+      DEPLOY_RETRY_DELAY=60
+      DEPLOY_SUCCESS=false
+      FAILURE_REASON=""
+
+      while [ "${DEPLOY_ATTEMPT}" -lt "${DEPLOY_MAX_ATTEMPTS}" ]; do
+        DEPLOY_ATTEMPT=$((DEPLOY_ATTEMPT + 1))
+        FAILURE_REASON=""
+        ECS_CB_DETECTED=false
+
+        if [ "${DEPLOY_ATTEMPT}" -gt 1 ]; then
+          echo ""
+          echo "Retrying deploy (attempt ${DEPLOY_ATTEMPT}/${DEPLOY_MAX_ATTEMPTS})..."
+          echo "Waiting for rollback to complete (minimum ${DEPLOY_RETRY_DELAY}s)..."
+          # Poll until the stack reaches a terminal retryable state AND at least
+          # DEPLOY_RETRY_DELAY seconds have elapsed. This ensures:
+          #   (a) the 60s minimum between retries required by the AC
+          #   (b) we never retry while a rollback is still in progress (which
+          #       previously caused "unexpected state" errors and lost retries)
+          ROLLBACK_ELAPSED=0
+          ROLLBACK_MAX=300
+          ROLLBACK_READY=false
+          while [ "${ROLLBACK_ELAPSED}" -lt "${ROLLBACK_MAX}" ]; do
+            sleep 15
+            ROLLBACK_ELAPSED=$((ROLLBACK_ELAPSED + 15))
+            RETRY_STATUS=$(aws cloudformation describe-stacks \
+              --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+              --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "UNKNOWN")
+            case "${RETRY_STATUS}" in
+              UPDATE_ROLLBACK_COMPLETE|UPDATE_COMPLETE|CREATE_COMPLETE|IMPORT_COMPLETE)
+                if [ "${ROLLBACK_ELAPSED}" -ge "${DEPLOY_RETRY_DELAY}" ]; then
+                  echo "  Stack ready for retry after ${ROLLBACK_ELAPSED}s (${RETRY_STATUS})."
+                  ROLLBACK_READY=true
+                  break
+                fi
+                echo "  Stack settled (${ROLLBACK_ELAPSED}s), waiting for ${DEPLOY_RETRY_DELAY}s minimum..." ;;
+              UPDATE_ROLLBACK_FAILED|*ROLLBACK_FAILED*)
+                echo "ERROR: Stack rollback itself failed (${RETRY_STATUS}) — cannot retry."
+                FAILURE_REASON="CF_ROLLBACK_FAILED"
+                break ;;
+              UPDATE_ROLLBACK_IN_PROGRESS|UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS)
+                echo "  Rollback in progress (${ROLLBACK_ELAPSED}s, ${RETRY_STATUS})..." ;;
+              *)
+                echo "  Stack state: ${RETRY_STATUS} (${ROLLBACK_ELAPSED}s)..." ;;
+            esac
+          done
+          if [ "${FAILURE_REASON}" = "CF_ROLLBACK_FAILED" ]; then
+            break
+          fi
+          if [ "${ROLLBACK_READY}" != "true" ]; then
+            echo "ERROR: Stack did not reach a retryable state within ${ROLLBACK_MAX}s. Giving up."
+            FAILURE_REASON="CF_ROLLBACK_TIMEOUT"
+            break
+          fi
+          ACTION="update-stack"
+        fi
+
+        echo ""
+        echo "Performing: ${ACTION} on stack ${STACK_NAME} (attempt ${DEPLOY_ATTEMPT}/${DEPLOY_MAX_ATTEMPTS})"
+        aws cloudformation ${ACTION} \
+          --stack-name "${STACK_NAME}" \
+          --template-url "${TEMPLATE_URL}" \
+          --parameters ${PARAMS} \
+          --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+          --role-arn "${CFN_ROLE_ARN}" \
+          --region "${AWS_REGION}" \
+          --tags "Key=AppName,Value=${APP_NAME}" "Key=Environment,Value=${ENVIRONMENT}" \
+          || true
+
+        echo "Waiting for deployment..."
+
+        if [ "${ACTION}" = "create-stack" ]; then
+          # Never retry create-stack: a first deploy either works or it doesn't.
+          # Guard the wait exit code so a failed create doesn't falsely report success.
+          if aws cloudformation wait stack-create-complete \
+            --stack-name "${STACK_NAME}" \
+            --region "${AWS_REGION}"; then
+            DEPLOY_SUCCESS=true
+          else
+            FAILURE_REASON="CF_CREATE_FAILED"
+          fi
+          break
+        else
+          # Poll every 15s with ECS circuit breaker detection.
+          # Cancels and fails within ~5 min of a bad deploy instead of waiting up to 60 min.
+          DEPLOY_ELAPSED=0
+          DEPLOY_POLL_MAX=900
+          while [ "${DEPLOY_ELAPSED}" -lt "${DEPLOY_POLL_MAX}" ]; do
+            CF_STATUS=$(aws cloudformation describe-stacks \
+              --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+              --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "UNKNOWN")
+            case "${CF_STATUS}" in
+              UPDATE_COMPLETE|CREATE_COMPLETE)
+                echo "Deployment complete (${DEPLOY_ELAPSED}s)."
+                DEPLOY_SUCCESS=true
+                break ;;
+              UPDATE_ROLLBACK_IN_PROGRESS|UPDATE_ROLLBACK_COMPLETE|UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS|UPDATE_ROLLBACK_FAILED|*FAILED*)
+                echo "Deployment failed: stack status = ${CF_STATUS} (${DEPLOY_ELAPSED}s)"
+                # ECS circuit breaker was detected earlier in this poll loop — treat as ECS failure.
+                if [ "${ECS_CB_DETECTED}" = "true" ]; then
+                  FAILURE_REASON="ECS_CIRCUIT_BREAKER"
+                else
+                  FAILURE_REASON="CF_ERROR"
+                fi
+                break ;;
+              UPDATE_IN_PROGRESS|UPDATE_COMPLETE_CLEANUP_IN_PROGRESS)
+                # After the container start period, check if the ECS circuit breaker fired
+                # due to health check failures specifically. Only cancel on confirmed health
+                # check failures -- not image pull errors, OOM, or other transient issues.
+                if [ "${DEPLOY_ELAPSED}" -ge 90 ] && [ -n "${CLUSTER_ARN}" ]; then
+                  ROLLOUT_STATE=$(aws ecs describe-services \
+                    --cluster "${CLUSTER_ARN}" --services "${ECS_SVC_NAME}" \
+                    --region "${AWS_REGION}" \
+                    --query "services[0].deployments[0].rolloutState" \
+                    --output text 2>/dev/null || echo "")
+                  if [ "${ROLLOUT_STATE}" = "FAILED" ]; then
+                    ECS_CB_DETECTED=true
+                    # Confirm it's a health check failure before cancelling.
+                    # ECS emits a "health check" service event when tasks fail health checks.
+                    HC_MSG=$(aws ecs describe-services \
+                      --cluster "${CLUSTER_ARN}" --services "${ECS_SVC_NAME}" \
+                      --region "${AWS_REGION}" \
+                      --query "services[0].events[?contains(message, 'health check')].message | [0]" \
+                      --output text 2>/dev/null || echo "")
+                    if [ -n "${HC_MSG}" ] && [ "${HC_MSG}" != "None" ]; then
+                      echo "ECS circuit breaker fired: health check failures detected after ${DEPLOY_ELAPSED}s."
+                      echo "  Last health check event: ${HC_MSG}"
+                      echo "Cancelling CF update and failing fast..."
+                      aws cloudformation cancel-update-stack \
+                        --stack-name "${STACK_NAME}" --region "${AWS_REGION}" || true
+                      FAILURE_REASON="ECS_HEALTH_CHECK"
+                      # Poll until CF transitions out of UPDATE_IN_PROGRESS to prevent a
+                      # false-success result: cancel-update-stack is async, and checking
+                      # FINAL_STATUS immediately after cancel can still see UPDATE_IN_PROGRESS
+                      # (which doesn't match FAILED|ROLLBACK and would incorrectly mark success).
+                      _CW=0
+                      while [ "${_CW}" -lt 60 ]; do
+                        sleep 5; _CW=$((_CW + 5))
+                        _CS=$(aws cloudformation describe-stacks \
+                          --stack-name "${STACK_NAME}" --region "${AWS_REGION}" \
+                          --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "UNKNOWN")
+                        case "${_CS}" in UPDATE_IN_PROGRESS) ;; *) break ;; esac
+                      done
+                      break
+                    else
+                      echo "ECS circuit breaker fired (rolloutState=FAILED) but cause unclear — letting CF resolve."
+                    fi
+                  fi
+                fi
+                echo "  Deploying... (${DEPLOY_ELAPSED}s, CF=${CF_STATUS})"
+                sleep 15
+                DEPLOY_ELAPSED=$((DEPLOY_ELAPSED + 15))
+                ;;
+              *)
+                sleep 15
+                DEPLOY_ELAPSED=$((DEPLOY_ELAPSED + 15))
+                ;;
+            esac
+          done
+          if [ "${DEPLOY_ELAPSED}" -ge "${DEPLOY_POLL_MAX}" ]; then
+            echo "ERROR: Deployment timed out after ${DEPLOY_POLL_MAX}s. Cancelling..."
+            FAILURE_REASON="CF_TIMEOUT"
+            aws cloudformation cancel-update-stack \
+              --stack-name "${STACK_NAME}" --region "${AWS_REGION}" || true
+          fi
+        fi
+
+        if [ "${DEPLOY_SUCCESS}" = "true" ]; then
+          break
+        fi
+
+        # Only retry ECS failures — CF template/config/timeout errors are not transient
+        # and retrying them just delays feedback to the developer.
+        case "${FAILURE_REASON}" in
+          ECS_HEALTH_CHECK|ECS_CIRCUIT_BREAKER) ;;  # retryable: ECS startup/health issues
+          *)
+            echo "Deploy failed due to non-retryable cause (${FAILURE_REASON}). Failing fast."
+            break ;;
+        esac
+
+        if [ "${DEPLOY_ATTEMPT}" -lt "${DEPLOY_MAX_ATTEMPTS}" ]; then
+          echo "Attempt ${DEPLOY_ATTEMPT} failed (${FAILURE_REASON}). Will retry..."
+        fi
+      done
+
+      # Use the last known FINAL_STATUS for error reporting (set in last loop iteration)
+      FINAL_STATUS=$(aws cloudformation describe-stacks \
+        --stack-name "${STACK_NAME}" \
+        --region "${AWS_REGION}" \
+        --query "Stacks[0].StackStatus" \
+        --output text 2>/dev/null || echo "UNKNOWN")
+
+      if [ "${DEPLOY_SUCCESS}" != "true" ]; then
+        echo ""
+        echo "=============================================="
+        echo "DEPLOYMENT FAILED after ${DEPLOY_ATTEMPT} attempt(s) [${FAILURE_REASON}]"
+        echo "=============================================="
+        echo "Stack '${STACK_NAME}' ended in status: ${FINAL_STATUS}"
+        echo ""
+        case "${FAILURE_REASON}" in
+          ECS_HEALTH_CHECK|ECS_CIRCUIT_BREAKER)
+            echo "Cause: ECS health check failures — the container started but did not pass the ALB health check."
+            echo "Common fixes:"
+            echo "  - Ensure the app listens on CONTAINER_PORT (${CONTAINER_PORT:-3000})"
+            echo "  - Check HEALTH_CHECK_PATH (${HEALTH_CHECK_PATH:-/}) returns HTTP 200"
+            echo "  - Check for startup crashes in the container logs below"
+            ;;
+          CF_ERROR)
+            echo "Cause: CloudFormation resource failure — a stack resource could not be created or updated."
+            echo "Common fixes:"
+            echo "  - Review the CloudFormation failed events below for the specific resource and reason"
+            echo "  - Check IAM permissions, parameter values, and resource limits"
+            ;;
+          CF_TIMEOUT)
+            echo "Cause: Deployment timed out waiting for the stack to stabilise."
+            echo "  - Check ECS service events and container logs below for the root cause"
+            ;;
+          CF_CREATE_FAILED)
+            echo "Cause: Initial stack creation failed."
+            echo "  - Review the CloudFormation failed events below"
+            ;;
+          CF_ROLLBACK_FAILED|CF_ROLLBACK_TIMEOUT)
+            echo "Cause: Stack rollback failed or timed out — manual intervention required."
+            echo "  - Check the CloudFormation console and resolve the stuck stack before re-deploying"
+            ;;
+          *)
+            echo "Common causes:"
+            echo "  - Container not serving HTTP on port ${CONTAINER_PORT:-3000} (health check fails)"
+            echo "  - Container crashing on startup (see logs below)"
+            echo "  - CONTAINER_PORT variable doesn't match what your app listens on"
+            ;;
+        esac
+        echo ""
+
+        echo "--- CloudFormation failed events ---"
+        aws cloudformation describe-stack-events \
+          --stack-name "${STACK_NAME}" \
+          --region "${AWS_REGION}" \
+          --query "StackEvents[?contains(ResourceStatus, 'FAILED')].[Timestamp,LogicalResourceId,ResourceStatus,ResourceStatusReason]" \
+          --output table 2>/dev/null || true
+
+        if [ -n "${CLUSTER_ARN}" ]; then
+          echo ""
+          echo "--- ECS service events (last 5) ---"
+          aws ecs describe-services \
+            --cluster "${CLUSTER_ARN}" --services "${ECS_SVC_NAME}" \
+            --region "${AWS_REGION}" \
+            --query "services[0].events[:5].[createdAt,message]" \
+            --output table 2>/dev/null || true
+
+          echo ""
+          echo "--- Recently stopped ECS tasks ---"
+          STOPPED_TASKS=$(aws ecs list-tasks \
+            --cluster "${CLUSTER_ARN}" \
+            --service-name "${ECS_SVC_NAME}" \
+            --desired-status STOPPED \
+            --region "${AWS_REGION}" \
+            --query "taskArns[:3]" \
+            --output text 2>/dev/null || echo "")
+          if [ -n "${STOPPED_TASKS}" ]; then
+            aws ecs describe-tasks \
+              --cluster "${CLUSTER_ARN}" \
+              --tasks ${STOPPED_TASKS} \
+              --region "${AWS_REGION}" \
+              --query "tasks[*].[taskArn,lastStatus,stoppedReason,containers[0].reason]" \
+              --output table 2>/dev/null || true
+          else
+            echo "(no recently stopped tasks found)"
+          fi
+
+          echo ""
+          echo "--- Container logs (last 30 lines from ${LOG_GROUP}) ---"
+          LATEST_STREAM=$(aws logs describe-log-streams \
+            --log-group-name "${LOG_GROUP}" \
+            --order-by LastEventTime --descending \
+            --region "${AWS_REGION}" \
+            --query "logStreams[0].logStreamName" \
+            --output text 2>/dev/null || echo "")
+          if [ -n "${LATEST_STREAM}" ] && [ "${LATEST_STREAM}" != "None" ]; then
+            aws logs get-log-events \
+              --log-group-name "${LOG_GROUP}" \
+              --log-stream-name "${LATEST_STREAM}" \
+              --limit 30 --start-from-head false \
+              --region "${AWS_REGION}" \
+              --query "events[*].message" \
+              --output text 2>/dev/null || echo "(could not retrieve logs)"
+          else
+            echo "(no log streams found — container may have crashed before emitting logs)"
+          fi
+        fi
+
+        echo ""
+        echo "Full details: https://${AWS_REGION}.console.aws.amazon.com/cloudformation/home#/stacks"
+        exit 1
+      fi
+
+      echo ""
+      echo "=============================================="
+      echo "Deployment Complete!"
+      echo "=============================================="
+      echo ""
+      echo "Your app is now live at:"
+      echo "  https://${APP_NAME}.${DOMAIN_PREFIX-${ENVIRONMENT}.}${TEAM_APP_DOMAIN:-shipsummit.riseeight.us}"
+      echo ""
+
+  environment:
+    name: ${ENVIRONMENT}
+    url: https://${APP_NAME}.${DOMAIN_PREFIX-${ENVIRONMENT}.}${TEAM_APP_DOMAIN:-shipsummit.riseeight.us}
+
+# =============================================================================
+# SECREL LINT STAGE
+# =============================================================================
+# Extends the centralized Biome lint job and adds ESLint + TypeScript typecheck.
+# Matches pre-commit hook exactly so CI never catches surprises.
+# =============================================================================
+lint:
+  extends: .lint-biome
+  image: cgr.dev/shipsummit/bun:v1.3.10
+  script:
+    - bun install --frozen-lockfile
+    - bun run check:lint
+
+# =============================================================================
+# SECREL UNIT TEST STAGE
+# =============================================================================
+# Extends the centralized unit test job. Uses Bun for this fullstack template.
+# =============================================================================
+unit-test:
+  extends: .unit-test
+  image: cgr.dev/shipsummit/bun:v1.3.10
+  script:
+    - bun install --frozen-lockfile
+    - bun test --coverage
+
+# =============================================================================
+# AI SUMMARY EVAL HARNESS (MANUAL)
+# =============================================================================
+# Validates that the AI summary mentions every avalanche observation.
+# Trigger manually from the GitLab pipeline UI — does not run on every push.
+#
+# Prerequisites:
+#   - The app must be deployed (run the deploy job first)
+#   - ANTHROPIC_API_KEY must be set as a GitLab CI/CD variable
+# =============================================================================
+eval-ai-summary:
+  stage: test
+  image: cgr.dev/shipsummit/bun:v1.3.10
+  when: manual
+  allow_failure: true
+  needs: []
+  variables:
+    APP_URL: "https://${APP_NAME}.${DOMAIN_PREFIX:-${ENVIRONMENT}.}${TEAM_APP_DOMAIN:-shipsummit.riseeight.us}"
+  script:
+    - bun install --frozen-lockfile
+    - echo "Running eval against $APP_URL"
+    - bun run scripts/eval-summary.ts

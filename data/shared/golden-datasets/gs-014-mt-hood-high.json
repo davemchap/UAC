@@ -1,0 +1,314 @@
+{
+  "scenario_id": "gs-014",
+  "scenario_name": "Mt Hood, OR — High Danger (2026-02-24)",
+  "description": "NWAC forecast via avalanche.org with historical weather for Mt Hood",
+  "source": "avalanche.org product 181260, historical data from 2026-02-24",
+  "zone": {
+    "name": "Mt Hood",
+    "center": "NWAC",
+    "state": "OR",
+    "coordinates": {
+      "latitude": 45.38,
+      "longitude": -121.69
+    }
+  },
+  "inputs": {
+    "forecast_raw": {
+      "id": 181260,
+      "published_time": "2026-02-24T02:27:00+00:00",
+      "expires_time": "2026-02-25T02:00:00+00:00",
+      "created_at": "2026-02-24T03:20:35+00:00",
+      "updated_at": "2026-02-24T03:38:37+00:00",
+      "author": "Joe Dellaporta",
+      "product_type": "forecast",
+      "bottom_line": "<p>A strong storm will bring very dangerous avalanche conditions to the Mt. Hood zone. Any steep slopes will be dangerous, especially in areas with wind drifting. Stick to simple, sheltered low-angle terrain, and avoid travel under large, steep slopes.&nbsp;</p>",
+      "hazard_discussion": "<p>This storm will continue to bring waves of moisture and fluctuating snow levels to the Mt. Hood zone. There is some uncertainty about snow levels, but expect them to range from 5500 to 6500 ft throughout the day. These are some of the highest snow levels we&rsquo;ve seen in a while, so expect new snow to fall upside-down and for wet avalanches to be easy to trigger, especially when snow starts changing to rain.&nbsp;</p>\n<p>The new snow is finally stacking up. Unfortunately, the new snow isn't as blower as last week's, but since the 21st, weather stations have picked up approximately 21 inches (2\" SWE) on a very slow warming trend. Avalanche activity has been mainly confined to wind-drifted features, and occasional storm slabs have been reported during periods of heavy precipitation. Signs of wet snow instabilities have been creeping further into the lower elevations, but wet avalanche observations have been minimal so far.&nbsp;</p>\n<p>Below the surface, we do have things to think about. On Sunday, I got good verification that weak layers do, in fact, exist above the 2/7 crust on the eastern side of Mt Hood near Cloud Cap. In general, I found these weak grains about 1.5-2 ft below the surface, sitting just above the 2/7 crust. This weak layer did show the ability to propagate with snowpack tests and was easy to identify with hand hardness profiles. While this layer was easy to identify here, it wasn't as obvious on the south side of the mountain, where the snowpack was generally deeper and stronger over this crust. This is a well-documented weak layer that has transitioned to a persistent slab avalanche problem just to our north. So far, these kinds of observations are few and confined to the eastern part of the Mt. Hood zone, but I wouldn&rsquo;t fully rule it out at upper elevations or in data-sparse areas.&nbsp;</p>\n<p><strong>&nbsp;Let us know what you see by submitting an observation <a href=\"https://nwac.us/observations/#/form\" target=\"_blank\" rel=\"noopener\">here</a> or on the AvyApp</strong></p>",
+      "weather_discussion": null,
+      "announcement": null,
+      "status": "published",
+      "media": [
+        {
+          "id": 1,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/pst%2030%20100%20end%20edit_699bc6176f20b-large.png",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/pst%2030%20100%20end%20edit_699bc6176f20b-medium.png",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/pst%2030%20100%20end%20edit_699bc6176f20b.png",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/pst%2030%20100%20end%20edit_699bc6176f20b-thumbnail.png"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/22/2026) <p>A propagation saw test producing propagating test results on facets above the 2/7 crust.</p> Photo: Joe Dellaporta",
+          "favorite": false
+        },
+        {
+          "id": 2,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/NW%20asp%20edit_699bc859e3e81-large.png",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/NW%20asp%20edit_699bc859e3e81-medium.png",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/NW%20asp%20edit_699bc859e3e81.png",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/NW%20asp%20edit_699bc859e3e81-thumbnail.png"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/22/2026) <p>A profile from a shallow northerly below treeline.&nbsp;</p> Photo: Joe Dellaporta",
+          "favorite": false
+        },
+        {
+          "id": 3,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/junky_699bb7048d27f-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/junky_699bb7048d27f-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/junky_699bb7048d27f.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/junky_699bb7048d27f-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/22/2026) <p>Junky snow resting over the 2/7 crust was easy to find on the east side of Mt Hood on Sunday. In general, this layers sits about 1.5 ft below the snow surface around 6000 ft.&nbsp;</p> Photo: Joe Dellaporta",
+          "favorite": false
+        },
+        {
+          "id": 4,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/EC71F615-5294-4409-8B76-2997448FB7AA_699bbf6087515-large.jpeg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/EC71F615-5294-4409-8B76-2997448FB7AA_699bbf6087515-medium.jpeg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/EC71F615-5294-4409-8B76-2997448FB7AA_699bbf6087515.jpeg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/EC71F615-5294-4409-8B76-2997448FB7AA_699bbf6087515-thumbnail.jpeg"
+          },
+          "type": "image",
+          "title": "Public Observation: White River canyon",
+          "caption": "(2/22/2026) <p>Signs of warming in the White River Canyon on Sunday.</p> Photo: Ryan Bunker",
+          "favorite": false
+        },
+        {
+          "id": 5,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Azone%20avy_69990bdf6dd0e-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Azone%20avy_69990bdf6dd0e-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Azone%20avy_69990bdf6dd0e.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Azone%20avy_69990bdf6dd0e-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/20/2026) <p>A large explosive-triggered avalanche in heavily wind-loaded alpine terrain.</p>\n<p>HS-AE-R3-D2.5 @ E aspect, 7300 ft</p> Photo: Joe Dellaporta",
+          "favorite": false
+        },
+        {
+          "id": 6,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Large%20natural%20in%20upper%20newton_69990b2f88336-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Large%20natural%20in%20upper%20newton_69990b2f88336-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Large%20natural%20in%20upper%20newton_69990b2f88336.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Large%20natural%20in%20upper%20newton_69990b2f88336-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/20/2026) <p>A large natural avalanche that failed in wind dirfted snow in upper Newton Canyon.&nbsp;</p>\n<p>HS-N-R2-D2-U @ E aspect, 7500 ft</p> Photo: Joe Dellaporta",
+          "favorite": true
+        },
+        {
+          "id": 7,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/PGR%20PIT%20edit_69990e878d89a-large.png",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/PGR%20PIT%20edit_69990e878d89a-medium.png",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/PGR%20PIT%20edit_69990e878d89a.png",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/PGR%20PIT%20edit_69990e878d89a-thumbnail.png"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/20/2026) <p>A snow profile showing the upper snowpack structure&nbsp; above the 2/7 crust.&nbsp;</p>\n<p>In this spot, we had nearly 3 ft over the crust.&nbsp;</p> Photo: Joe Dellaporta",
+          "favorite": false
+        },
+        {
+          "id": 8,
+          "url": {
+            "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Pollallie_699bb780965ac-large.jpg",
+            "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Pollallie_699bb780965ac-medium.jpg",
+            "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Pollallie_699bb780965ac.jpg",
+            "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/Pollallie_699bb780965ac-thumbnail.jpg"
+          },
+          "type": "image",
+          "title": null,
+          "caption": "(2/22/2026) <p>Southerly aspects in Polallie Canyon remain thin.&nbsp;</p> Photo: Joe Dellaporta",
+          "favorite": false
+        }
+      ],
+      "weather_data": null,
+      "avalanche_center": {
+        "id": "NWAC",
+        "name": "Northwest Avalanche Center",
+        "url": "https://www.nwac.us/",
+        "city": "Seattle",
+        "state": "WA"
+      },
+      "forecast_avalanche_problems": [
+        {
+          "id": 2779468,
+          "forecast_id": 181260,
+          "avalanche_problem_id": 2,
+          "rank": 1,
+          "likelihood": "very likely",
+          "discussion": "<p>Heavy, dense snow will continue to accumulate on a gradual warming trend, setting the stage for reactive storm and wind slabs. Expect these slabs to be much larger and deadlier on wind-loaded slopes. These avalanches could break within the new storm snow, on recently formed crusts, or in isolated areas; they could step down to weak faceted snow resting over the 2/7 crust, creating a much bigger avalanche. This weak structure has been most prominent on the east side of Mt. Hood, but I wouldn&rsquo;t rule it out elsewhere, given limited observations. With the warming trend and heavy loading, large to very large avalanches remain a very real concern. Some of these could initiate on the upper mountain or canyons and gouge into canyon runouts.&nbsp;</p>\n<p>The travel advice is simple on a day like this: stay off and out of the way of all avalanche terrain. This includes traveling below large steep slopes or anywhere in the upper canyons where overhead avalanche concerns are significant.&nbsp;</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/4380A7BD-5BA2-42B3-9AF7-6EBF5ED9C1A2_699cfd0fc84cf-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/4380A7BD-5BA2-42B3-9AF7-6EBF5ED9C1A2_699cfd0fc84cf-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/4380A7BD-5BA2-42B3-9AF7-6EBF5ED9C1A2_699cfd0fc84cf.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/4380A7BD-5BA2-42B3-9AF7-6EBF5ED9C1A2_699cfd0fc84cf-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "<p>(2/23/2026)</p>\n<p>A shallow but wide natural avalanche in the Stevens Pass zone on February 23rd. Don't ignore recent avalanches, shooting cracks, or whumphing as obvious signs of instability.&nbsp;</p>\n<p>Photo: Nick Kelley</p>"
+          },
+          "location": [
+            "north upper",
+            "north middle",
+            "north lower",
+            "northeast lower",
+            "northeast middle",
+            "northeast upper",
+            "east upper",
+            "east middle",
+            "east lower",
+            "southeast upper",
+            "southeast middle",
+            "southeast lower",
+            "south upper",
+            "south middle",
+            "south lower",
+            "southwest upper",
+            "southwest middle",
+            "southwest lower",
+            "west upper",
+            "west middle",
+            "west lower",
+            "northwest upper",
+            "northwest middle",
+            "northwest lower"
+          ],
+          "size": [
+            "2",
+            "3"
+          ],
+          "name": "Storm Slab",
+          "problem_description": "Storm Slab avalanches are the release of a cohesive layer (a slab) of new snow that breaks within new snow or on the old snow surface. Storm-slabs typically last between a few hours and few days (following snowfall). Storm-slabs that form over a persistent weak layer (surface hoar, depth hoar, or near-surface facets) may be termed Persistent Slabs or may develop into Persistent Slabs.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/StormSlab.png"
+        },
+        {
+          "id": 2779469,
+          "forecast_id": 181260,
+          "avalanche_problem_id": 6,
+          "rank": 2,
+          "likelihood": "likely",
+          "discussion": "<p>Snow levels are forecast to creep up to 6000 ft or even higher, depending on how this storm plays out. Natural wet avalanches may start start peeling off as snow transitions to rain, and these could be easy to trigger on steep terrain. Some of these slides could carry some weight and grow large given the amount of recent snow we received.&nbsp;</p>\n<p>Look for rollerballs, pinwheels, or sluffs fanning out below your skis or machine as obvious clues the snow surface is becoming wet and weak. While many folks may think these tend to be more manageable, they won&rsquo;t be if they funnel into terrain traps or if they grow larger than you anticipate. You can simply avoid this issue by staying off of any steep terrain if the snow feels wet or if heavy snow starts transitioning to rain.&nbsp;</p>",
+          "media": {
+            "url": {
+              "large": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/sWL1_69927ade05e53-large.jpg",
+              "medium": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/sWL1_69927ade05e53-medium.jpg",
+              "original": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/sWL1_69927ade05e53.jpg",
+              "thumbnail": "https://avalanche-org-media.s3.us-west-2.amazonaws.com/sWL1_69927ade05e53-thumbnail.jpg"
+            },
+            "type": "image",
+            "title": null,
+            "caption": "<p>(2/15/2026)</p>\n<p>An example of a wet avalanche from earlier this winter. Wet avalanches could grow on Tuesday in terrain like this.&nbsp;</p>"
+          },
+          "location": [
+            "southwest middle",
+            "southwest lower",
+            "south middle",
+            "south lower",
+            "southeast middle",
+            "southeast lower",
+            "east middle",
+            "east lower",
+            "northeast lower",
+            "northeast middle",
+            "north lower",
+            "north middle",
+            "northwest middle",
+            "northwest lower",
+            "west middle",
+            "west lower"
+          ],
+          "size": [
+            "1",
+            "2"
+          ],
+          "name": "Wet Loose",
+          "problem_description": "Wet Loose avalanches are the release of wet unconsolidated snow or slush. These avalanches typically occur within layers of wet snow near the surface of the snowpack, but they may quickly gouge into lower snowpack layers. Like Loose Dry Avalanches, they start at a point and entrain snow as they move downhill, forming a fan-shaped avalanche. Other names for loose-wet avalanches include point-release avalanches or sluffs. Loose Wet avalanches can trigger slab avalanches that break into deeper snow layers.",
+          "icon": "http://api.avalanche.org/img/avalanche_problems/WetLoose.png"
+        }
+      ],
+      "danger": [
+        {
+          "lower": 3,
+          "upper": 4,
+          "middle": 4,
+          "valid_day": "current"
+        },
+        {
+          "lower": 2,
+          "upper": 3,
+          "middle": 3,
+          "valid_day": "tomorrow"
+        }
+      ],
+      "forecast_zone": [
+        {
+          "id": 1657,
+          "name": "Mt Hood",
+          "url": "http://www.nwac.us/avalanche-forecast/#/mt-hood",
+          "state": "OR",
+          "zone_id": "10",
+          "config": null
+        }
+      ]
+    },
+    "weather": {
+      "source": "NWS-format (converted from NOAA archive data)",
+      "api_endpoint": null,
+      "data": {
+        "number": 8,
+        "name": "",
+        "startTime": "2026-02-24T07:00:00-08:00",
+        "endTime": "2026-02-24T08:00:00-08:00",
+        "isDaytime": true,
+        "temperature": 31,
+        "temperatureUnit": "F",
+        "temperatureTrend": null,
+        "probabilityOfPrecipitation": {
+          "unitCode": "wmoUnit:percent",
+          "value": 90
+        },
+        "dewpoint": {
+          "unitCode": "wmoUnit:degC",
+          "value": -1.17
+        },
+        "relativeHumidity": {
+          "unitCode": "wmoUnit:percent",
+          "value": 96
+        },
+        "windSpeed": "3 mph",
+        "windDirection": "SSE",
+        "icon": "",
+        "shortForecast": "Light Snow",
+        "detailedForecast": ""
+      }
+    },
+    "snowpack": null
+  },
+  "expected_outputs": {
+    "danger_rating": "High",
+    "danger_level": 4,
+    "danger_by_elevation": {
+      "above_treeline": { "rating": "High", "level": 4 },
+      "near_treeline": { "rating": "High", "level": 4 },
+      "below_treeline": { "rating": "Considerable", "level": 3 }
+    },
+    "avalanche_problems": [
+      "Storm Slab",
+      "Wet Loose"
+    ],
+    "alert_action": "auto_send",
+    "alert_reasoning": "High danger (level 4) at upper and middle elevations triggers automatic alert dispatch"
+  }
+}
