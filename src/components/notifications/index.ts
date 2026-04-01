@@ -21,20 +21,6 @@ export function buildCooldownKey(zoneSlug: string, action: AlertAction): string 
 // Persistence
 // ---------------------------------------------------------------------------
 
-export async function findRecentDuplicate(
-	sql: ReturnType<typeof postgres>,
-	cooldownKey: string,
-	windowMinutes: number,
-): Promise<boolean> {
-	const rows = await sql<{ id: number }[]>`
-		SELECT id FROM notifications
-		WHERE cooldown_key = ${cooldownKey}
-		  AND created_at > NOW() - (${windowMinutes} * INTERVAL '1 minute')
-		LIMIT 1
-	`;
-	return rows.length > 0;
-}
-
 export async function insertNotification(
 	sql: ReturnType<typeof postgres>,
 	input: NotificationInput,
@@ -106,19 +92,11 @@ async function updateWebhookStatus(sql: ReturnType<typeof postgres>, id: number,
 // Orchestration
 // ---------------------------------------------------------------------------
 
-const DEFAULT_COOLDOWN_MINUTES = 360; // 6 hours
-
 export async function evaluateAndCreate(
 	sql: ReturnType<typeof postgres>,
 	input: NotificationInput,
-	cooldownMinutes = DEFAULT_COOLDOWN_MINUTES,
 ): Promise<Notification | null> {
 	if (!shouldNotify(input.action)) return null;
-
-	const cooldownKey = buildCooldownKey(input.zoneSlug, input.action);
-	const isDuplicate = await findRecentDuplicate(sql, cooldownKey, cooldownMinutes);
-	if (isDuplicate) return null;
-
 	return insertNotification(sql, input);
 }
 
