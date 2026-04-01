@@ -401,6 +401,29 @@ Organize code as small, single-responsibility modules:
 
 When adding code, suggest the appropriate component boundary and keep side-effectful wiring in bases.
 
+## Task & Requirement Management (Beads)
+
+This project uses **bd (beads)** as the single source of truth for all work. A skill is available at `.claude/skills/beads/SKILL.md` — use it for all task and requirement management.
+
+**Invoke the beads skill automatically when:**
+- The user asks to plan, create, or manage features, stories, tasks, or bugs
+- Before starting any implementation — verify a story exists and claim it first
+- The user asks what work is available or what to do next
+
+**Core rules:**
+- Never write code without a linked beads story
+- All features must be written as user stories: `As a <user>, I want <goal>, so that <benefit>.`
+- Every story must have acceptance criteria before implementation begins
+- Use epics to group related stories: `bd epic create "Feature Name"`
+- Claim work before starting: `bd update <id> --claim`
+- Reference the story ID in commit messages: `feat: add zone alerts (app-a3f2)`
+- Push beads at end of session: `bd dolt push`
+
+**If `bd` is not installed**, run:
+```bash
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
+```
+
 ## Rules
 
 - Fix all violations before asking for help
