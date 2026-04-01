@@ -402,6 +402,40 @@ h1 {
 	text-decoration: underline;
 }
 
+.alert-buttons {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.alert-btn {
+	padding: 0.4rem 0.9rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	background: #1e3a5f;
+	color: #93c5fd;
+	border: 1px solid #2563eb;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.alert-btn:hover {
+	background: #1d4ed8;
+	color: #fff;
+}
+
+.ai-alert-output {
+	font-size: 0.875rem;
+	line-height: 1.6;
+	color: var(--text-primary);
+	background: #0f172a;
+	border: 1px solid #1e293b;
+	border-radius: 6px;
+	padding: 0.75rem 1rem;
+	white-space: pre-wrap;
+}
+
 /* Utility */
 .hidden {
 	display: none !important;

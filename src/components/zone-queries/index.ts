@@ -3,8 +3,10 @@ import { getDb, queries } from "../db";
 import { avalancheForecasts, avalancheProblems, snowpackReadings, snotelStations, weatherReadings } from "../db/schema";
 import { dangerNameToLevel } from "../risk-assessment";
 import { generateAlert } from "../alerts";
+import { generateAIAlert } from "../ai-alert";
 import type { RiskAssessment } from "../risk-assessment";
 import type { AlertDecision } from "../alerts";
+import type { AlertType, AlertResult } from "../ai-alert";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -272,4 +274,10 @@ export async function getZoneDetail(slug: string): Promise<ZoneDetail | null> {
 		dateIssued: forecast?.dateIssued ?? "",
 		problems: forecastProblems,
 	};
+}
+
+export async function generateZoneAlert(slug: string, type: AlertType): Promise<AlertResult | null> {
+	const detail = await getZoneDetail(slug);
+	if (!detail) return null;
+	return generateAIAlert({ name: detail.name }, detail.assessment, type);
 }

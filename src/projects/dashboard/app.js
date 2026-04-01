@@ -163,12 +163,42 @@ async function openModal(slug) {
           <p class="modal-bottom-line">${bottomLine}</p>
         </div>` : ""}
 
+      <div class="modal-section">
+        <div class="modal-section-label">AI Alert Translation</div>
+        <div class="alert-buttons">
+          <button class="alert-btn" onclick="generateAlert('${slug}', 'traveler')">Traveler Summary</button>
+          <button class="alert-btn" onclick="generateAlert('${slug}', 'ops')">Ops Alert</button>
+        </div>
+        <div id="ai-alert-output" class="ai-alert-output hidden"></div>
+      </div>
+
       ${forecastLink ? `<div class="modal-footer">${forecastLink}</div>` : ""}
     `;
 	} catch {
 		body.innerHTML = "<p style='color:var(--color-high)'>Failed to load zone detail.</p>";
 	}
 }
+
+async function generateAlert(slug, type) {
+	const output = document.getElementById("ai-alert-output");
+	output.classList.remove("hidden");
+	output.textContent = "Generating…";
+
+	try {
+		const res = await fetch(`/api/zones/${slug}/alert`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ type }),
+		});
+		const data = await res.json();
+		if (!data.success) throw new Error("Alert generation failed");
+		output.textContent = data.alert.content;
+	} catch {
+		output.textContent = "Failed to generate alert. Please try again.";
+	}
+}
+
+window.generateAlert = generateAlert;
 
 function stripHtml(html) {
 	return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\r\n/g, " ").replace(/\s+/g, " ").trim();

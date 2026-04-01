@@ -1,6 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { RiskAssessment } from "../risk-assessment";
-import type { ZoneConfig } from "../avalanche-data";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -18,7 +17,7 @@ export interface AlertResult {
 // Prompt builders
 // ---------------------------------------------------------------------------
 
-function buildPrompt(zone: ZoneConfig, assessment: RiskAssessment, type: AlertType): string {
+function buildPrompt(zone: { name: string }, assessment: RiskAssessment, type: AlertType): string {
 	const problemList = assessment.problems.length > 0 ? assessment.problems.join(", ") : "none identified";
 	const weatherLine =
 		assessment.currentTemp !== null
@@ -82,7 +81,7 @@ function parseResponse(text: string, model: string): AlertResult {
 // ---------------------------------------------------------------------------
 
 export async function generateAIAlert(
-	zone: ZoneConfig,
+	zone: { name: string },
 	assessment: RiskAssessment,
 	type: AlertType,
 ): Promise<AlertResult> {
