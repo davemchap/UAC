@@ -246,12 +246,8 @@ function timeAgo(dateStr) {
 }
 
 function renderNotifItem(n) {
-	const ackBtn = n.acknowledged
-		? ""
-		: `<button class="notif-ack-btn" data-id="${n.id}">Acknowledge</button>`;
-
 	return `
-		<div class="notif-item${n.acknowledged ? " acknowledged" : ""}" data-notif-id="${n.id}">
+		<div class="notif-item" data-notif-id="${n.id}">
 			<div class="notif-item-header">
 				<span class="notif-zone">${n.zoneName}</span>
 				<span class="notif-time">${timeAgo(n.createdAt)}</span>
@@ -260,7 +256,6 @@ function renderNotifItem(n) {
 				<span class="alert-badge alert-${n.action}">${n.label}</span>
 				<span class="danger-badge danger-${n.dangerLevel}">${n.dangerName}</span>
 			</div>
-			${ackBtn}
 		</div>
 	`;
 }
@@ -279,9 +274,6 @@ async function loadNotifications() {
 			list.innerHTML = `<div class="notif-empty">No notifications yet.<br>Alerts will appear here when zones reach critical levels.</div>`;
 		} else {
 			list.innerHTML = data.notifications.map(renderNotifItem).join("");
-			list.querySelectorAll(".notif-ack-btn").forEach((btn) => {
-				btn.addEventListener("click", () => acknowledgeNotif(Number(btn.dataset.id)));
-			});
 		}
 
 		const unread = data.notifications.filter((n) => !n.acknowledged).length;
@@ -293,16 +285,6 @@ async function loadNotifications() {
 		}
 	} catch {
 		// Silently ignore — notifications are non-critical
-	}
-}
-
-async function acknowledgeNotif(id) {
-	try {
-		const res = await fetch(`/api/notifications/${id}/acknowledge`, { method: "POST" });
-		if (!res.ok) return;
-		await loadNotifications();
-	} catch {
-		// Silently ignore
 	}
 }
 
@@ -333,3 +315,269 @@ setInterval(() => {
 
 loadZones();
 void loadNotifications();
+
+// ---------------------------------------------------------------------------
+// Alert Configuration
+// ---------------------------------------------------------------------------
+
+const ACTION_LABELS = {
+	no_alert: "No Alert",
+	human_review: "Review Required",
+	auto_send: "Auto-Send",
+	auto_send_urgent: "URGENT Auto-Send",
+	flag_for_review: "Flagged – Missing Data",
+};
+
+let configPanelOpen = false;
+let activeConfigTab = "thresholds";
+let allRules = [];
+let allZones = [];
+
+function openConfigPanel() {
+	configPanelOpen = true;
+	document.getElementById("alert-config-panel").classList.remove("hidden");
+	document.getElementById("notif-overlay").classList.remove("hidden");
+	void loadAlertConfig();
+}
+
+function closeConfigPanel() {
+	configPanelOpen = false;
+	document.getElementById("alert-config-panel").classList.add("hidden");
+	document.getElementById("notif-overlay").classList.add("hidden");
+}
+
+function switchConfigTab(tab) {
+	activeConfigTab = tab;
+	document.querySelectorAll(".config-tab").forEach((btn) => {
+		btn.classList.toggle("active", btn.dataset.tab === tab);
+	});
+	document.getElementById("tab-thresholds").classList.toggle("hidden", tab !== "thresholds");
+	document.getElementById("tab-rules").classList.toggle("hidden", tab !== "rules");
+}
+
+async function loadAlertConfig() {
+	try {
+		const [cfgRes, rulesRes, zonesRes] = await Promise.all([
+			fetch("/api/alert-config"),
+			fetch("/api/alert-config/rules"),
+			fetch("/api/zones"),
+		]);
+		const cfg = await cfgRes.json();
+		const rulesData = await rulesRes.json();
+		const zonesData = await zonesRes.json();
+
+		if (cfg.success) renderThresholds(cfg.thresholds);
+		if (rulesData.success) {
+			allRules = rulesData.rules;
+			renderRules(allRules);
+		}
+		if (zonesData.success) {
+			allZones = zonesData.zones;
+			populateZoneSelect(allZones);
+		}
+	} catch {
+		// silently ignore
+	}
+}
+
+function renderThresholds(thresholds) {
+	const tbody = document.getElementById("threshold-rows");
+	const dangerNames = { 1: "Low", 2: "Moderate", 3: "Considerable", 4: "High", 5: "Extreme" };
+	tbody.innerHTML = thresholds
+		.filter((t) => t.dangerLevel >= 1)
+		.map((t) => {
+			const options = Object.entries(ACTION_LABELS)
+				.map(([val, label]) => `<option value="${val}"${t.action === val ? " selected" : ""}>${label}</option>`)
+				.join("");
+			return `<tr>
+				<td>${t.dangerLevel}</td>
+				<td><span class="danger-badge danger-${t.dangerLevel}">${dangerNames[t.dangerLevel] || t.dangerName}</span></td>
+				<td><select class="threshold-select" data-level="${t.dangerLevel}">${options}</select></td>
+			</tr>`;
+		})
+		.join("");
+}
+
+async function saveThresholds() {
+	const selects = document.querySelectorAll(".threshold-select");
+	const thresholds = Array.from(selects).map((s) => ({
+		dangerLevel: Number(s.dataset.level),
+		action: s.value,
+	}));
+
+	const statusEl = document.getElementById("threshold-save-status");
+	statusEl.textContent = "Saving…";
+
+	try {
+		const res = await fetch("/api/alert-config/thresholds", {
+			method: "PUT",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ thresholds }),
+		});
+		const data = await res.json();
+		statusEl.textContent = data.success ? "✓ Saved" : "✗ Failed";
+		if (data.success) setTimeout(() => { statusEl.textContent = ""; }, 2000);
+	} catch {
+		statusEl.textContent = "✗ Error";
+	}
+}
+
+function populateZoneSelect(zones) {
+	const select = document.getElementById("rule-zone");
+	const existing = Array.from(select.options).map((o) => o.value);
+	zones.forEach((z) => {
+		if (!existing.includes(z.slug)) {
+			const opt = document.createElement("option");
+			opt.value = z.slug;
+			opt.textContent = z.name;
+			select.appendChild(opt);
+		}
+	});
+}
+
+function renderRules(rules) {
+	const list = document.getElementById("rules-list");
+	if (rules.length === 0) {
+		list.innerHTML = `<div class="rules-empty">No custom rules yet. Rules override thresholds when conditions match.</div>`;
+		return;
+	}
+	list.innerHTML = rules.map((r) => renderRuleCard(r)).join("");
+	list.querySelectorAll(".rule-edit-btn").forEach((btn) => {
+		btn.addEventListener("click", () => openEditRuleForm(Number(btn.dataset.id)));
+	});
+	list.querySelectorAll(".rule-delete-btn").forEach((btn) => {
+		btn.addEventListener("click", () => deleteRule(Number(btn.dataset.id)));
+	});
+}
+
+function ruleConditionSummary(r) {
+	const parts = [];
+	if (r.minDangerLevel) parts.push(`Danger ≥ ${r.minDangerLevel}`);
+	if (r.minProblemCount) parts.push(`Problems ≥ ${r.minProblemCount}`);
+	if (r.zoneSlug) {
+		const z = allZones.find((z) => z.slug === r.zoneSlug);
+		parts.push(`Zone: ${z ? z.name : r.zoneSlug}`);
+	}
+	return parts.length > 0 ? parts.join(" · ") : "Any zone, any level";
+}
+
+function renderRuleCard(r) {
+	const enabled = r.enabled ? "🟢" : "⚪";
+	const conditions = ruleConditionSummary(r);
+	return `
+		<div class="rule-card${r.enabled ? "" : " rule-disabled"}">
+			<div class="rule-card-header">
+				<span class="rule-enabled-icon">${enabled}</span>
+				<span class="rule-name">${r.name}</span>
+			</div>
+			<div class="rule-summary">${conditions} → <strong>${ACTION_LABELS[r.action] || r.action}</strong></div>
+			<div class="rule-actions">
+				<button class="btn-link rule-edit-btn" data-id="${r.id}">Edit</button>
+				<button class="btn-link rule-delete-btn" data-id="${r.id}" style="color:var(--color-high)">Delete</button>
+			</div>
+		</div>
+	`;
+}
+
+function openNewRuleForm() {
+	document.getElementById("rule-form-title").textContent = "New Rule";
+	document.getElementById("rule-form-id").value = "";
+	document.getElementById("rule-name").value = "";
+	document.getElementById("rule-min-danger").value = "";
+	document.getElementById("rule-min-problems").value = "";
+	document.getElementById("rule-zone").value = "";
+	document.getElementById("rule-action").value = "human_review";
+	document.getElementById("rule-enabled").checked = true;
+	document.getElementById("rule-save-status").textContent = "";
+	document.getElementById("rule-form-container").classList.remove("hidden");
+}
+
+function openEditRuleForm(id) {
+	const rule = allRules.find((r) => r.id === id);
+	if (!rule) return;
+	document.getElementById("rule-form-title").textContent = "Edit Rule";
+	document.getElementById("rule-form-id").value = String(id);
+	document.getElementById("rule-name").value = rule.name;
+	document.getElementById("rule-min-danger").value = rule.minDangerLevel ?? "";
+	document.getElementById("rule-min-problems").value = rule.minProblemCount ?? "";
+	document.getElementById("rule-zone").value = rule.zoneSlug ?? "";
+	document.getElementById("rule-action").value = rule.action;
+	document.getElementById("rule-enabled").checked = rule.enabled;
+	document.getElementById("rule-save-status").textContent = "";
+	document.getElementById("rule-form-container").classList.remove("hidden");
+}
+
+function cancelRuleForm() {
+	document.getElementById("rule-form-container").classList.add("hidden");
+}
+
+async function saveRule() {
+	const id = document.getElementById("rule-form-id").value;
+	const body = {
+		name: document.getElementById("rule-name").value.trim(),
+		minDangerLevel: document.getElementById("rule-min-danger").value ? Number(document.getElementById("rule-min-danger").value) : null,
+		minProblemCount: document.getElementById("rule-min-problems").value ? Number(document.getElementById("rule-min-problems").value) : null,
+		zoneSlug: document.getElementById("rule-zone").value || null,
+		action: document.getElementById("rule-action").value,
+		enabled: document.getElementById("rule-enabled").checked,
+	};
+
+	if (!body.name) {
+		document.getElementById("rule-save-status").textContent = "Name required";
+		return;
+	}
+
+	const statusEl = document.getElementById("rule-save-status");
+	statusEl.textContent = "Saving…";
+
+	try {
+		const url = id ? `/api/alert-config/rules/${id}` : "/api/alert-config/rules";
+		const method = id ? "PUT" : "POST";
+		const res = await fetch(url, {
+			method,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+		});
+		const data = await res.json();
+		if (data.success) {
+			cancelRuleForm();
+			const rulesRes = await fetch("/api/alert-config/rules");
+			const rulesData = await rulesRes.json();
+			if (rulesData.success) { allRules = rulesData.rules; renderRules(allRules); }
+		} else {
+			statusEl.textContent = "✗ Failed";
+		}
+	} catch {
+		statusEl.textContent = "✗ Error";
+	}
+}
+
+async function deleteRule(id) {
+	try {
+		const res = await fetch(`/api/alert-config/rules/${id}`, { method: "DELETE" });
+		const data = await res.json();
+		if (data.success) {
+			const rulesRes = await fetch("/api/alert-config/rules");
+			const rulesData = await rulesRes.json();
+			if (rulesData.success) { allRules = rulesData.rules; renderRules(allRules); }
+		}
+	} catch {
+		// silently ignore
+	}
+}
+
+document.getElementById("alert-config-btn").addEventListener("click", () => {
+	configPanelOpen ? closeConfigPanel() : openConfigPanel();
+});
+document.getElementById("alert-config-close").addEventListener("click", closeConfigPanel);
+document.getElementById("notif-overlay").addEventListener("click", () => {
+	closeNotifPanel();
+	closeConfigPanel();
+});
+document.querySelectorAll(".config-tab").forEach((btn) => {
+	btn.addEventListener("click", () => switchConfigTab(btn.dataset.tab));
+});
+document.getElementById("save-thresholds").addEventListener("click", () => void saveThresholds());
+document.getElementById("new-rule-btn").addEventListener("click", openNewRuleForm);
+document.getElementById("save-rule-btn").addEventListener("click", () => void saveRule());
+document.getElementById("cancel-rule-btn").addEventListener("click", cancelRuleForm);
