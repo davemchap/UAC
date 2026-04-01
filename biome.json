@@ -1,6 +1,14 @@
 {
 	"files": {
-		"ignore": [".claude/**", ".beads/**", "data/**", "package.json", "tsconfig.json"]
+		"ignore": [
+			".claude/**",
+			".beads/**",
+			"data/**",
+			"package.json",
+			"tsconfig.json",
+			"sample-eval-app/**",
+			"eval/results/**"
+		]
 	},
 	"formatter": {
 		"lineWidth": 120

@@ -15,6 +15,7 @@
 		"test": "bun test",
 		"check:lint": "bun run lint:biome && bun run lint && bun run typecheck && bun run circular",
 		"check": "bun run check:lint && bun run test && echo '✅ All checks passed!'",
+		"eval": "bun run scripts/run-eval.ts",
 		"prepare": "git config core.hooksPath .githooks",
 		"db:migrate": "bun run --env-file .env src/components/db/migrate.ts",
 		"db:seed": "bun run --env-file .env src/components/db/seed.ts",

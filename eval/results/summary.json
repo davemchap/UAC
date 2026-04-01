@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-04-01T20:12:46.470Z",
+  "totalCases": 13,
+  "passCount": 13,
+  "failCount": 0,
+  "accuracyPct": 100,
+  "byEvaluator": {
+    "assessment": {
+      "pass": 13,
+      "fail": 0
+    },
+    "alert": {
+      "pass": 13,
+      "fail": 0
+    },
+    "notification": {
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}
