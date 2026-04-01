@@ -41,27 +41,33 @@ Check the current GitLab config and verify connectivity:
 bd gitlab status
 ```
 
-If not configured, set credentials using environment variables (preferred — no secrets in config files):
+If configured, you're done. If not:
+
+**Step 1 — Find your project ID**
+
+`$GITLAB_URL` and `$GITLAB_TOKEN` are already set in the workspace environment.
+Use them to look up the numeric project ID from the git remote path:
 
 ```bash
-# GITLAB_URL is already set in the workspace environment
-# Set GITLAB_TOKEN to a personal access token with api scope
-export GITLAB_TOKEN=<your-token>
+# Get the namespace/path from git remote (e.g. shipsummit/black-3/app)
+git remote get-url origin | sed 's|.*/\(.*/.*/.*\)\.git|\1|'
+
+# Look up the numeric project ID
+curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/<namespace%2Fpath>" | grep -o '"id":[0-9]*' | head -1
+# URL-encode slashes as %2F: shipsummit/black-3/app → shipsummit%2Fblack-3%2Fapp
 ```
 
-Or persist via bd config:
+**Step 2 — Persist the config**
 
 ```bash
 bd config set gitlab.url "$GITLAB_URL"
 bd config set gitlab.token "$GITLAB_TOKEN"
-bd config set gitlab.project_id <project-id-or-path>  # e.g. mygroup/myproject
+bd config set gitlab.project_id <numeric-id>   # e.g. 152
 ```
 
-To find your project ID or path:
-
-```bash
-bd gitlab projects
-```
+> **Note**: The `glab` CLI stores an OAuth bearer token that can expire.
+> Always use `$GITLAB_TOKEN` (a PAT) for beads — do not copy the token value from `~/.config/glab-cli/config.yml`.
 
 Verify the connection is working before proceeding:
 
