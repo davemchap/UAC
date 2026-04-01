@@ -15,6 +15,13 @@
 			"when": 1775085260173,
 			"tag": "0001_dry_whiplash",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1775090000000,
+			"tag": "0002_alert_rules_notifications",
+			"breakpoints": true
 		}
 	]
 }
