@@ -77,6 +77,10 @@ COPY --from=builder --chown=nonroot:nonroot /app/package.json ./
 COPY --from=builder --chown=nonroot:nonroot /app/tsconfig.json ./
 COPY --from=builder --chown=nonroot:nonroot /app/src ./src
 
+# Copy static data files (zone config, alert thresholds, API docs)
+# Required for seedReferenceData() to populate the DB on startup
+COPY --chown=nonroot:nonroot data ./data
+
 # Chainguard images ship with a nonroot user (uid 65532) — no need to create one
 # CVE patching via apk upgrade is also no longer needed; Chainguard ships zero/near-zero CVEs
 USER nonroot
