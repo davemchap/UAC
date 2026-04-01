@@ -1,10 +1,11 @@
 export type AlertAction = "no_alert" | "human_review" | "auto_send" | "auto_send_urgent" | "flag_for_review";
 
 export interface ThresholdRow {
+	id: number;
 	dangerLevel: number;
-	dangerName: string;
+	name: string;
 	action: AlertAction;
-	updatedAt: Date;
+	description: string | null;
 }
 
 export interface AlertRule {

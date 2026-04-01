@@ -24,11 +24,11 @@ function makeAssessment(overrides: Partial<RiskAssessment> = {}): RiskAssessment
 
 const BASE_CONFIG: AlertConfig = {
 	thresholds: [
-		{ dangerLevel: 1, dangerName: "Low", action: "no_alert", updatedAt: new Date() },
-		{ dangerLevel: 2, dangerName: "Moderate", action: "no_alert", updatedAt: new Date() },
-		{ dangerLevel: 3, dangerName: "Considerable", action: "human_review", updatedAt: new Date() },
-		{ dangerLevel: 4, dangerName: "High", action: "auto_send", updatedAt: new Date() },
-		{ dangerLevel: 5, dangerName: "Extreme", action: "auto_send_urgent", updatedAt: new Date() },
+		{ id: 1, dangerLevel: 1, name: "Low", action: "no_alert", description: null },
+		{ id: 2, dangerLevel: 2, name: "Moderate", action: "no_alert", description: null },
+		{ id: 3, dangerLevel: 3, name: "Considerable", action: "human_review", description: null },
+		{ id: 4, dangerLevel: 4, name: "High", action: "auto_send", description: null },
+		{ id: 5, dangerLevel: 5, name: "Extreme", action: "auto_send_urgent", description: null },
 	],
 	rules: [],
 };

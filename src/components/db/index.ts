@@ -45,7 +45,7 @@ export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
 	return _db;
 }
 
-/** @deprecated Prefer getDb() for typed queries. Use for raw SQL only. */
+/** For raw SQL only. Prefer getDb() for typed queries via Drizzle. */
 export function getSql(): ReturnType<typeof postgres> {
 	if (_sql) return _sql;
 	if (!databaseUrl) throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
@@ -94,8 +94,17 @@ export async function initializeDatabase(): Promise<void> {
 
 export async function closeDatabase(): Promise<void> {
 	await Promise.all([
-		_client ? _client.end().then(() => { _client = null; _db = null; }) : Promise.resolve(),
-		_sql ? _sql.end().then(() => { _sql = null; }) : Promise.resolve(),
+		_client
+			? _client.end().then(() => {
+					_client = null;
+					_db = null;
+				})
+			: Promise.resolve(),
+		_sql
+			? _sql.end().then(() => {
+					_sql = null;
+				})
+			: Promise.resolve(),
 	]);
 	if (_client !== null || _sql !== null) return;
 	console.log("Database connection closed");

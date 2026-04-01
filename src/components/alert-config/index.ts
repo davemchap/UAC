@@ -27,7 +27,7 @@ export async function seedThresholds(sql: ReturnType<typeof postgres>): Promise<
 	const entries = loadThresholdsFromJson();
 	for (const entry of entries) {
 		await sql`
-			INSERT INTO alert_thresholds (danger_level, danger_name, action)
+			INSERT INTO alert_thresholds (danger_level, name, action)
 			VALUES (${entry.danger_level}, ${entry.name}, ${entry.action})
 			ON CONFLICT (danger_level) DO NOTHING
 		`;
@@ -53,9 +53,7 @@ export async function upsertThresholds(
 ): Promise<void> {
 	for (const row of rows) {
 		await sql`
-			UPDATE alert_thresholds
-			SET action = ${row.action}, updated_at = now()
-			WHERE danger_level = ${row.dangerLevel}
+			UPDATE alert_thresholds SET action = ${row.action} WHERE danger_level = ${row.dangerLevel}
 		`;
 	}
 }

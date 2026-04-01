@@ -391,7 +391,7 @@ function renderThresholds(thresholds) {
 				.join("");
 			return `<tr>
 				<td>${t.dangerLevel}</td>
-				<td><span class="danger-badge danger-${t.dangerLevel}">${dangerNames[t.dangerLevel] || t.dangerName}</span></td>
+				<td><span class="danger-badge danger-${t.dangerLevel}">${dangerNames[t.dangerLevel] || t.name}</span></td>
 				<td><select class="threshold-select" data-level="${t.dangerLevel}">${options}</select></td>
 			</tr>`;
 		})
