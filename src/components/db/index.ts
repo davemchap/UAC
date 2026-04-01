@@ -29,13 +29,12 @@ if (!databaseUrl) {
 }
 
 let _client: ReturnType<typeof postgres> | null = null;
-let _sql: ReturnType<typeof postgres> | null = null;
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 function getClient(): ReturnType<typeof postgres> {
 	if (_client) return _client;
 	if (!databaseUrl) throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
-	_client = postgres(databaseUrl, { max: 10, idle_timeout: 20, connect_timeout: 10 });
+	_client = postgres(databaseUrl, { max: 10, idle_timeout: 20, connect_timeout: 10, transform: postgres.camel });
 	return _client;
 }
 
@@ -47,17 +46,7 @@ export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
 
 /** For raw SQL only. Prefer getDb() for typed queries via Drizzle. */
 export function getSql(): ReturnType<typeof postgres> {
-	if (_sql) return _sql;
-	if (!databaseUrl) throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
-	_sql = postgres(databaseUrl, {
-		max: 10,
-		idle_timeout: 20,
-		connect_timeout: 10,
-		transform: {
-			column: (col: string): string => col.replace(/_([a-z])/g, (_: string, letter: string) => letter.toUpperCase()),
-		},
-	});
-	return _sql;
+	return getClient();
 }
 
 // ---------------------------------------------------------------------------
@@ -93,20 +82,11 @@ export async function initializeDatabase(): Promise<void> {
 }
 
 export async function closeDatabase(): Promise<void> {
-	await Promise.all([
-		_client
-			? _client.end().then(() => {
-					_client = null;
-					_db = null;
-				})
-			: Promise.resolve(),
-		_sql
-			? _sql.end().then(() => {
-					_sql = null;
-				})
-			: Promise.resolve(),
-	]);
-	if (_client !== null || _sql !== null) return;
+	if (_client) {
+		await _client.end();
+		_client = null;
+		_db = null;
+	}
 	console.log("Database connection closed");
 }
 
