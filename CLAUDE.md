@@ -417,7 +417,7 @@ This project uses **bd (beads)** as the single source of truth for all work. A s
 - Use epics to group related stories: `bd epic create "Feature Name"`
 - Claim work before starting: `bd update <id> --claim`
 - Reference the story ID in commit messages: `feat: add zone alerts (app-a3f2)`
-- Push beads at end of session: `bd dolt push`
+- Sync beads with GitLab at end of session: `bd gitlab sync`
 
 **If `bd` is not installed**, run:
 ```bash

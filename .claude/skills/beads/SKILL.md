@@ -11,7 +11,7 @@ All implementation must trace back to a beads story with user story format and a
 
 ---
 
-## Step 1 — Ensure bd is installed
+## Step 1 — Ensure bd is installed and configured
 
 Check for `bd` before doing anything else:
 
@@ -32,6 +32,42 @@ export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Verify: `bd version`
+
+### Configure GitLab integration
+
+Check the current GitLab config and verify connectivity:
+
+```bash
+bd gitlab status
+```
+
+If not configured, set credentials using environment variables (preferred — no secrets in config files):
+
+```bash
+# GITLAB_URL is already set in the workspace environment
+# Set GITLAB_TOKEN to a personal access token with api scope
+export GITLAB_TOKEN=<your-token>
+```
+
+Or persist via bd config:
+
+```bash
+bd config set gitlab.url "$GITLAB_URL"
+bd config set gitlab.token "$GITLAB_TOKEN"
+bd config set gitlab.project_id <project-id-or-path>  # e.g. mygroup/myproject
+```
+
+To find your project ID or path:
+
+```bash
+bd gitlab projects
+```
+
+Verify the connection is working before proceeding:
+
+```bash
+bd gitlab status
+```
 
 ---
 
@@ -127,10 +163,27 @@ bd dep add <story-id> <depends-on-story-id>
 
 ---
 
-## Step 5 — Sync at end of session
+## Step 5 — Sync with GitLab
+
+Sync issues bidirectionally with GitLab. Run this after creating/updating issues and at the end of each session:
 
 ```bash
-bd dolt push
+bd gitlab sync
+```
+
+This pulls new/updated issues from GitLab into beads and pushes local beads issues to GitLab.
+
+To sync in one direction only:
+
+```bash
+bd gitlab sync --pull-only   # pull from GitLab only
+bd gitlab sync --push-only   # push to GitLab only
+```
+
+To preview what would change without making edits:
+
+```bash
+bd gitlab sync --dry-run
 ```
 
 ---
@@ -168,6 +221,10 @@ bd epic create "name"                 # Create an epic
 bd update <id> --claim                # Claim work atomically
 bd close <id>                         # Mark complete
 bd graph                              # Visualize dependency tree
-bd dolt push                          # Sync with remote
+bd gitlab sync                        # Sync issues with GitLab (bidirectional)
+bd gitlab sync --pull-only            # Pull from GitLab only
+bd gitlab sync --push-only            # Push to GitLab only
+bd gitlab sync --dry-run              # Preview sync without changes
+bd gitlab status                      # Show GitLab config and sync status
 bd prime                              # Full AI-optimized workflow context
 ```
