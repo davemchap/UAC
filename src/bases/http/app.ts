@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import proxy from "./routes/proxy";
+import zones from "./routes/zones";
 
 export const app = new Hono();
 
@@ -43,10 +44,14 @@ app.get("/health", async (c) => {
 
 app.get("/api", (c) =>
 	c.json({
-		message: "Ship Summit Fullstack App API",
+		message: "Utah Avalanche Forecast Analysis & Alerting Engine",
 		version: "1.0.0",
 		endpoints: {
 			health: "GET /health",
+			zones: {
+				allZones: "GET /api/zones",
+				zoneDetail: "GET /api/zones/:slug",
+			},
 			proxy: {
 				avalancheForecast: "GET /api/proxy/avalanche/forecast?zone=<zone_id>",
 				avalancheZones: "GET /api/proxy/avalanche/zones",
@@ -56,6 +61,7 @@ app.get("/api", (c) =>
 	}),
 );
 
+app.route("/api/zones", zones);
 app.route("/api/proxy", proxy);
 
 // ---------------------------------------------------------------------------
