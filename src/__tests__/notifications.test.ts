@@ -61,6 +61,7 @@ describe("buildCooldownKey", () => {
 // ---------------------------------------------------------------------------
 
 void mock.module("../components/db", () => ({
+	getDb: () => ({}),
 	getSql: () => {
 		const mockSql = (strings: TemplateStringsArray) => {
 			const query = strings.join("?").toLowerCase();
