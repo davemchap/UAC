@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mock } from "bun:test";
 
 // Mock the db module before importing the app
-void mock.module("../db", () => ({
+void mock.module("../components/db", () => ({
 	getSql: () => () => [],
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
@@ -10,7 +10,7 @@ void mock.module("../db", () => ({
 }));
 
 // Import app after mocking
-const { app } = await import("../index");
+const { app } = await import("../bases/http/app");
 
 function request(method: string, path: string): Request {
 	return new Request(`http://localhost${path}`, { method });

@@ -381,6 +381,26 @@ const sql = postgres(process.env.DATABASE_URL, { max: 10 })
 
 Exceeding 20 total connections will cause new connections to fail.
 
+## Coding Style
+
+### Functional Programming
+Prefer functional patterns throughout:
+- Pure functions over stateful classes
+- Immutable data (`const`, `readonly`, `as const`)
+- Explicit data transformation pipelines (map/filter/reduce) over imperative loops
+- No side effects in business logic — isolate I/O at the edges (routes, DB calls)
+- Prefer function composition over inheritance
+
+### Modular Structure (Polylith-inspired)
+Organize code as small, single-responsibility modules:
+- **components** (`src/components/`) — pure business logic, no framework dependencies, fully testable in isolation
+- **bases** (`src/bases/`) — entry points that wire components together (the Hono app is a base)
+- No circular dependencies between components (enforced by `bun run circular`)
+- Each component owns its types; export only what external callers need
+- New features get a new component directory, not additions to existing files
+
+When adding code, suggest the appropriate component boundary and keep side-effectful wiring in bases.
+
 ## Rules
 
 - Fix all violations before asking for help
