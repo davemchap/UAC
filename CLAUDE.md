@@ -457,6 +457,25 @@ Organize code as small, single-responsibility modules:
 
 When adding code, suggest the appropriate component boundary and keep side-effectful wiring in bases.
 
+## Deploy Workflow
+
+Every code change must go through the deploy skill before a story can be considered complete. The skill is at `.claude/skills/deploy/SKILL.md`.
+
+**The deploy workflow is: lint locally → commit → push → watch GitLab CI pipeline.**
+
+**Invoke the deploy skill automatically when:**
+- Any code change is committed and pushed
+- A story is being wrapped up and the pipeline status is unknown
+- A CI pipeline failure is reported
+
+**Non-negotiable rules:**
+- `bun run check` must pass locally before every push
+- Always commit `bun.lock` alongside `package.json` when packages are added or updated
+- Never close a beads story while its pipeline is `pending`, `running`, or `failed`
+- A passing pipeline is a prerequisite for story closure — not a trigger for it
+
+**GitLab project ID for pipeline API calls: `152`**
+
 ## Task & Requirement Management (Beads)
 
 This project uses **bd (beads)** as the single source of truth for all work. A skill is available at `.claude/skills/beads/SKILL.md` — use it for all task and requirement management.
