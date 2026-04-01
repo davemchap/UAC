@@ -62,23 +62,29 @@ function renderZones(grid, zones) {
 
 function renderZoneCard(zone) {
 	const lvl = zone.dangerLevel;
+	const ai = zone.aiAlert;
 	const problems =
 		zone.problems.length > 0
 			? `<div class="problems-list">
-            <div class="problems-label">Avalanche Problems</div>
+            <div class="problems-label">UAC Avalanche Problems</div>
             ${zone.problems.map((p) => `<span class="problem-tag">${p}</span>`).join("")}
           </div>`
 			: "";
 
-	const escalation = zone.alert.escalated
-		? `<span class="escalation-note">↑ escalated: ${zone.alert.escalationReason}</span>`
+	const aiProblems = ai && ai.avalancheProblems.length > 0
+		? `<div class="problems-list">
+            <div class="problems-label">AI Avalanche Problems</div>
+            ${ai.avalancheProblems.map((p) => `<span class="problem-tag ai-tag">${p}</span>`).join("")}
+          </div>`
 		: "";
 
-	const temp =
-		zone.currentTemp !== null ? `<div class="stat"><span class="stat-label">Temp</span><span class="stat-value">${zone.currentTemp}°${zone.tempUnit}</span></div>` : "";
+	const aiDanger = ai
+		? `<span class="danger-badge danger-${ai.dangerLevel} ai-badge">AI: ${ai.dangerRating}</span>`
+		: "";
 
-	const snow =
-		zone.snowDepthIn !== null ? `<div class="stat"><span class="stat-label">Snow Depth</span><span class="stat-value">${zone.snowDepthIn}"</span></div>` : "";
+	const backcountry = ai && ai.backcountrySummary
+		? `<div class="backcountry-summary">${ai.backcountrySummary}</div>`
+		: "";
 
 	return `
     <div class="zone-card" data-slug="${zone.slug}">
@@ -86,18 +92,20 @@ function renderZoneCard(zone) {
       <div class="zone-card-body">
         <div class="zone-card-header">
           <span class="zone-name">${zone.name}</span>
-          <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.dangerName}</span>
+          <div class="danger-badges">
+            <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.dangerName}</span>
+            ${aiDanger}
+          </div>
         </div>
         <div class="alert-badge alert-${zone.alert.action}">
           ${zone.alert.label}
         </div>
-        ${escalation}
         <div class="zone-stats">
           <div class="stat"><span class="stat-label">Problems</span><span class="stat-value">${zone.problemCount}</span></div>
-          ${temp}
-          ${snow}
         </div>
         ${problems}
+        ${aiProblems}
+        ${backcountry}
       </div>
     </div>
   `;
@@ -117,6 +125,7 @@ async function openModal(slug) {
 		if (!data.success) throw new Error("Zone not found");
 		const { zone } = data;
 		const lvl = zone.assessment.dangerLevel;
+		const ai = zone.aiAlert;
 
 		const problemTags = zone.assessment.problems.map((p) => `<span class="problem-tag">${p}</span>`).join("");
 
@@ -126,16 +135,46 @@ async function openModal(slug) {
 			? `<a class="modal-link" href="${zone.forecastUrl}" target="_blank" rel="noopener">View full UAC forecast →</a>`
 			: "";
 
-		const conditionStats = [
-			zone.assessment.currentTemp !== null
-				? `<div class="modal-stat"><div class="modal-stat-label">Temperature</div><div class="modal-stat-value">${zone.assessment.currentTemp}°${zone.assessment.tempUnit}</div></div>`
-				: "",
-			zone.assessment.snowDepthIn !== null
-				? `<div class="modal-stat"><div class="modal-stat-label">Snow Depth</div><div class="modal-stat-value">${zone.assessment.snowDepthIn}"</div></div>`
-				: "",
-		]
-			.filter(Boolean)
-			.join("");
+		const aiDangerBadge = ai
+			? `<span class="danger-badge danger-${ai.dangerLevel} ai-badge">AI: ${ai.dangerRating}</span>`
+			: "";
+
+		const aiElevationSection = ai ? `
+        <div class="modal-section">
+          <div class="modal-section-label">AI Danger by Elevation</div>
+          <div class="elevation-grid">
+            <div class="elevation-item">
+              <span class="elevation-label">Above Treeline</span>
+              <span class="danger-badge danger-${ai.dangerAboveTreelineLevel}">${ai.dangerAboveTreelineRating}</span>
+            </div>
+            <div class="elevation-item">
+              <span class="elevation-label">Near Treeline</span>
+              <span class="danger-badge danger-${ai.dangerNearTreelineLevel}">${ai.dangerNearTreelineRating}</span>
+            </div>
+            <div class="elevation-item">
+              <span class="elevation-label">Below Treeline</span>
+              <span class="danger-badge danger-${ai.dangerBelowTreelineLevel}">${ai.dangerBelowTreelineRating}</span>
+            </div>
+          </div>
+        </div>` : "";
+
+		const aiProblemsSection = ai && ai.avalancheProblems.length > 0 ? `
+        <div class="modal-section">
+          <div class="modal-section-label">AI Avalanche Problems</div>
+          <div class="modal-tags">${ai.avalancheProblems.map((p) => `<span class="problem-tag ai-tag">${p}</span>`).join("")}</div>
+        </div>` : "";
+
+		const backcountrySection = ai && ai.backcountrySummary ? `
+        <div class="modal-section">
+          <div class="modal-section-label">Backcountry Summary</div>
+          <p class="modal-bottom-line backcountry-text">${ai.backcountrySummary}</p>
+        </div>` : "";
+
+		const reasoningSection = ai && ai.alertReasoning ? `
+        <div class="modal-section">
+          <div class="modal-section-label">Alert Reasoning</div>
+          <p class="modal-bottom-line alert-reasoning-text">${ai.alertReasoning}</p>
+        </div>` : "";
 
 		body.innerHTML = `
       <div class="modal-header accent-${lvl}">
@@ -143,34 +182,32 @@ async function openModal(slug) {
           <div class="modal-zone-name">${zone.name}</div>
           <div class="modal-header-badges">
             <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.assessment.dangerName}</span>
+            ${aiDangerBadge}
             <span class="alert-badge alert-${zone.alert.action}">${zone.alert.label}</span>
           </div>
           ${zone.alert.escalated ? `<div class="escalation-note">↑ Escalated: ${zone.alert.escalationReason}</div>` : ""}
         </div>
       </div>
 
-      ${conditionStats ? `<div class="modal-stats-row">${conditionStats}</div>` : ""}
+      ${backcountrySection}
+
+      ${aiElevationSection}
 
       ${zone.assessment.problems.length > 0 ? `
         <div class="modal-section">
-          <div class="modal-section-label">Avalanche Problems</div>
+          <div class="modal-section-label">UAC Avalanche Problems</div>
           <div class="modal-tags">${problemTags}</div>
         </div>` : ""}
 
+      ${aiProblemsSection}
+
       ${bottomLine ? `
         <div class="modal-section">
-          <div class="modal-section-label">Bottom Line</div>
+          <div class="modal-section-label">UAC Bottom Line</div>
           <p class="modal-bottom-line">${bottomLine}</p>
         </div>` : ""}
 
-      <div class="modal-section">
-        <div class="modal-section-label">AI Alert Translation</div>
-        <div class="alert-buttons">
-          <button class="alert-btn" onclick="generateAlert('${slug}', 'traveler')">Traveler Summary</button>
-          <button class="alert-btn" onclick="generateAlert('${slug}', 'ops')">Ops Alert</button>
-        </div>
-        <div id="ai-alert-output" class="ai-alert-output hidden"></div>
-      </div>
+      ${reasoningSection}
 
       ${forecastLink ? `<div class="modal-footer">${forecastLink}</div>` : ""}
     `;
@@ -179,26 +216,6 @@ async function openModal(slug) {
 	}
 }
 
-async function generateAlert(slug, type) {
-	const output = document.getElementById("ai-alert-output");
-	output.classList.remove("hidden");
-	output.textContent = "Generating…";
-
-	try {
-		const res = await fetch(`/api/zones/${slug}/alert`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ type }),
-		});
-		const data = await res.json();
-		if (!data.success) throw new Error("Alert generation failed");
-		output.textContent = data.alert.content;
-	} catch {
-		output.textContent = "Failed to generate alert. Please try again.";
-	}
-}
-
-window.generateAlert = generateAlert;
 
 function stripHtml(html) {
 	return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\r\n/g, " ").replace(/\s+/g, " ").trim();

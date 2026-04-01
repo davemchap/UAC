@@ -1027,3 +1027,59 @@ h1 {
 	font-size: 0.875rem;
 	padding: 2rem 1rem;
 }
+
+/* AI Alert Styles */
+.danger-badges {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.ai-badge {
+	border: 1px dashed rgba(255, 255, 255, 0.3);
+	font-size: 0.7rem;
+}
+
+.ai-tag {
+	border: 1px dashed rgba(255, 255, 255, 0.2);
+	background: rgba(99, 102, 241, 0.15);
+}
+
+.backcountry-summary {
+	font-size: 0.8rem;
+	color: #d1d5db;
+	line-height: 1.5;
+	padding: 0.5rem 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	margin-top: 0.5rem;
+}
+
+.backcountry-text {
+	color: #93c5fd;
+}
+
+.alert-reasoning-text {
+	color: #a5b4fc;
+	font-size: 0.85rem;
+}
+
+.elevation-grid {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.elevation-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	flex: 1;
+	min-width: 100px;
+}
+
+.elevation-label {
+	font-size: 0.75rem;
+	color: #9ca3af;
+}
