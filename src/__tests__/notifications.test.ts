@@ -60,8 +60,22 @@ describe("buildCooldownKey", () => {
 // Notification API routes
 // ---------------------------------------------------------------------------
 
+const stubQueries = {
+	getAllZones: () => Promise.resolve([]),
+	getZoneBySlug: () => Promise.resolve([]),
+	getZoneByZoneId: () => Promise.resolve([]),
+	getSnotelStationsByZoneId: () => Promise.resolve([]),
+	getLatestForecast: () => Promise.resolve([]),
+	getForecastProblems: () => Promise.resolve([]),
+	getWeatherReadings: () => Promise.resolve([]),
+	getSnowpackReadings: () => Promise.resolve([]),
+	getAllAlertThresholds: () => Promise.resolve([]),
+	getAllEscalationRules: () => Promise.resolve([]),
+};
+
 void mock.module("../components/db", () => ({
 	getDb: () => ({}),
+	queries: stubQueries,
 	getSql: () => {
 		const mockSql = (strings: TemplateStringsArray) => {
 			const query = strings.join("?").toLowerCase();
