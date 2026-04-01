@@ -3,6 +3,7 @@ import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
+import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
@@ -133,6 +134,7 @@ let _stopScheduler: (() => void) | null = null;
 export async function initApp(): Promise<void> {
 	try {
 		await initializeDatabase();
+		await seedReferenceData();
 	} catch (error) {
 		console.error("Failed to initialize database:", error);
 		console.log("Continuing without database...");

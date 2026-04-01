@@ -42,6 +42,16 @@ export interface ZoneSummariesResult {
 	zones: ZoneSummary[];
 }
 
+export interface MapZoneData {
+	slug: string;
+	name: string;
+	lat: number;
+	lon: number;
+	dangerLevel: number;
+	dangerName: string;
+	alert: Pick<AlertDecision, "action" | "label" | "escalated" | "escalationReason">;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -150,6 +160,42 @@ export async function getZoneSummaries(): Promise<ZoneSummariesResult> {
 		.then((rows) => rows.at(0)?.dateIssued ?? new Date().toISOString().slice(0, 10));
 
 	return { snapshotDate, zones };
+}
+
+export async function getMapData(): Promise<MapZoneData[]> {
+	const db = getDb();
+	const zoneRows = await queries.getAllZones();
+
+	return Promise.all(
+		zoneRows.map(async (zone): Promise<MapZoneData> => {
+			const forecast = await db
+				.select()
+				.from(avalancheForecasts)
+				.where(eq(avalancheForecasts.zoneId, zone.zoneId))
+				.orderBy(desc(avalancheForecasts.createdAt))
+				.limit(1)
+				.then((rows) => rows.at(0));
+
+			const problems = extractProblems(forecast);
+			const assessment = buildAssessment(forecast?.overallDangerRating, problems, null, null, null, !forecast);
+			const alert = generateAlert(assessment);
+
+			return {
+				slug: zone.slug,
+				name: zone.name,
+				lat: zone.lat,
+				lon: zone.lon,
+				dangerLevel: assessment.dangerLevel,
+				dangerName: assessment.dangerName,
+				alert: {
+					action: alert.action,
+					label: alert.label,
+					escalated: alert.escalated,
+					escalationReason: alert.escalationReason,
+				},
+			};
+		}),
+	);
 }
 
 export async function getZoneDetail(slug: string): Promise<ZoneDetail | null> {

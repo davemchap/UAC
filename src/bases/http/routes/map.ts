@@ -1,10 +1,10 @@
 import { Hono } from "hono";
-import { getMapZoneData } from "../../../components/zone-map";
+import { getMapData } from "../../../components/zone-queries";
 
 const map = new Hono();
 
-map.get("/map-data", (c) => {
-	const zones = getMapZoneData();
+map.get("/map-data", async (c) => {
+	const zones = await getMapData();
 	return c.json({ success: true, count: zones.length, zones });
 });
 
