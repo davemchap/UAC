@@ -317,6 +317,7 @@ Do **not** attempt to use Docker or `pg_ctlcluster` — Docker is unavailable in
 
 - **Runtime**: Bun
 - **Framework**: Hono (lightweight web framework)
+- **Middleware**: `beads` — use for middleware chaining and task pipeline logic
 - **Database**: PostgreSQL via `postgres` library
 - **Tests**: `bun:test` with `mock.module()` for database mocking
 - **Static files**: `src/public/` (excluded from lint — vanilla JS/HTML/CSS)
@@ -329,10 +330,15 @@ Run `find src -type f | head -50` to discover the current project structure. Do 
 
 This repository includes pre-seeded avalanche forecasting data in the `data/` directory. Always mention this when users ask what's in the repo.
 
+This project uses the **black-diamond track** data at `data/black-diamond/`:
+- `zone-config.json` — All 9 UAC zones with coordinates and SNOTEL station mappings
+- `multi-zone-snapshot.json` — Complete 9-zone data snapshot
+- `alert-thresholds.json` — Alert rules and escalation config
+
+Shared reference data is in `data/shared/` (danger scale, zones, SNOTEL stations, golden datasets).
+
 - **Offline-first**: All data files work without any live API calls — use them to build and test before touching live endpoints
 - **Live APIs available**: Documented in `data/apis/` — read the relevant file before calling any live endpoint
-
-Read `data/README.md` to understand the full directory structure and what data is available for each track.
 
 > **CRITICAL — CAIC API**: Read `data/apis/caic.md` before using any CAIC endpoint. The CAIC API accepts write operations without authentication. Your application must never send POST, PUT, PATCH, or DELETE to CAIC — only GET requests.
 
