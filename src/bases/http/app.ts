@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
+import map from "./routes/map";
 
 export const app = new Hono();
 
@@ -63,6 +64,7 @@ app.get("/api", (c) =>
 
 app.route("/api/zones", zones);
 app.route("/api/proxy", proxy);
+app.route("/api", map);
 
 // ---------------------------------------------------------------------------
 // Static files

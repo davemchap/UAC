@@ -184,4 +184,19 @@ document.addEventListener("keydown", (e) => {
 	if (e.key === "Escape") closeModal();
 });
 
+// Expose for map.js marker click handlers
+window.openZoneModal = openModal;
+
+// Tab switching — lazy-init map on first activation
+function switchTab(tab) {
+	const isGrid = tab === "grid";
+	document.getElementById("view-grid").classList.toggle("hidden", !isGrid);
+	document.getElementById("view-map").classList.toggle("hidden", isGrid);
+	document.getElementById("tab-grid").classList.toggle("tab-active", isGrid);
+	document.getElementById("tab-map").classList.toggle("tab-active", !isGrid);
+	if (!isGrid && window.initMap) window.initMap();
+}
+
+window.switchTab = switchTab;
+
 loadZones();

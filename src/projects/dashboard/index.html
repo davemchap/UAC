@@ -4,6 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Avalanche Forecast Analysis Engine</title>
+		<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
 		<link rel="stylesheet" href="/styles.css" />
 	</head>
 	<body>
@@ -19,7 +20,19 @@
 		<main>
 			<div id="snapshot-date" class="snapshot-date"></div>
 			<div id="summary-bar" class="summary-bar hidden"></div>
-			<div id="zones-grid" class="zones-grid"></div>
+
+			<div class="tab-bar">
+				<button id="tab-grid" class="tab-btn tab-active" onclick="switchTab('grid')">Grid</button>
+				<button id="tab-map" class="tab-btn" onclick="switchTab('map')">Map</button>
+			</div>
+
+			<div id="view-grid">
+				<div id="zones-grid" class="zones-grid"></div>
+			</div>
+
+			<div id="view-map" class="hidden">
+				<div id="map-container"></div>
+			</div>
 		</main>
 
 		<div id="zone-modal" class="modal hidden">
@@ -30,6 +43,8 @@
 			</div>
 		</div>
 
+		<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 		<script src="/app.js"></script>
+		<script src="/map.js"></script>
 	</body>
 </html>

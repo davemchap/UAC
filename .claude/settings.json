@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"COMPONENT-FIRST REMINDER: Before writing code, verify: (1) business logic goes in src/components/, (2) routes in src/bases/http/routes/ are thin wiring only, (3) src/projects/dashboard/*.js is fetch+render only. See .claude/skills/component-first/SKILL.md for the full checklist.\"}}'",
+            "statusMessage": "Checking component-first architecture..."
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
