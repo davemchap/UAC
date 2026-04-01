@@ -1,0 +1,20 @@
+CREATE TABLE "ai_alerts" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"zone_id" integer NOT NULL,
+	"danger_rating" text NOT NULL,
+	"danger_level" integer NOT NULL,
+	"danger_above_treeline_rating" text NOT NULL,
+	"danger_above_treeline_level" integer NOT NULL,
+	"danger_near_treeline_rating" text NOT NULL,
+	"danger_near_treeline_level" integer NOT NULL,
+	"danger_below_treeline_rating" text NOT NULL,
+	"danger_below_treeline_level" integer NOT NULL,
+	"avalanche_problems" text[] NOT NULL,
+	"alert_action" text NOT NULL,
+	"alert_reasoning" text NOT NULL,
+	"backcountry_summary" text NOT NULL,
+	"model" text NOT NULL,
+	"forecast_nid" text NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	CONSTRAINT "ai_alerts_zone_id_forecast_nid_unique" UNIQUE("zone_id","forecast_nid")
+);

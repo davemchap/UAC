@@ -1,10 +1,11 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { eq } from "drizzle-orm";
+import { and, eq, desc, gte } from "drizzle-orm";
 import postgres from "postgres";
 import { resolve } from "node:path";
 import * as schema from "./schema";
 import {
+	aiAlerts,
 	alertThresholds,
 	avalancheForecasts,
 	avalancheProblems,
@@ -133,10 +134,21 @@ export const queries = {
 	getAllAlertThresholds: () => getDb().select().from(alertThresholds).orderBy(alertThresholds.dangerLevel),
 
 	getAllEscalationRules: () => getDb().select().from(escalationRules),
+
+	getLatestAlert: (zoneId: number) =>
+		getDb().select().from(aiAlerts).where(eq(aiAlerts.zoneId, zoneId)).orderBy(desc(aiAlerts.createdAt)).limit(1),
+
+	getAlertHistory: (zoneId: number, since: Date) =>
+		getDb()
+			.select()
+			.from(aiAlerts)
+			.where(and(eq(aiAlerts.zoneId, zoneId), gte(aiAlerts.createdAt, since)))
+			.orderBy(desc(aiAlerts.createdAt)),
 };
 
 // Re-export schema tables for use in other components
 export {
+	aiAlerts,
 	forecastZones,
 	snotelStations,
 	avalancheForecasts,

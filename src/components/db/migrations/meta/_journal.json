@@ -8,6 +8,13 @@
 			"when": 1775072513486,
 			"tag": "0000_true_lucky_pierre",
 			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1775085260173,
+			"tag": "0001_dry_whiplash",
+			"breakpoints": true
 		}
 	]
 }

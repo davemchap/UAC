@@ -101,3 +101,27 @@ export const escalationRules = pgTable("escalation_rules", {
 	description: text("description").notNull(),
 	action: text("action").notNull(),
 });
+
+export const aiAlerts = pgTable(
+	"ai_alerts",
+	{
+		id: serial("id").primaryKey(),
+		zoneId: integer("zone_id").notNull(),
+		dangerRating: text("danger_rating").notNull(),
+		dangerLevel: integer("danger_level").notNull(),
+		dangerAboveTreelineRating: text("danger_above_treeline_rating").notNull(),
+		dangerAboveTreelineLevel: integer("danger_above_treeline_level").notNull(),
+		dangerNearTreelineRating: text("danger_near_treeline_rating").notNull(),
+		dangerNearTreelineLevel: integer("danger_near_treeline_level").notNull(),
+		dangerBelowTreelineRating: text("danger_below_treeline_rating").notNull(),
+		dangerBelowTreelineLevel: integer("danger_below_treeline_level").notNull(),
+		avalancheProblems: text("avalanche_problems").array().notNull(),
+		alertAction: text("alert_action").notNull(),
+		alertReasoning: text("alert_reasoning").notNull(),
+		backcountrySummary: text("backcountry_summary").notNull(),
+		model: text("model").notNull(),
+		forecastNid: text("forecast_nid").notNull(),
+		createdAt: timestamp("created_at").defaultNow(),
+	},
+	(t) => [unique().on(t.zoneId, t.forecastNid)],
+);
