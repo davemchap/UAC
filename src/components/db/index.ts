@@ -1,4 +1,23 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import { eq } from "drizzle-orm";
 import postgres from "postgres";
+import { resolve } from "node:path";
+import * as schema from "./schema";
+import {
+	alertThresholds,
+	avalancheForecasts,
+	avalancheProblems,
+	escalationRules,
+	forecastZones,
+	snowpackReadings,
+	snotelStations,
+	weatherReadings,
+} from "./schema";
+
+// ---------------------------------------------------------------------------
+// Connection
+// ---------------------------------------------------------------------------
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -9,40 +28,36 @@ if (!databaseUrl) {
 	);
 }
 
-let _sql: ReturnType<typeof postgres> | null = null;
+let _client: ReturnType<typeof postgres> | null = null;
+let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
-export function getSql(): ReturnType<typeof postgres> {
-	if (_sql) {
-		return _sql;
-	}
-
-	if (!databaseUrl) {
-		throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
-	}
-
-	_sql = postgres(databaseUrl, {
-		max: 5,
-		idle_timeout: 20,
-		connect_timeout: 10,
-		transform: {
-			column: (col: string): string => col.replace(/_([a-z])/g, (_: string, letter: string) => letter.toUpperCase()),
-		},
-		onnotice: (notice: { message?: string }): void => {
-			console.log("Database notice:", notice.message);
-		},
-	});
-
-	return _sql;
+function getClient(): ReturnType<typeof postgres> {
+	if (_client) return _client;
+	if (!databaseUrl) throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
+	_client = postgres(databaseUrl, { max: 10, idle_timeout: 20, connect_timeout: 10 });
+	return _client;
 }
 
-export async function checkDatabaseHealth(): Promise<boolean> {
-	if (!databaseUrl) {
-		return false;
-	}
+export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
+	if (_db) return _db;
+	_db = drizzle(getClient(), { schema });
+	return _db;
+}
 
+/** @deprecated Prefer getDb() for typed queries. Use for raw SQL only. */
+export function getSql(): ReturnType<typeof postgres> {
+	return getClient();
+}
+
+// ---------------------------------------------------------------------------
+// Lifecycle
+// ---------------------------------------------------------------------------
+
+export async function checkDatabaseHealth(): Promise<boolean> {
+	if (!databaseUrl) return false;
 	try {
-		const sql = getSql();
-		await sql`SELECT 1`;
+		const client = getClient();
+		await client`SELECT 1`;
 		return true;
 	} catch (error) {
 		console.error("Database health check failed:", error);
@@ -50,21 +65,84 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 	}
 }
 
-export function initializeDatabase(): Promise<void> {
+export async function initializeDatabase(): Promise<void> {
 	if (!databaseUrl) {
 		console.log("Skipping database initialization (no DATABASE_URL)");
-		return Promise.resolve();
+		return;
 	}
-
-	console.log("Initializing database schema...");
-	console.log("Database schema initialized successfully");
-	return Promise.resolve();
+	console.log("Running database migrations...");
+	const migrationClient = postgres(databaseUrl, { max: 1 });
+	try {
+		const migrationDb = drizzle(migrationClient);
+		await migrate(migrationDb, { migrationsFolder: resolve(import.meta.dir, "migrations") });
+		console.log("Database migrations complete.");
+	} finally {
+		await migrationClient.end();
+	}
 }
 
 export async function closeDatabase(): Promise<void> {
-	if (_sql) {
-		await _sql.end();
-		_sql = null;
+	if (_client) {
+		await _client.end();
+		_client = null;
+		_db = null;
 		console.log("Database connection closed");
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Query helpers
+// ---------------------------------------------------------------------------
+
+export const queries = {
+	getAllZones: () => getDb().select().from(forecastZones).orderBy(forecastZones.name),
+
+	getZoneBySlug: (slug: string) => getDb().select().from(forecastZones).where(eq(forecastZones.slug, slug)).limit(1),
+
+	getZoneByZoneId: (zoneId: number) =>
+		getDb().select().from(forecastZones).where(eq(forecastZones.zoneId, zoneId)).limit(1),
+
+	getSnotelStationsByZoneId: (zoneId: number) =>
+		getDb().select().from(snotelStations).where(eq(snotelStations.zoneId, zoneId)),
+
+	getLatestForecast: (zoneId: number) =>
+		getDb()
+			.select()
+			.from(avalancheForecasts)
+			.where(eq(avalancheForecasts.zoneId, zoneId))
+			.orderBy(avalancheForecasts.createdAt)
+			.limit(1),
+
+	getForecastProblems: (forecastId: number) =>
+		getDb()
+			.select()
+			.from(avalancheProblems)
+			.where(eq(avalancheProblems.forecastId, forecastId))
+			.orderBy(avalancheProblems.problemNumber),
+
+	getWeatherReadings: (zoneId: number) =>
+		getDb().select().from(weatherReadings).where(eq(weatherReadings.zoneId, zoneId)).orderBy(weatherReadings.startTime),
+
+	getSnowpackReadings: (triplet: string) =>
+		getDb()
+			.select()
+			.from(snowpackReadings)
+			.where(eq(snowpackReadings.stationTriplet, triplet))
+			.orderBy(snowpackReadings.date),
+
+	getAllAlertThresholds: () => getDb().select().from(alertThresholds).orderBy(alertThresholds.dangerLevel),
+
+	getAllEscalationRules: () => getDb().select().from(escalationRules),
+};
+
+// Re-export schema tables for use in other components
+export {
+	forecastZones,
+	snotelStations,
+	avalancheForecasts,
+	avalancheProblems,
+	weatherReadings,
+	snowpackReadings,
+	alertThresholds,
+	escalationRules,
+};

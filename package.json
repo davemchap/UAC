@@ -15,18 +15,23 @@
 		"test": "bun test",
 		"check:lint": "bun run lint:biome && bun run lint && bun run typecheck && bun run circular",
 		"check": "bun run check:lint && bun run test && echo '✅ All checks passed!'",
-		"prepare": "git config core.hooksPath .githooks"
+		"prepare": "git config core.hooksPath .githooks",
+		"db:migrate": "bun run --env-file .env src/components/db/migrate.ts",
+		"db:seed": "bun run --env-file .env src/components/db/seed.ts",
+		"db:studio": "bunx drizzle-kit studio --config=drizzle.config.ts"
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.81.0",
 		"@sparticuz/chromium": "^143.0.4",
 		"beads": "^0.2.1",
+		"drizzle-orm": "^0.45.2",
 		"hono": "^4.4.0",
 		"postgres": "^3.4.4",
 		"puppeteer-core": "^24.40.0"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.1.0",
+		"drizzle-kit": "^0.31.10",
 		"eslint": "^9.0.0",
 		"eslint-plugin-sonarjs": "^3.0.0",
 		"eslint-plugin-unused-imports": "^4.0.0",
