@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
+import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
@@ -71,6 +72,7 @@ app.get("/api", (c) =>
 
 app.route("/api/zones", zones);
 app.route("/api/notifications", notifications);
+app.route("/api/alert-config", alertConfig);
 app.route("/api/proxy", proxy);
 app.route("/api", map);
 

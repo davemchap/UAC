@@ -20,6 +20,13 @@
 					</p>
 				</div>
 				<div class="header-actions">
+					<button id="alert-config-btn" class="alert-config-btn" aria-label="Alert Configuration">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="3"/>
+							<path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+							<path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+						</svg>
+					</button>
 					<button id="notif-bell" class="notif-bell" aria-label="Notifications">
 						<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -32,6 +39,94 @@
 		</header>
 
 		<div id="notif-overlay" class="notif-overlay hidden"></div>
+
+		<!-- Alert Config Panel -->
+		<div id="alert-config-panel" class="side-panel hidden">
+			<div class="side-panel-header">
+				<span class="side-panel-title">Alert Configuration</span>
+				<button id="alert-config-close" class="side-panel-close" aria-label="Close">✕</button>
+			</div>
+			<div class="config-tabs">
+				<button class="config-tab active" data-tab="thresholds">Thresholds</button>
+				<button class="config-tab" data-tab="rules">Advanced Rules</button>
+			</div>
+			<!-- Thresholds tab -->
+			<div id="tab-thresholds" class="config-tab-content">
+				<p class="config-description">Set which action fires for each UAC danger rating by default.</p>
+				<table class="threshold-table">
+					<thead><tr><th>Level</th><th>Rating</th><th>Action</th></tr></thead>
+					<tbody id="threshold-rows"></tbody>
+				</table>
+				<div class="config-actions">
+					<button id="save-thresholds" class="btn-primary">Save Thresholds</button>
+					<span id="threshold-save-status" class="save-status"></span>
+				</div>
+			</div>
+			<!-- Rules tab -->
+			<div id="tab-rules" class="config-tab-content hidden">
+				<div class="rules-header">
+					<p class="config-description">Rules are evaluated before thresholds. First matching rule wins.</p>
+					<button id="new-rule-btn" class="btn-primary">+ New Rule</button>
+				</div>
+				<div id="rule-form-container" class="rule-form-container hidden">
+					<div class="rule-form">
+						<h4 id="rule-form-title">New Rule</h4>
+						<input type="hidden" id="rule-form-id" value="" />
+						<div class="form-row">
+							<label>Name</label>
+							<input type="text" id="rule-name" placeholder="e.g. Salt Lake high alert" />
+						</div>
+						<div class="form-row">
+							<label>Min Danger Level</label>
+							<select id="rule-min-danger">
+								<option value="">Any</option>
+								<option value="1">1 – Low</option>
+								<option value="2">2 – Moderate</option>
+								<option value="3">3 – Considerable</option>
+								<option value="4">4 – High</option>
+								<option value="5">5 – Extreme</option>
+							</select>
+						</div>
+						<div class="form-row">
+							<label>Min Problem Count</label>
+							<select id="rule-min-problems">
+								<option value="">Any</option>
+								<option value="1">1+</option>
+								<option value="2">2+</option>
+								<option value="3">3</option>
+							</select>
+						</div>
+						<div class="form-row">
+							<label>Zone</label>
+							<select id="rule-zone">
+								<option value="">All Zones</option>
+							</select>
+						</div>
+						<div class="form-row">
+							<label>Action</label>
+							<select id="rule-action">
+								<option value="no_alert">No Alert</option>
+								<option value="human_review">Review Required</option>
+								<option value="auto_send">Auto-Send</option>
+								<option value="auto_send_urgent">URGENT Auto-Send</option>
+								<option value="flag_for_review">Flagged – Missing Data</option>
+							</select>
+						</div>
+						<div class="form-row form-row-inline">
+							<label>Enabled</label>
+							<input type="checkbox" id="rule-enabled" checked />
+						</div>
+						<div class="form-buttons">
+							<button id="save-rule-btn" class="btn-primary">Save Rule</button>
+							<button id="cancel-rule-btn" class="btn-secondary">Cancel</button>
+							<span id="rule-save-status" class="save-status"></span>
+						</div>
+					</div>
+				</div>
+				<div id="rules-list" class="rules-list"></div>
+			</div>
+		</div>
+
 		<div id="notif-panel" class="notif-panel hidden">
 			<div class="notif-panel-header">
 				<span class="notif-panel-title">Notifications</span>

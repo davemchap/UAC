@@ -32,6 +32,8 @@ header {
 .header-actions {
 	display: flex;
 	justify-content: flex-end;
+	align-items: center;
+	gap: 0.5rem;
 	padding-top: 0.25rem;
 }
 
@@ -626,6 +628,7 @@ h1 {
 	display: none !important;
 }
 
+<<<<<<< HEAD
 /* Tab bar */
 .tab-bar {
 	display: flex;
@@ -643,15 +646,36 @@ h1 {
 	border-radius: 6px;
 	font-size: 0.9rem;
 	font-weight: 600;
+=======
+/* ---------------------------------------------------------------------------
+   Alert Config Button
+--------------------------------------------------------------------------- */
+
+.alert-config-btn {
+	background: none;
+	border: 1px solid #2e3344;
+	color: #9aa3b2;
+	border-radius: 8px;
+	width: 38px;
+	height: 38px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+>>>>>>> 119193d (feat: add user-configurable alert rules (simple + advanced))
 	cursor: pointer;
 	transition: border-color 0.15s, color 0.15s;
 }
 
+<<<<<<< HEAD
 .tab-btn:hover {
+=======
+.alert-config-btn:hover {
+>>>>>>> 119193d (feat: add user-configurable alert rules (simple + advanced))
 	border-color: #4a5580;
 	color: #e8eaf0;
 }
 
+<<<<<<< HEAD
 .tab-active {
 	border-color: #4a90d9;
 	color: #e8eaf0;
@@ -683,4 +707,323 @@ h1 {
 
 .map-marker:hover {
 	transform: scale(1.3);
+=======
+/* ---------------------------------------------------------------------------
+   Side Panel (shared by Alert Config)
+--------------------------------------------------------------------------- */
+
+.side-panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100vh;
+	width: 420px;
+	background: #161b2e;
+	border-left: 1px solid #2e3344;
+	z-index: 200;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.side-panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid #2e3344;
+	flex-shrink: 0;
+}
+
+.side-panel-title {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: #e8eaf0;
+}
+
+.side-panel-close {
+	background: none;
+	border: none;
+	color: #6b7280;
+	font-size: 1rem;
+	cursor: pointer;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+}
+
+.side-panel-close:hover {
+	color: #e8eaf0;
+}
+
+/* ---------------------------------------------------------------------------
+   Config Tabs
+--------------------------------------------------------------------------- */
+
+.config-tabs {
+	display: flex;
+	border-bottom: 1px solid #2e3344;
+	flex-shrink: 0;
+}
+
+.config-tab {
+	flex: 1;
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	color: #6b7280;
+	font-size: 0.85rem;
+	font-weight: 500;
+	padding: 0.65rem 1rem;
+	cursor: pointer;
+	transition: color 0.15s, border-color 0.15s;
+}
+
+.config-tab.active {
+	color: #7c9cf8;
+	border-bottom-color: #7c9cf8;
+}
+
+.config-tab-content {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1.25rem;
+}
+
+.config-description {
+	font-size: 0.8rem;
+	color: #6b7280;
+	margin-bottom: 1rem;
+	line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------------------
+   Threshold Table
+--------------------------------------------------------------------------- */
+
+.threshold-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+	margin-bottom: 1rem;
+}
+
+.threshold-table th {
+	text-align: left;
+	color: #6b7280;
+	font-size: 0.75rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 0.5rem 0.5rem;
+	border-bottom: 1px solid #2e3344;
+}
+
+.threshold-table td {
+	padding: 0.6rem 0.5rem;
+	border-bottom: 1px solid #1e2436;
+	vertical-align: middle;
+}
+
+.threshold-select {
+	background: #0f1117;
+	border: 1px solid #2e3344;
+	color: #e8eaf0;
+	font-size: 0.8rem;
+	padding: 0.3rem 0.5rem;
+	border-radius: 4px;
+	width: 100%;
+	cursor: pointer;
+}
+
+.threshold-select:focus {
+	outline: none;
+	border-color: #7c9cf8;
+}
+
+.config-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 0.75rem;
+}
+
+.save-status {
+	font-size: 0.8rem;
+	color: #4ade80;
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons
+--------------------------------------------------------------------------- */
+
+.btn-primary {
+	background: #2a3a6e;
+	border: 1px solid #3d52a0;
+	color: #a8c0f8;
+	font-size: 0.82rem;
+	font-weight: 500;
+	padding: 0.45rem 0.9rem;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-primary:hover {
+	background: #334080;
+	border-color: #5a73c8;
+}
+
+.btn-secondary {
+	background: none;
+	border: 1px solid #2e3344;
+	color: #6b7280;
+	font-size: 0.82rem;
+	padding: 0.45rem 0.9rem;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.btn-secondary:hover {
+	border-color: #4a5580;
+	color: #9aa3b2;
+}
+
+.btn-link {
+	background: none;
+	border: none;
+	color: #7c9cf8;
+	font-size: 0.8rem;
+	cursor: pointer;
+	padding: 0;
+	text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+   Rules
+--------------------------------------------------------------------------- */
+
+.rules-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 1rem;
+}
+
+.rules-header .config-description {
+	margin-bottom: 0;
+	flex: 1;
+}
+
+.rule-form-container {
+	background: #1a2035;
+	border: 1px solid #2e3344;
+	border-radius: 8px;
+	padding: 1rem;
+	margin-bottom: 1rem;
+}
+
+.rule-form h4 {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #e8eaf0;
+	margin-bottom: 0.75rem;
+}
+
+.form-row {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-bottom: 0.65rem;
+}
+
+.form-row-inline {
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.form-row label {
+	font-size: 0.75rem;
+	color: #6b7280;
+	font-weight: 500;
+}
+
+.form-row input[type="text"],
+.form-row select {
+	background: #0f1117;
+	border: 1px solid #2e3344;
+	color: #e8eaf0;
+	font-size: 0.82rem;
+	padding: 0.35rem 0.5rem;
+	border-radius: 4px;
+	width: 100%;
+}
+
+.form-row input[type="text"]:focus,
+.form-row select:focus {
+	outline: none;
+	border-color: #7c9cf8;
+}
+
+.form-row input[type="checkbox"] {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+
+.form-buttons {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.rules-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.rule-card {
+	background: #1a2035;
+	border: 1px solid #2e3344;
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+}
+
+.rule-card.rule-disabled {
+	opacity: 0.5;
+}
+
+.rule-card-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.3rem;
+}
+
+.rule-name {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #e8eaf0;
+}
+
+.rule-summary {
+	font-size: 0.78rem;
+	color: #9aa3b2;
+	margin-bottom: 0.5rem;
+}
+
+.rule-actions {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.rules-empty {
+	text-align: center;
+	color: #6b7280;
+	font-size: 0.875rem;
+	padding: 2rem 1rem;
+>>>>>>> 119193d (feat: add user-configurable alert rules (simple + advanced))
 }

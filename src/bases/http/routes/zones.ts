@@ -7,10 +7,10 @@ const zones = new Hono();
 
 zones.get("/", async (c) => {
 	const { snapshotDate, zones: summaries } = await getZoneSummaries();
+	const sql = getSql();
 
 	// Fire-and-forget: evaluate and dispatch notifications — never blocks the response
 	try {
-		const sql = getSql();
 		void Promise.allSettled(
 			summaries
 				.filter((z) => shouldNotify(z.alert.action))

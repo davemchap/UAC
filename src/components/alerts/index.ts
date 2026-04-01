@@ -1,12 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { AlertAction, AlertConfig } from "../alert-config/types";
 import type { RiskAssessment } from "../risk-assessment";
+
+export type { AlertAction };
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type AlertAction = "no_alert" | "human_review" | "auto_send" | "auto_send_urgent" | "flag_for_review";
 
 export interface AlertDecision {
 	action: AlertAction;
@@ -20,7 +21,7 @@ export interface AlertDecision {
 interface ThresholdEntry {
 	danger_level: number;
 	name: string;
-	action: string;
+	action: AlertAction;
 }
 
 interface ThresholdsFile {
@@ -28,7 +29,7 @@ interface ThresholdsFile {
 }
 
 // ---------------------------------------------------------------------------
-// Load thresholds
+// JSON fallback (used when no DB config is provided — keeps eval tests green)
 // ---------------------------------------------------------------------------
 
 let _thresholds: ThresholdEntry[] | null = null;
@@ -47,7 +48,7 @@ function loadThresholds(): ThresholdEntry[] {
 
 const ACTION_LADDER: AlertAction[] = ["no_alert", "human_review", "auto_send", "auto_send_urgent"];
 
-const ACTION_LABEL: Record<AlertAction, string> = {
+export const ACTION_LABEL: Record<AlertAction, string> = {
 	no_alert: "No Alert",
 	human_review: "Review Required",
 	auto_send: "Auto-Send",
@@ -55,18 +56,40 @@ const ACTION_LABEL: Record<AlertAction, string> = {
 	flag_for_review: "Flagged – Missing Data",
 };
 
-function baseAction(dangerLevel: number): AlertAction {
-	const entry = loadThresholds().find((t) => t.danger_level === dangerLevel);
-	return (entry?.action ?? "no_alert") as AlertAction;
-}
-
 function escalateAction(action: AlertAction): AlertAction {
 	const idx = ACTION_LADDER.indexOf(action);
 	return idx >= 0 && idx < ACTION_LADDER.length - 1 ? ACTION_LADDER[idx + 1] : action;
 }
 
-export function generateAlert(assessment: RiskAssessment): AlertDecision {
-	let action = baseAction(assessment.dangerLevel);
+function resolveBaseAction(
+	dangerLevel: number,
+	problemCount: number,
+	zoneSlug: string | undefined,
+	config: AlertConfig | undefined,
+): AlertAction {
+	if (config) {
+		// 1. Check advanced rules (priority DESC, first match wins)
+		for (const rule of config.rules) {
+			if (!rule.enabled) continue;
+			const levelOk = rule.minDangerLevel === null || dangerLevel >= rule.minDangerLevel;
+			const problemOk = rule.minProblemCount === null || problemCount >= rule.minProblemCount;
+			const zoneOk = rule.zoneSlug === null || rule.zoneSlug === zoneSlug;
+			if (levelOk && problemOk && zoneOk) {
+				return rule.action;
+			}
+		}
+		// 2. Fall back to DB thresholds
+		const entry = config.thresholds.find((t) => t.dangerLevel === dangerLevel);
+		return entry?.action ?? "no_alert";
+	}
+
+	// 3. JSON fallback (no DB config — used by eval + tests)
+	const entry = loadThresholds().find((t) => t.danger_level === dangerLevel);
+	return entry?.action ?? "no_alert";
+}
+
+export function generateAlert(assessment: RiskAssessment, config?: AlertConfig, zoneSlug?: string): AlertDecision {
+	let action = resolveBaseAction(assessment.dangerLevel, assessment.problemCount, zoneSlug, config);
 	let escalated = false;
 	let escalationReason: string | null = null;
 

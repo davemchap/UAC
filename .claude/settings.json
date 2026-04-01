@@ -18,9 +18,9 @@
         "hooks": [
           {
             "type": "agent",
+            "prompt": "You just ran a Bash command. The hook input is: $ARGUMENTS\n\nCheck whether tool_input.command contains 'git commit' or 'git push'. If it does NOT, stop immediately and do nothing.\n\nIf it does, monitor the GitLab CI/CD pipeline and fix any failures:\n\n1. Get the latest pipeline ID:\n   glab pipeline list --limit 1\n\n2. Poll until the pipeline reaches a terminal state (passed/failed/canceled). Check every 20 seconds, timeout after 5 minutes:\n   glab pipeline status <id>\n\n3. If the pipeline passed, report success and stop.\n\n4. If the pipeline failed:\n   a. Find the failed job(s): glab pipeline jobs <id>\n   b. Read the failure log: glab api \"projects/:id/jobs/<job_id>/trace\" --method GET\n   c. Diagnose and fix the root cause in the source files\n   d. Run `bun run check` locally to verify the fix\n   e. Commit the fix with a message describing what was corrected\n   f. Push and confirm the new pipeline passes\n   g. Write a one-line summary to /tmp/ci-fix-notify.txt:\n      echo 'Brief description of what was fixed' > /tmp/ci-fix-notify.txt\n\nNever modify .gitlab-ci.yml to suppress failures. Fix the actual code.",
             "timeout": 360,
-            "statusMessage": "Watching CI pipeline...",
-            "prompt": "You just ran a Bash command. The hook input is: $ARGUMENTS\n\nCheck whether tool_input.command contains 'git commit' or 'git push'. If it does NOT, stop immediately and do nothing.\n\nIf it does, monitor the GitLab CI/CD pipeline and fix any failures:\n\n1. Get the latest pipeline ID:\n   glab pipeline list --limit 1\n\n2. Poll until the pipeline reaches a terminal state (passed/failed/canceled). Check every 20 seconds, timeout after 5 minutes:\n   glab pipeline status <id>\n\n3. If the pipeline passed, report success and stop.\n\n4. If the pipeline failed:\n   a. Find the failed job(s): glab pipeline jobs <id>\n   b. Read the failure log: glab api \"projects/:id/jobs/<job_id>/trace\" --method GET\n   c. Diagnose and fix the root cause in the source files\n   d. Run `bun run check` locally to verify the fix\n   e. Commit the fix with a message describing what was corrected\n   f. Push and confirm the new pipeline passes\n   g. Write a one-line summary to /tmp/ci-fix-notify.txt:\n      echo 'Brief description of what was fixed' > /tmp/ci-fix-notify.txt\n\nNever modify .gitlab-ci.yml to suppress failures. Fix the actual code."
+            "statusMessage": "Watching CI pipeline..."
           }
         ]
       }
@@ -35,5 +35,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "everything-claude-code@everything-claude-code": true
   }
 }
