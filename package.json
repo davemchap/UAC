@@ -21,7 +21,7 @@
 		"db:studio": "bunx drizzle-kit studio --config=drizzle.config.ts"
 	},
 	"dependencies": {
-		"@anthropic-ai/sdk": "^0.81.0",
+		"@anthropic-ai/sdk": "^0.82.0",
 		"@sparticuz/chromium": "^143.0.4",
 		"beads": "^0.2.1",
 		"drizzle-orm": "^0.45.2",
