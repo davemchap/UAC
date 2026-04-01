@@ -1083,3 +1083,37 @@ h1 {
 	font-size: 0.75rem;
 	color: #9ca3af;
 }
+
+.comparison-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+}
+
+.comparison-col {
+	padding: 0.75rem;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.comparison-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 0.5rem;
+}
+
+.ai-label {
+	color: #93c5fd;
+}
+
+.uac-label {
+	color: #9ca3af;
+}
+
+.comparison-text {
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: #d1d5db;
+}

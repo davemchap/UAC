@@ -154,7 +154,7 @@ Based on ALL the data above, produce a JSON object with these fields:
 - danger_below_treeline_rating: string matching the level
 - avalanche_problems: array of problem type names, normalized to these exact values: ${VALID_PROBLEMS.join(", ")}
 - alert_reasoning: 2-3 sentences explaining why this danger level was assigned (ops-facing, reference specific data points)
-- backcountry_summary: 2-3 plain-language sentences a backcountry skier can act on (no jargon, actionable)
+- backcountry_summary: A concise SMS/push notification for backcountry travelers. MAX 280 characters. 1-2 sentences, plain language, no jargon, actionable. Must fit in a single tweet or SMS message.
 
 Respond with ONLY the JSON object, no markdown fences, no extra text.`;
 }

@@ -71,19 +71,8 @@ function renderZoneCard(zone) {
           </div>`
 			: "";
 
-	const aiProblems = ai && ai.avalancheProblems.length > 0
-		? `<div class="problems-list">
-            <div class="problems-label">AI Avalanche Problems</div>
-            ${ai.avalancheProblems.map((p) => `<span class="problem-tag ai-tag">${p}</span>`).join("")}
-          </div>`
-		: "";
-
 	const aiDanger = ai
 		? `<span class="danger-badge danger-${ai.dangerLevel} ai-badge">AI: ${ai.dangerRating}</span>`
-		: "";
-
-	const backcountry = ai && ai.backcountrySummary
-		? `<div class="backcountry-summary">${ai.backcountrySummary}</div>`
 		: "";
 
 	return `
@@ -93,7 +82,7 @@ function renderZoneCard(zone) {
         <div class="zone-card-header">
           <span class="zone-name">${zone.name}</span>
           <div class="danger-badges">
-            <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.dangerName}</span>
+            <span class="danger-badge danger-${lvl}">UAC: ${DANGER_ICON[lvl] || ""} ${zone.dangerName}</span>
             ${aiDanger}
           </div>
         </div>
@@ -104,8 +93,6 @@ function renderZoneCard(zone) {
           <div class="stat"><span class="stat-label">Problems</span><span class="stat-value">${zone.problemCount}</span></div>
         </div>
         ${problems}
-        ${aiProblems}
-        ${backcountry}
       </div>
     </div>
   `;
@@ -158,16 +145,27 @@ async function openModal(slug) {
           </div>
         </div>` : "";
 
+		const comparisonSection = (ai && ai.backcountrySummary) || bottomLine ? `
+        <div class="modal-section">
+          <div class="modal-section-label">Summary Comparison</div>
+          <div class="comparison-grid">
+            ${ai && ai.backcountrySummary ? `
+            <div class="comparison-col">
+              <div class="comparison-label ai-label">Backcountry Notification</div>
+              <p class="comparison-text backcountry-text">${ai.backcountrySummary}</p>
+            </div>` : ""}
+            ${bottomLine ? `
+            <div class="comparison-col">
+              <div class="comparison-label uac-label">UAC Bottom Line</div>
+              <p class="comparison-text">${bottomLine}</p>
+            </div>` : ""}
+          </div>
+        </div>` : "";
+
 		const aiProblemsSection = ai && ai.avalancheProblems.length > 0 ? `
         <div class="modal-section">
           <div class="modal-section-label">AI Avalanche Problems</div>
           <div class="modal-tags">${ai.avalancheProblems.map((p) => `<span class="problem-tag ai-tag">${p}</span>`).join("")}</div>
-        </div>` : "";
-
-		const backcountrySection = ai && ai.backcountrySummary ? `
-        <div class="modal-section">
-          <div class="modal-section-label">Backcountry Summary</div>
-          <p class="modal-bottom-line backcountry-text">${ai.backcountrySummary}</p>
         </div>` : "";
 
 		const reasoningSection = ai && ai.alertReasoning ? `
@@ -181,7 +179,7 @@ async function openModal(slug) {
         <div class="modal-header-inner">
           <div class="modal-zone-name">${zone.name}</div>
           <div class="modal-header-badges">
-            <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.assessment.dangerName}</span>
+            <span class="danger-badge danger-${lvl}">UAC: ${DANGER_ICON[lvl] || ""} ${zone.assessment.dangerName}</span>
             ${aiDangerBadge}
             <span class="alert-badge alert-${zone.alert.action}">${zone.alert.label}</span>
           </div>
@@ -189,7 +187,7 @@ async function openModal(slug) {
         </div>
       </div>
 
-      ${backcountrySection}
+      ${comparisonSection}
 
       ${aiElevationSection}
 
@@ -200,12 +198,6 @@ async function openModal(slug) {
         </div>` : ""}
 
       ${aiProblemsSection}
-
-      ${bottomLine ? `
-        <div class="modal-section">
-          <div class="modal-section-label">UAC Bottom Line</div>
-          <p class="modal-bottom-line">${bottomLine}</p>
-        </div>` : ""}
 
       ${reasoningSection}
 
