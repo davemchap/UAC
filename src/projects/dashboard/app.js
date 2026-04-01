@@ -126,23 +126,44 @@ async function openModal(slug) {
 			? `<a class="modal-link" href="${zone.forecastUrl}" target="_blank" rel="noopener">View full UAC forecast →</a>`
 			: "";
 
+		const conditionStats = [
+			zone.assessment.currentTemp !== null
+				? `<div class="modal-stat"><div class="modal-stat-label">Temperature</div><div class="modal-stat-value">${zone.assessment.currentTemp}°${zone.assessment.tempUnit}</div></div>`
+				: "",
+			zone.assessment.snowDepthIn !== null
+				? `<div class="modal-stat"><div class="modal-stat-label">Snow Depth</div><div class="modal-stat-value">${zone.assessment.snowDepthIn}"</div></div>`
+				: "",
+		]
+			.filter(Boolean)
+			.join("");
+
 		body.innerHTML = `
-      <div class="modal-zone-name">${zone.name}</div>
-      <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.assessment.dangerName}</span>
-      <div style="margin-top:0.5rem">
-        <div class="alert-badge alert-${zone.alert.action}">${zone.alert.label}</div>
-        ${zone.alert.escalated ? `<span class="escalation-note">↑ ${zone.alert.escalationReason}</span>` : ""}
-      </div>
-      ${zone.assessment.problems.length > 0 ? `<div class="modal-section"><div class="modal-section-label">Avalanche Problems</div>${problemTags}</div>` : ""}
-      ${bottomLine ? `<div class="modal-section"><div class="modal-section-label">Bottom Line</div><p>${bottomLine}</p></div>` : ""}
-      <div class="modal-section">
-        <div class="modal-section-label">Conditions</div>
-        <div class="zone-stats">
-          ${zone.assessment.currentTemp !== null ? `<div class="stat"><span class="stat-label">Temp</span><span class="stat-value">${zone.assessment.currentTemp}°${zone.assessment.tempUnit}</span></div>` : ""}
-          ${zone.assessment.snowDepthIn !== null ? `<div class="stat"><span class="stat-label">Snow Depth</span><span class="stat-value">${zone.assessment.snowDepthIn}"</span></div>` : ""}
+      <div class="modal-header accent-${lvl}">
+        <div class="modal-header-inner">
+          <div class="modal-zone-name">${zone.name}</div>
+          <div class="modal-header-badges">
+            <span class="danger-badge danger-${lvl}">${DANGER_ICON[lvl] || ""} ${zone.assessment.dangerName}</span>
+            <span class="alert-badge alert-${zone.alert.action}">${zone.alert.label}</span>
+          </div>
+          ${zone.alert.escalated ? `<div class="escalation-note">↑ Escalated: ${zone.alert.escalationReason}</div>` : ""}
         </div>
       </div>
-      ${forecastLink}
+
+      ${conditionStats ? `<div class="modal-stats-row">${conditionStats}</div>` : ""}
+
+      ${zone.assessment.problems.length > 0 ? `
+        <div class="modal-section">
+          <div class="modal-section-label">Avalanche Problems</div>
+          <div class="modal-tags">${problemTags}</div>
+        </div>` : ""}
+
+      ${bottomLine ? `
+        <div class="modal-section">
+          <div class="modal-section-label">Bottom Line</div>
+          <p class="modal-bottom-line">${bottomLine}</p>
+        </div>` : ""}
+
+      ${forecastLink ? `<div class="modal-footer">${forecastLink}</div>` : ""}
     `;
 	} catch {
 		body.innerHTML = "<p style='color:var(--color-high)'>Failed to load zone detail.</p>";

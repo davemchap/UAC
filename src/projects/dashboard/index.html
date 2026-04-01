@@ -17,9 +17,19 @@
 		</header>
 
 		<main>
-			<section class="dashboard-placeholder">
-				<p>Dashboard coming soon</p>
-			</section>
+			<div id="snapshot-date" class="snapshot-date"></div>
+			<div id="summary-bar" class="summary-bar hidden"></div>
+			<div id="zones-grid" class="zones-grid"></div>
 		</main>
+
+		<div id="zone-modal" class="modal hidden">
+			<div id="modal-overlay" class="modal-overlay"></div>
+			<div class="modal-content">
+				<button id="modal-close" class="modal-close">✕</button>
+				<div id="modal-body"></div>
+			</div>
+		</div>
+
+		<script src="/app.js"></script>
 	</body>
 </html>
