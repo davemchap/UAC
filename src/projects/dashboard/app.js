@@ -229,4 +229,107 @@ function switchTab(tab) {
 
 window.switchTab = switchTab;
 
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+let notifPanelOpen = false;
+
+function timeAgo(dateStr) {
+	const diff = Date.now() - new Date(dateStr).getTime();
+	const mins = Math.floor(diff / 60000);
+	if (mins < 1) return "just now";
+	if (mins < 60) return `${mins}m ago`;
+	const hrs = Math.floor(mins / 60);
+	if (hrs < 24) return `${hrs}h ago`;
+	return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function renderNotifItem(n) {
+	const ackBtn = n.acknowledged
+		? ""
+		: `<button class="notif-ack-btn" data-id="${n.id}">Acknowledge</button>`;
+
+	return `
+		<div class="notif-item${n.acknowledged ? " acknowledged" : ""}" data-notif-id="${n.id}">
+			<div class="notif-item-header">
+				<span class="notif-zone">${n.zoneName}</span>
+				<span class="notif-time">${timeAgo(n.createdAt)}</span>
+			</div>
+			<div class="notif-badges">
+				<span class="alert-badge alert-${n.action}">${n.label}</span>
+				<span class="danger-badge danger-${n.dangerLevel}">${n.dangerName}</span>
+			</div>
+			${ackBtn}
+		</div>
+	`;
+}
+
+async function loadNotifications() {
+	try {
+		const res = await fetch("/api/notifications?limit=30");
+		if (!res.ok) return;
+		const data = await res.json();
+		if (!data.success) return;
+
+		const list = document.getElementById("notif-list");
+		const countEl = document.getElementById("notif-count");
+
+		if (data.notifications.length === 0) {
+			list.innerHTML = `<div class="notif-empty">No notifications yet.<br>Alerts will appear here when zones reach critical levels.</div>`;
+		} else {
+			list.innerHTML = data.notifications.map(renderNotifItem).join("");
+			list.querySelectorAll(".notif-ack-btn").forEach((btn) => {
+				btn.addEventListener("click", () => acknowledgeNotif(Number(btn.dataset.id)));
+			});
+		}
+
+		const unread = data.notifications.filter((n) => !n.acknowledged).length;
+		if (unread > 0) {
+			countEl.textContent = unread > 99 ? "99+" : String(unread);
+			countEl.classList.remove("hidden");
+		} else {
+			countEl.classList.add("hidden");
+		}
+	} catch {
+		// Silently ignore — notifications are non-critical
+	}
+}
+
+async function acknowledgeNotif(id) {
+	try {
+		const res = await fetch(`/api/notifications/${id}/acknowledge`, { method: "POST" });
+		if (!res.ok) return;
+		await loadNotifications();
+	} catch {
+		// Silently ignore
+	}
+}
+
+function openNotifPanel() {
+	notifPanelOpen = true;
+	document.getElementById("notif-panel").classList.remove("hidden");
+	document.getElementById("notif-overlay").classList.remove("hidden");
+	void loadNotifications();
+}
+
+function closeNotifPanel() {
+	notifPanelOpen = false;
+	document.getElementById("notif-panel").classList.add("hidden");
+	document.getElementById("notif-overlay").classList.add("hidden");
+}
+
+document.getElementById("notif-bell").addEventListener("click", () => {
+	notifPanelOpen ? closeNotifPanel() : openNotifPanel();
+});
+
+document.getElementById("notif-panel-close").addEventListener("click", closeNotifPanel);
+document.getElementById("notif-overlay").addEventListener("click", closeNotifPanel);
+
+// Poll for new notifications every 30 seconds
+setInterval(() => {
+	void loadNotifications();
+}, 30000);
+
 loadZones();
+void loadNotifications();

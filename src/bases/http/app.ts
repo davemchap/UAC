@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
+import notifications from "./routes/notifications";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
 import map from "./routes/map";
@@ -55,6 +56,10 @@ app.get("/api", (c) =>
 				allZones: "GET /api/zones",
 				zoneDetail: "GET /api/zones/:slug",
 			},
+			notifications: {
+				list: "GET /api/notifications",
+				acknowledge: "POST /api/notifications/:id/acknowledge",
+			},
 			proxy: {
 				avalancheForecast: "GET /api/proxy/avalanche/forecast?zone=<zone_id>",
 				avalancheZones: "GET /api/proxy/avalanche/zones",
@@ -65,6 +70,7 @@ app.get("/api", (c) =>
 );
 
 app.route("/api/zones", zones);
+app.route("/api/notifications", notifications);
 app.route("/api/proxy", proxy);
 app.route("/api", map);
 

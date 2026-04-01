@@ -29,6 +29,7 @@ if (!databaseUrl) {
 }
 
 let _client: ReturnType<typeof postgres> | null = null;
+let _sql: ReturnType<typeof postgres> | null = null;
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 function getClient(): ReturnType<typeof postgres> {
@@ -46,7 +47,17 @@ export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
 
 /** @deprecated Prefer getDb() for typed queries. Use for raw SQL only. */
 export function getSql(): ReturnType<typeof postgres> {
-	return getClient();
+	if (_sql) return _sql;
+	if (!databaseUrl) throw new Error("DATABASE_URL is not set. Configure it in .env for local development.");
+	_sql = postgres(databaseUrl, {
+		max: 10,
+		idle_timeout: 20,
+		connect_timeout: 10,
+		transform: {
+			column: (col: string): string => col.replace(/_([a-z])/g, (_: string, letter: string) => letter.toUpperCase()),
+		},
+	});
+	return _sql;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,12 +93,12 @@ export async function initializeDatabase(): Promise<void> {
 }
 
 export async function closeDatabase(): Promise<void> {
-	if (_client) {
-		await _client.end();
-		_client = null;
-		_db = null;
-		console.log("Database connection closed");
-	}
+	await Promise.all([
+		_client ? _client.end().then(() => { _client = null; _db = null; }) : Promise.resolve(),
+		_sql ? _sql.end().then(() => { _sql = null; }) : Promise.resolve(),
+	]);
+	if (_client !== null || _sql !== null) return;
+	console.log("Database connection closed");
 }
 
 // ---------------------------------------------------------------------------
