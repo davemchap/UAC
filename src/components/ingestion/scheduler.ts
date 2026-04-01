@@ -1,3 +1,4 @@
+import { generateAlertsForAllZones } from "./alert-generator";
 import { ingestAllNwsZones } from "./nws";
 import { ingestAllSnotelStations } from "./snotel";
 import { ingestAllUacZones } from "./uac";
@@ -21,16 +22,25 @@ async function runSafe(name: string, fn: () => Promise<void>): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// UAC ingestion + alert generation pipeline
+// ---------------------------------------------------------------------------
+
+async function ingestUacThenGenerateAlerts(): Promise<void> {
+	await ingestAllUacZones();
+	await runSafe("AI alert generation", generateAlertsForAllZones);
+}
+
+// ---------------------------------------------------------------------------
 // Scheduler
 // ---------------------------------------------------------------------------
 
 export function startScheduler(): () => void {
 	// Run all jobs immediately on startup, then on their respective intervals
-	void runSafe("UAC forecast", ingestAllUacZones);
+	void runSafe("UAC forecast + alerts", ingestUacThenGenerateAlerts);
 	void runSafe("NWS weather", ingestAllNwsZones);
 	void runSafe("SNOTEL snowpack", ingestAllSnotelStations);
 
-	const uacTimer = setInterval(() => void runSafe("UAC forecast", ingestAllUacZones), SIX_HOURS_MS);
+	const uacTimer = setInterval(() => void runSafe("UAC forecast + alerts", ingestUacThenGenerateAlerts), SIX_HOURS_MS);
 	const nwsTimer = setInterval(() => void runSafe("NWS weather", ingestAllNwsZones), ONE_HOUR_MS);
 	const snotelTimer = setInterval(() => void runSafe("SNOTEL snowpack", ingestAllSnotelStations), TWENTY_FOUR_HOURS_MS);
 
