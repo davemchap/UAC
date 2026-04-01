@@ -69,7 +69,7 @@ interface ThresholdsFile {
 
 const MODEL = "claude-sonnet-4-6";
 
-const VALID_RATINGS = ["Low", "Moderate", "Considerable", "High", "Extreme"] as const;
+const VALID_RATINGS = ["None", "Low", "Moderate", "Considerable", "High", "Extreme"] as const;
 
 const VALID_PROBLEMS = [
 	"Wind Slab",
@@ -143,14 +143,16 @@ ${weatherLines}
 ${snowpackLines}
 
 ## Instructions
+IMPORTANT: The UAC Forecast Bottom Line is authoritative. If UAC indicates no avalanche danger, the season is over, forecasts are suspended, or conditions are safe (e.g. due to melt-off), you MUST set danger_level to 0 ("None") and avalanche_problems to an empty array. Do NOT invent danger from weather or snowpack data when UAC has determined there is no risk.
+
 Based on ALL the data above, produce a JSON object with these fields:
-- danger_level: integer 1-5 (1=Low, 2=Moderate, 3=Considerable, 4=High, 5=Extreme)
-- danger_rating: string matching the level ("Low", "Moderate", "Considerable", "High", "Extreme")
-- danger_above_treeline_level: integer 1-5
+- danger_level: integer 0-5 (0=None, 1=Low, 2=Moderate, 3=Considerable, 4=High, 5=Extreme)
+- danger_rating: string matching the level ("None", "Low", "Moderate", "Considerable", "High", "Extreme")
+- danger_above_treeline_level: integer 0-5
 - danger_above_treeline_rating: string matching the level
-- danger_near_treeline_level: integer 1-5
+- danger_near_treeline_level: integer 0-5
 - danger_near_treeline_rating: string matching the level
-- danger_below_treeline_level: integer 1-5
+- danger_below_treeline_level: integer 0-5
 - danger_below_treeline_rating: string matching the level
 - avalanche_problems: array of problem type names, normalized to these exact values: ${VALID_PROBLEMS.join(", ")}
 - alert_reasoning: 2-3 sentences explaining why this danger level was assigned (ops-facing, reference specific data points)
@@ -225,11 +227,11 @@ async function callClaude(prompt: string): Promise<AiStructuredResponse> {
 // ---------------------------------------------------------------------------
 
 function clampLevel(level: number): number {
-	return Math.max(1, Math.min(5, Math.round(level)));
+	return Math.max(0, Math.min(5, Math.round(level)));
 }
 
 function levelToRating(level: number): string {
-	return VALID_RATINGS[level - 1] ?? "Moderate";
+	return VALID_RATINGS[level] ?? "Moderate";
 }
 
 function normalizeResponse(raw: AiStructuredResponse): AiStructuredResponse {
