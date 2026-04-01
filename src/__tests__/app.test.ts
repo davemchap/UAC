@@ -4,6 +4,7 @@ import { mock } from "bun:test";
 // Mock the db module before importing the app
 void mock.module("../components/db", () => ({
 	getSql: () => () => [],
+	getDb: () => ({}),
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
 	closeDatabase: () => Promise.resolve(),

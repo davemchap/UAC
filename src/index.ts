@@ -1,5 +1,5 @@
 import { closeDatabase } from "./components/db";
-import { app, initApp } from "./bases/http/app";
+import { app, initApp, stopScheduler } from "./bases/http/app";
 
 const PORT = Number.parseInt(process.env.PORT ?? "3000", 10);
 
@@ -20,6 +20,7 @@ async function main(): Promise<void> {
 
 	const shutdown = (): void => {
 		console.log("\nShutting down...");
+		stopScheduler();
 		closeDatabase()
 			.then(() => process.exit(0))
 			.catch((err: unknown) => {

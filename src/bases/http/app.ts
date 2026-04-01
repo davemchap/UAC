@@ -3,6 +3,7 @@ import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
+import { startScheduler } from "../../components/ingestion";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
 import map from "./routes/map";
@@ -124,8 +125,10 @@ app.onError((err, c) => {
 });
 
 // ---------------------------------------------------------------------------
-// Init (called by the server entry point)
+// Init / teardown (called by the server entry point)
 // ---------------------------------------------------------------------------
+
+let _stopScheduler: (() => void) | null = null;
 
 export async function initApp(): Promise<void> {
 	try {
@@ -134,4 +137,10 @@ export async function initApp(): Promise<void> {
 		console.error("Failed to initialize database:", error);
 		console.log("Continuing without database...");
 	}
+	_stopScheduler = startScheduler();
+}
+
+export function stopScheduler(): void {
+	_stopScheduler?.();
+	_stopScheduler = null;
 }
