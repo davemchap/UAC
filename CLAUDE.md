@@ -318,9 +318,65 @@ Do **not** attempt to use Docker or `pg_ctlcluster` — Docker is unavailable in
 - **Runtime**: Bun
 - **Framework**: Hono (lightweight web framework)
 - **Middleware**: `beads` — use for middleware chaining and task pipeline logic
-- **Database**: PostgreSQL via `postgres` library
+- **Database**: PostgreSQL via `drizzle-orm` (ORM) + `postgres` (driver)
 - **Tests**: `bun:test` with `mock.module()` for database mocking
 - **Static files**: `src/projects/dashboard/` (excluded from lint — vanilla JS/HTML/CSS)
+
+### Database Tables
+
+| Table | Source | Purpose |
+|---|---|---|
+| `forecast_zones` | `data/black-diamond/zone-config.json` | 9 UAC Wasatch forecast zones |
+| `snotel_stations` | zone-config snotel field | SNOTEL station triplets per zone |
+| `avalanche_forecasts` | UAC Native API / snapshot | Forecast snapshots per zone per date |
+| `avalanche_problems` | UAC Native API / snapshot | Individual avalanche problems per forecast |
+| `weather_readings` | NWS hourly API / snapshot | NWS hourly weather periods per zone |
+| `snowpack_readings` | SNOTEL AWDB API / snapshot | Daily snowpack measurements per station |
+| `alert_thresholds` | `data/black-diamond/alert-thresholds.json` | Danger level → alert action config |
+| `escalation_rules` | `data/black-diamond/alert-thresholds.json` | Escalation condition rules |
+
+Schema defined in `src/components/db/schema.ts`. Migrations in `src/components/db/migrations/`.
+
+### ORM Usage (Drizzle)
+
+Always use `getDb()` and the `queries.*` helpers from `src/components/db` for typed queries:
+
+```typescript
+import { getDb, queries } from "../db";
+
+// Preferred: use query helpers
+const zones = await queries.getAllZones();
+const forecast = await queries.getLatestForecast(zoneId);
+
+// For custom queries, use getDb() directly
+const db = getDb();
+const result = await db.select().from(forecastZones).where(eq(forecastZones.slug, slug));
+```
+
+Never import `getSql()` for new code — it exists only for legacy compatibility.
+
+### Ingestion Component Conventions
+
+`src/components/ingestion/` owns all external data polling. Follow this pattern:
+
+- **Fetch functions** — pure, no side effects, return typed data (`fetchUacForecast`, `fetchHourlyForecast`)
+- **Persist functions** — accept typed data, upsert via Drizzle, always `onConflictDoUpdate` or `onConflictDoNothing`
+- **Ingest functions** — combine fetch + persist, iterate over zones/stations, catch per-item errors
+- **Scheduler** — wires ingest functions to intervals via `setInterval`; started/stopped by the HTTP base
+
+Cron intervals: UAC every 6h, NWS every 1h, SNOTEL every 24h. All fire immediately on startup.
+
+### External API Rules
+
+> **ALL external API calls must be GET-only.** Never send POST, PUT, PATCH, or DELETE to any external API.
+
+This applies to all data sources without exception:
+- **UAC** (`utahavalanchecenter.org`) — forecast data, Cloudflare-protected
+- **NWS** (`api.weather.gov`) — weather forecasts, include `User-Agent` header
+- **SNOTEL** (`wcc.sc.egov.usda.gov`) — snowpack readings
+- **CAIC** (`avalanche.state.co.us`) — accepts writes without auth; **never write to CAIC**
+
+See `data/apis/` for full documentation on each API before calling live endpoints.
 
 ## Project Discovery
 
