@@ -1,0 +1,1364 @@
+{
+  "run_date": "2026-04-01",
+  "prompt_version": "v1.0",
+  "results": [
+    {
+      "scenario_id": "gs-001",
+      "scenario_name": "Salt Lake, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Salt Lake",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "The overall avalanche danger is MODERATE. Watch for fresh soft slabs of wind-drifted snow 6-12 inches deep at the mid and upper elevations. Although winds may keep the snow surface cool enough, there is also a potential for avalanches involving wet snow on aspects facing east, south, and west, and low-elevation northerly slopes.\r",
+        "hazard_discussion": "This morning: Skies are clear and temperatures are in the 30's °F. Winds are from the west and have increased overnight, gusting 25-35 mph, with 11,000 foot gusts over 50 mph.\r\rToday: Sunshine with temperatures warming into the upper 30's and low 40's °F.&nbsp; Winds will be from the west/southwest, gusting 25-35 mph along exposed mid and upper elevation ridges, with 11,000 foot gusts in the 50's mph.\r\rA dry cold front moves in overnight and into Tuesday, bringing an increase in clouds and cooler temperatures for Tuesday and Wednesday. There are no storms in sight for the next 7-10 days.\r\rAlthough there was plenty of sun this weekend, temperatures stayed cool enough to preserve cold, dry snow on northerly aspects.\r\r&nbsp;\r\r&nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**Salt Lake Zone — Pre-Shift Briefing | 5:00 AM**\n\nThe forecaster has rated avalanche danger at **Moderate (2/5)** across all elevation bands — above treeline, near treeline, and below treeline. Three avalanche problem types are active: **Wind Slab**, **Wet Slab**, and **Persistent Slab**. Wind Slabs 6–12 inches deep are the primary concern at mid and upper elevations, while Wet Slab activity is possible on east-, south-, and west-facing aspects as well as low-elevation north-facing slopes. The system has flagged this zone for **Review Required**, reflecting the multiple concurrent problem types that staff need to account for before operations begin.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-002",
+      "scenario_name": "Ogden, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Ogden",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "None",
+            "level": 0
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "The overall avalanche danger is MODERATE. Watch for fresh soft slabs of wind-drifted snow 6-12 inches deep at the mid and upper elevations. Although winds may keep the snow surface cool enough, there is also a potential for avalanches involving wet snow on aspects facing east, south, and west, and low-elevation northerly slopes.\r",
+        "hazard_discussion": "This morning: Skies are clear and temperatures are in the 30's °F. Winds are from the southwest and have increased overnight, gusting 25-35 mph, including gusts of 40 mph along upper reaches of the Ogden Skyline.\r\rToday: Sunshine with temperatures warming into the low and mid 40's °F.&nbsp; Winds will be from the west/southwest, gusting 25-40 mph along exposed mid and upper elevation ridges.\r\rA dry cold front moves in overnight and into Tuesday, bringing an increase in clouds and cooler temperatures for Tuesday and Wednesday. There are no storms in sight for the next 7-10 days.\r\rAlthough there was plenty of sun this weekend, temperatures stayed cool enough to preserve cold, dry snow on northerly aspects.\r\r&nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**UAC Ogden Zone — Pre-Shift Ops Briefing | 5:00 AM**\n\nThe forecaster has rated overall avalanche danger at **Moderate (2/5)** for both **above treeline and near treeline** elevations; **below treeline is rated None (0/5)**. Three avalanche problems are identified: **Wind Slab**, **Wet Slab**, and **Persistent Slab** — with Wind Slabs running 6–12 inches deep on mid and upper elevation terrain, and Wet Slab potential focused on east-, south-, and west-facing aspects as well as low-elevation northerly slopes. The system has flagged this zone with a **Review Required** alert, meaning staff must review the full forecast before operations proceed. No independent conclusions have been added — all information reflects the forecaster's assessment directly.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 5,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-003",
+      "scenario_name": "Provo, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Provo",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "The overall avalanche danger is MODERATE. Watch for fresh soft slabs of wind-drifted snow 6-12 inches deep at the mid and upper elevations. Although winds may keep the snow surface cool enough, there is also a potential for avalanches involving wet snow on aspects facing east, south, and west, and low-elevation northerly slopes.\r",
+        "hazard_discussion": "This morning: Skies are clear and temperatures are in the 30's °F. Winds are from the southwest and have increased overnight, gusting 25-35 mph, with 11,000 foot gusts over 50 mph.\r\rToday: Sunshine with temperatures warming into the low and mid 40's °F.&nbsp; Winds will be from the west/southwest, gusting 25-35 mph along exposed mid and upper elevation ridges, with 11,000 foot gusts in the 50's mph.\r\rA dry cold front moves in overnight and into Tuesday, bringing an increase in clouds and cooler temperatures for Tuesday and Wednesday. There are no storms in sight for the next 7-10 days.\r\rAlthough there was plenty of sun this weekend, temperatures stayed cool enough to preserve cold, dry snow on northerly aspects.\r\r&nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**UAC Ops Briefing — Provo Zone | Report to Shift by 0500**\n\nThe forecaster has rated avalanche danger at **Moderate (2/5)** across **all elevation bands** (below, near, and above treeline). Three avalanche problems are identified: **Wind Slab**, **Wet Slab**, and **Persistent Slab**. Wind Slabs are the primary concern at mid and upper elevations — fresh, soft slabs 6–12 inches deep from recent drifting; Wet Slab potential exists on east-, south-, and west-facing aspects as well as low-elevation north-facing slopes. The system has flagged this zone for **Review Required**, meaning staff should confirm current conditions against this forecast before authorizing operations.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-004",
+      "scenario_name": "Logan, UT — Considerable Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Logan",
+        "center": "UAC",
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "None",
+            "level": 0
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "Heightened avalanche conditions exist in the backcountry, and very warm mountain temperatures will elevate the danger to CONSIDERABLE,&nbsp;especially&nbsp;in sheltered terrain.&nbsp;Wet avalanches entraining saturated snow are likely&nbsp;on slopes steeper than 30 degrees.&nbsp;\r\rEvaluate the snow and terrain carefully, and make conservative decisions. Avoid being on or under steep slopes with saturated snow.\r\r&nbsp;\r",
+        "hazard_discussion": "Temperatures warmed significantly yesterday, turning the nice powder into mashed potatoes, even with a nice breeze and afternoon clouds. We observed rollerball swarms and loose wet avalanches entraining last week's fresh snow on many slopes across the Bear River Mountains. We found excellent powder riding this weekend, and people will still find nice soft riding conditions today, especially in northerly, upper-elevation terrain.&nbsp; Despite ventilation from an increasing, incessant breeze from the southwest,&nbsp;the danger of wet avalanches will be elevated by a high sun angle and very warm temperatures, especially in sheltered terrain.&nbsp; Natural and human-triggered wet avalanches will become likely.\r\rThe UAC Card Canyon weather station&nbsp;at 8700 feet reports 35°F and 63 inches of total snow. The Tony Grove Snotel, located at 8400 feet, reports 38°F with 75 inches of total snow.&nbsp; At 9700 feet on Logan Peak, winds are blowing from the southwest around 30mph, with gusts close to 50 mph.&nbsp; It's a cool 26°F on Paris Peak at 9500 feet, and the wind is blowing 30 to 40 mph from the south-southwest.\r\rMountain weather today includes 8500' highs around 44°F, strong and increasing winds blowing from the west, and skies will be mostly sunny. Wind gusts are expected to reach 50+ mph starting around noon and lasting into the evening. Tomorrow will be a bit cooler, and strong winds&nbsp;will continue to blow from the west.&nbsp; &nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "human_review",
+        "alert_reasoning": "Considerable danger, alert drafted and queued for human review before dispatch"
+      },
+      "computed_alert_action": "auto_send",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Logan (UAC) | 5:00 AM**\n\nThe UAC has rated today's avalanche danger at **Considerable (3/5)** overall for the Logan zone, with **Moderate (2/5) above treeline**, **Considerable (3/5) near treeline**, and **None (0/5) below treeline**. Three avalanche problems are in effect: **Wind Slab**, **Persistent Slab**, and **Wet Slab** — with forecasters noting that very warm temperatures will drive danger upward through the day, making wet avalanches likely on slopes steeper than 30 degrees where snow is saturated. Staff and guests should carefully evaluate snow and terrain conditions and make conservative decisions, specifically avoiding travel on or beneath steep slopes with wet, saturated snow. **This briefing was auto-sent by the alert system in response to the Considerable danger rating.**",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-005",
+      "scenario_name": "Uintas, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Uintas",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab"
+        ],
+        "bottom_line": "Today,&nbsp;MODERATE avalanche danger&nbsp;exists in mid and upper elevation&nbsp;slopes facing northwest through east where human-triggered avalanches are POSSIBLE&nbsp;failing multiple feet deep into weak, faceted snow from the January dry-spell.&nbsp;\r\rAlthough the likelihood of triggering an avalanche as a rider is going down, the consequences remain the same if we do, with todays slides big enough to bury and kill us.\r",
+        "hazard_discussion": "Nowcast - After topping out at nearly 50°F yesterday in the heat of it, we have cooled back off and at 0500 trailhead temps at 7,500' are hovering around 25°F. Upper elevations report the same, however are chilled by winds blowing from the southwest, moderately, between 20-30 MPH.&nbsp;\r\rForecast -&nbsp;Today's ambient temperatures will be nearly the same as yesterday, with a hight near 35°F.&nbsp; The difference today? Westerly winds are going to ramp up ahead of a incoming cold front, blowing between 30 and 40 MPH along the high ridges by the days end.&nbsp;\r\rFuturecast - We cool down into tomorrow, then ramp right back up later this week ten degrees above normal averages. Any chances of a quick refresh have dwindled, and things stay sunny through most of the working week with continued wind and mild temperatures.\r\rCheck out the Uinta Weather Network here!\r\rTravel Conditions&nbsp;- Across the Uinta's snow depths range from no coverage at most of our trailheads to some of the best riding of the season in upper elevation terrain. The North Slope won last weeks storm and stacked up the most snow, with a settled 10-15\", and closer to 5-10\" down on the South Slope. Solar aspects and windward terrain are cooked and wind scoured leaving behind a mixed back of sastrugi, crusts, wind-board and wind-pack in exposed areas. But get high, orient yourself to the north, and you will be met with stellar riding conditions no matter where your off to today.&nbsp;\r\r\r\r&nbsp;\r\rLooking north, the hills are a bit whiter in the distance near the Mirror Lake Corridor, compared to that in the foreground. The lack of snow on the South Slope is beginning to show the past few days as the spring weather is putting a beatdown on mid and lower elevations -- Checkout more from out travels, here.\r\r\r\rA cool down can't save us now! Down south near Strawberry access is becoming challenging and I think we are getting close to the end of it, for tracked vehicles that is, as snow-packed roads turn to creek beds and the water makes its way to the rivers.&nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**UAC Uintas — Pre-Shift Ops Briefing | 5:00 AM**\n\nThe forecaster has rated overall danger at **Moderate (Level 2/5)** for today — **Moderate above and near treeline, Low below treeline**. The two active avalanche problems are **Persistent Slab** and **Wind Slab**, with the primary concern on mid and upper elevation slopes facing **northwest through east**, where human-triggered avalanches are possible and can break multiple feet deep into weak, faceted snow left over from January's dry spell. While trigger likelihood is trending down, the forecaster notes that slide size remains large enough to bury and kill, so consequences have not changed. This forecast has triggered a **Review Required** alert, meaning ops staff must review and acknowledge current conditions before proceeding with normal operations.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-006",
+      "scenario_name": "Skyline, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Skyline",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab"
+        ],
+        "bottom_line": "Under warm weather, the snowpack continues to settle and stabilize.\r\rIt is becoming less likely to trigger an avalanche but it is still possible that one could break into old, weak faceted snow.\r\rThe danger rating is&nbsp;MODERATE&nbsp;on steep slopes above 9500' that face northwest, north, northeast and east.\r\rI am still holding my cards tight and you won't see me in the described terrain.\r",
+        "hazard_discussion": "General Conditions:&nbsp; Springtime conditions prevail.&nbsp; Temperatures were warm enough on Sunday to make the snow on almost all aspects at all elevations damp.&nbsp; There may be just a hint of dry powder on the steeper, higher, due-north-facing terrain.&nbsp; Temperatures were around 40°F on Sunday and dropped down to around freezing overnight.&nbsp; Wind has been light from the southwest.&nbsp; You'll find sun crusts on almost every aspect this morning.\r\rMountain Weather:&nbsp; Warm weather is in the forecast this week.&nbsp; This is going to take a big hit on the already shallow snowpack.&nbsp; Today we'll see high temperatures well into the 40s.&nbsp; Wind from the southwest starts out light and gradually increases in speed late this afternoon.&nbsp; Expect more of the same through the week with VERY warm temperatures by this weekend.\r\rPhoto below:&nbsp; Chris Magerl - The end of the winter seems imminent.&nbsp;&nbsp;FULL OBSERVATION HERE\r\r\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "no_alert",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": true,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 6,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-007",
+      "scenario_name": "Moab, UT — Moderate Danger (2026-03-09)",
+      "center": "UAC",
+      "parsed": {
+        "zone_name": "Moab",
+        "center": "UAC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "The avalanche danger is MODERATE&nbsp;on steep slopes near and above treeline that face NW–N–E.&nbsp; Hard slab, human-triggered avalanches 2–4 feet deep failing on a buried persistent weak layer remain POSSIBLE&nbsp;here. If released, they could step down to involve the entire season’s snowpack and bury you.&nbsp;\r\rAlthough the odds of triggering an avalanche have decreased,&nbsp;the consequences remain the same. Personally, I'll be continuing to avoid steep, northerly aspects near and above treeline.\r\r&nbsp;\r\r&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+        "hazard_discussion": "\r\r24 Hour Snow:&nbsp;0\"&nbsp;72 Hour Snow:&nbsp;3\"&nbsp;Season Total Snow:&nbsp;75\"&nbsp;Depth at Gold Basin:&nbsp;33\"\r\rWinds on Pre-Laurel Peak: SW&nbsp;5-10&nbsp;Temp:&nbsp;25°F\r\rWeather\r\rExpect a sunny, breezy spring day. Under clear skies, winds shifted to the southwest overnight and will increase throughout the day to 15-20 mph, gusting into the 40s. Mountain highs in the La Sals will reach the mid-40s F as more corn forms on solars.\r\rGeneral Conditions\r\rThe 5 inches of fresh snow that fell on Friday looked to be \"winter's last gasp\" as Eric put it, as we enter a hot and dry period with temperatures reaching near record-breaking highs this week. Eric and I made the most of it yesterday in Middle Cirque, finding soft turns in fresh snow over a firm, supportable crust with mild wind effect up high. The new snow took some heat in recent days, and southerly slopes like those Dave and Travis skied on Saturday will have a melt-freeze crust this morning.&nbsp;\r\rMaggie Nielsen sent in this observation with an excellent pit profile that clearly details our persistent weak layer problem. The greatest threat from avalanches continues to be on northerly aspects near and above treeline, where hard slabs exist over layers of weak, dry, faceted snow. While Eric and I found the weak layer to be gaining strength yesterday, we concluded it was not stable yet. This is a notoriously unpredictable setup that offers little to no warning before failing. It’s a familiar pattern for seasoned La Sal skiers and riders, and the safest approach remains the same: avoid steep terrain on the north half of the compass.\r\r\r\rEric making the most of winter's last gasp high in Middle Cirque.&nbsp;\r\rSee all Moab&nbsp;observations here.&nbsp;\r\rSnowpack and Weather Data\r\r\r\rNEW! Gold Basin webcam storm stake&nbsp;\r\rGold Basin Storm Stake (10,000')\r\rGold Basin SNOTEL site (10,000')\r\rSNOTEL site near&nbsp;Geyser Pass Winter Trailhead (9600')\r\r\r\rWind Station on Pre-Laurel Peak (11,400')\r\rNWS forecast for the La Sal Mountains.&nbsp;\r\r&nbsp;\r\r&nbsp;\r"
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Wet Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger, heightened awareness only, no alert dispatched"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**UAC Ops Briefing — Moab Zone | 5:00 AM Shift Start**\n\nToday's danger is **Moderate (2/5) at and above treeline, Low (1/5) below treeline**. The two active avalanche problems are **Wet Slab** and **Persistent Slab**, with the Persistent Slab problem centered on steep NW–N–E facing slopes near and above treeline, where human-triggered hard slabs 2–4 feet deep remain possible on a buried persistent weak layer — and if one releases, it could step down to involve the full season's snowpack. Trigger likelihood has decreased, but consequences are unchanged. The system has flagged this zone for **Review Required** based on the ongoing Persistent Slab problem and its potential to produce consequential, full-depth slides on northerly aspects.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-008",
+      "scenario_name": "Southern Sawatch, CO — Low Danger (2026-03-09)",
+      "center": "CAIC",
+      "parsed": {
+        "zone_name": "Southern Sawatch",
+        "center": "CAIC",
+        "danger_rating": "Low",
+        "danger_level": 1,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "near_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [],
+        "bottom_line": {
+          "days": [
+            [],
+            [],
+            []
+          ]
+        },
+        "hazard_discussion": {
+          "days": [
+            {
+              "date": "2026-03-09T22:30:00Z",
+              "content": "<p>Most slopes remain generally safe. During times of LOW (1 of 5) avalanche danger, people often venture into larger terrain. Remember, even with \"Generally Safe Conditions,\" an avalanche can be triggered on isolated slopes and in extreme terrain. It's always a good idea to assess the slope you plan to ride and identify any hazards.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2-3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report<a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">&nbsp;</a><a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "danger_rating": "Low",
+        "danger_level": 1,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "near_treeline": {
+            "rating": "Low",
+            "level": 1
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [],
+        "alert_action": "no_alert",
+        "alert_reasoning": "All elevation bands at Low danger (level 1)"
+      },
+      "computed_alert_action": "no_alert",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": true,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 6,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-009",
+      "scenario_name": "Grand Mesa, CO — Moderate Danger (2026-03-09)",
+      "center": "CAIC",
+      "parsed": {
+        "zone_name": "Grand Mesa",
+        "center": "CAIC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab"
+        ],
+        "bottom_line": {
+          "days": [
+            [],
+            [],
+            []
+          ]
+        },
+        "hazard_discussion": {
+          "days": [
+            {
+              "date": "2026-03-09T22:30:00Z",
+              "content": "<p>You can still trigger a large slab avalanche on some northerly and east-facing slopes where you find a stiff slab resting on weak snow in the lower snowpack. You can also trigger a small avalanche in freshly wind-drifted snow that runs above the shallowly buried frozen crusts. Move away from steep slopes with wet snow later in the day.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 to 3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report&nbsp;<a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Low",
+            "level": 1
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger (level 2), inform but no urgent alert"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "**Grand Mesa – 5AM Ops Briefing**\n*Alert Status: Review Required*\n\nThe forecaster has rated avalanche danger at **Moderate (2/5) above and near treeline**, dropping to **Low (1/5) below treeline** for Grand Mesa today. Two avalanche problems are in play: **Persistent Slab** and **Wind Slab**, both focused in the upper elevation bands. A **Review Required** alert has been triggered, meaning staff should confirm operational readiness and assess whether conditions warrant adjusted procedures before the day begins. *(Note: The forecaster's bottom-line narrative was not transmitted correctly — verify the full forecast at CAIC before deployment.)*",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-010",
+      "scenario_name": "Sawatch Range, CO — Moderate Danger (2026-03-09)",
+      "center": "CAIC",
+      "parsed": {
+        "zone_name": "Sawatch Range",
+        "center": "CAIC",
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "bottom_line": {
+          "days": [
+            [],
+            [],
+            []
+          ]
+        },
+        "hazard_discussion": {
+          "days": [
+            {
+              "date": "2026-03-09T22:30:00Z",
+              "content": "<p>Avoid slopes where you find thick, rounded pillows of wind-drifted snow. You are most likely to find these on aspects facing the eastern half of the compass below ridgelines and in cross-loaded gullies. If these crack when weighted, you have found dangerous snow. You can find safer travel on slopes less than about 35 degrees and terrain sheltered from the wind.&nbsp;</p><p>Warm temperatures mean snow can shed off steep sunny aspects. Gullies with lots of exposed rocks to heat up will be the first to slide. If you are in steep terrain and see roller balls, or you are sinking into wet snow past your ankles, head to cooler slopes.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report <a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "danger_rating": "Moderate",
+        "danger_level": 2,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "alert_action": "no_alert",
+        "alert_reasoning": "Moderate danger (level 2), inform but no urgent alert"
+      },
+      "computed_alert_action": "human_review",
+      "ai_briefing": "⚠️ **Review Required — Sawatch Range (CAIC)**\n\nThe forecaster has rated avalanche danger at **Moderate (Level 2/5)** across all elevation bands — above treeline, near treeline, and below treeline. The active avalanche problems are **Wind Slab** and **Wet Loose**. The system has flagged this briefing for **Review Required**, likely because the forecaster's bottom-line assessment did not render correctly and contains a data error (`[object Object]`) — staff should pull the full CAIC forecast directly before operations begin. Do not proceed on this summary alone until the forecaster's written bottom line has been confirmed.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-011",
+      "scenario_name": "Northern San Juan, CO — Considerable Danger (2026-03-09)",
+      "center": "CAIC",
+      "parsed": {
+        "zone_name": "Northern San Juan",
+        "center": "CAIC",
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "bottom_line": {
+          "days": [
+            [],
+            [],
+            []
+          ]
+        },
+        "hazard_discussion": {
+          "days": [
+            {
+              "date": "2026-03-09T22:30:00Z",
+              "content": "<p>You can easily trigger a slab avalanche on steep wind-drifted terrain features where you find more than about a foot of fresh snow on the now-buried rain crust from late February. The more worrisome situation is if an avalanche breaks through that crust, into deeper buried weak layers. You can find safer conditions in wind-sheltered, lower-angled terrain without steep terrain overhead. Move away from steep slopes with wet snow later in the day.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 to 3 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report&nbsp;<a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "near_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "alert_action": "human_review",
+        "alert_reasoning": "Considerable danger (level 3) requires human review before alert dispatch"
+      },
+      "computed_alert_action": "auto_send",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Northern San Juan (CAIC) | 5:00 AM**\n\nThe forecaster has rated overall danger at **Considerable (3/5)** for today in the Northern San Juan zone. Above treeline sits at **Considerable (3/5)**, while near treeline and below treeline are both **Moderate (2/5)**. Three avalanche problems are identified: **Persistent Slab**, **Wind Slab**, and **Wet Loose**. The system has issued an **Auto-Send alert** based on the Considerable danger rating triggering the automated notification threshold.\n\n> ⚠️ **Note for ops staff:** The forecaster's bottom-line narrative was not transmitted correctly (`[object Object]`) — confirm the full forecast text directly at [CAIC.org](https://www.avalanchecenter.org) before briefing field personnel.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-012",
+      "scenario_name": "Vail & Summit County, CO — Considerable Danger (2026-03-09)",
+      "center": "CAIC",
+      "parsed": {
+        "zone_name": "Vail & Summit County",
+        "center": "CAIC",
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "bottom_line": {
+          "days": [
+            [],
+            [],
+            []
+          ]
+        },
+        "hazard_discussion": {
+          "days": [
+            {
+              "date": "2026-03-09T22:30:00Z",
+              "content": "<p>You can trigger an avalanche on slopes with a buried weak layer. Many of these slopes have been heavily drifted by wind, but slopes without loading will also be hazardous. If you trigger an avalanche at the surface, it is likely to step down to weak layers 2 to 3 feet deep. You may get no warning signs, like cracking or collapsing, before you trigger a deeper avalanche. Potentially from below or a distance. On slopes that face northwest through east to southeast, avoid being on or connected to slopes steeper than 30 degrees.</p><p>Warm temperatures mean snow can shed off steep sunny aspects. Gullies with lots of exposed rocks to heat up will be the first to slide. If you are in steep terrain and see roller balls, or you are sinking into wet snow past your ankles, head to cooler slopes.</p><p>On March 7th, a backcountry skier was caught and killed in an avalanche near Vail Pass. The avalanche released on a northeast-facing slope near treeline, about 2 feet deep. Our deepest condolences to the deceased skier's family, friends, and community. You can read the preliminary accident report&nbsp;<a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\">here</a>.</p><p><a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://avalanche.state.co.us/report/741d5676-5242-44f6-937d-fd3ca4983ccc\"><br></a></p>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "danger_rating": "Considerable",
+        "danger_level": 3,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab",
+          "Wind Slab",
+          "Wet Loose"
+        ],
+        "alert_action": "human_review",
+        "alert_reasoning": "Considerable danger (level 3) requires human review before alert dispatch"
+      },
+      "computed_alert_action": "auto_send",
+      "ai_briefing": "## Pre-Shift Ops Briefing — Vail & Summit County (CAIC)\n**Shift Start: 5:00 AM | Alert Status: AUTO-SEND ACTIVATED**\n\n---\n\nThe avalanche danger for Vail & Summit County is rated **Considerable (3/5) at and above treeline**, dropping to **Moderate (2/5) below treeline**. The forecaster has identified three active avalanche problems: **Persistent Slab, Wind Slab, and Wet Loose**. The Auto-Send alert has been triggered based on the Considerable danger rating at upper elevations, requiring immediate notification to affected parties before operations begin. Staff should treat all above- and near-treeline terrain with heightened caution given the multiple concurrent problems in play.\n\n---\n\n⚠️ *Note for Ops Lead: The forecaster's bottom-line summary was not transmitted correctly (\"object Object\") — confirm the full forecast text directly on [CAIC](https://avalanchecenter.org) before briefing field personnel.*",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": false,
+        "pass_count": 4,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-013",
+      "scenario_name": "Stevens Pass, WA — High Danger (2026-03-09)",
+      "center": "NWAC",
+      "parsed": {
+        "zone_name": "Stevens Pass",
+        "center": "NWAC",
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "<p>Avoid traveling on or near avalanche paths or slopes steeper than 30 degrees at upper elevations, especially where you see the wind blowing snow. A lingering, persistent weak layer could produce very large and deadly avalanches on the highest slopes. Elswere you can also trigger avalanches in the new snow, especially on wind-loaded slopes near ridges and drifted features.</p>\n<p>&nbsp;&nbsp;</p>",
+        "hazard_discussion": "<p>Ongoing snow, wind, and dropping temperatures will be the story into Monday night. While temperatures were slower to cool than originally forecast, it looks like they will arrive. With it, we can expect very light, low-density snow that will be easily transported by moderate to strong winds.</p>\n<p>By Sunday evening, Stevens Pass picked up over 1\" of water equivalent. At middle and upper elevations, this was mostly snow, though moist at times. Temperatures cooled, and by midday, precipitation shifted to all snow at the pass level.&nbsp;</p>\n<p>At low elevations, you can still find moist snow just below the surface. While it may be weak, we don't expect enough instability to warrant concern for wet avalanches. On Saturday, <a href=\"https://nwac.us/observations/#/view/observations/4875bc58-c05f-49e1-808a-488f1b1e3904\" target=\"_blank\" rel=\"noopener\">an NWAC forecaster in the Skyline area</a> reported a moist upper snowpack. At 5,300ft, NW water had reached and weakened the mid-February weak layers (2/13 surface hoar and 2/18 facets) and underlying crusts. Once frozen, we can rule out instability on persistent weak layers at these elevations. On Friday and Saturday, observers reported triggering wet avalanches, and some ran naturally with light rain and warming temperatures. Most of these were small and ran in surface layers.</p>\n<p>This storm is the biggest load on the existing weak layers since they've formed. Just 10 days ago, a much smaller storm drove a<a href=\"https://nwac.us/observations/#/view/avalanches/c93f6960-0b92-4f23-9950-8419e68fe172\" target=\"_blank\" rel=\"noopener\"> cycle of widely breaking D2-2.5-sized avalanches</a>. Natural and human-triggered avalanches occurred on leeward and sun-exposed slopes following a major westerly wind event. Wumphing was still reported from near Lake Valhalla and Yodelin areas in the past week.</p>"
+      },
+      "expected": {
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "Moderate",
+            "level": 2
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "auto_send",
+        "alert_reasoning": "High danger (level 4) at upper elevations triggers automatic alert dispatch"
+      },
+      "computed_alert_action": "auto_send_urgent",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Stevens Pass (NWAC) | Arriving 5:00 AM**\n**⚠️ URGENT AUTO-SEND ACTIVE**\n\nThe avalanche forecast for Stevens Pass is rated **High (4 out of 5) above treeline**, **Considerable (3 out of 5) near treeline**, and **Moderate (2 out of 5) below treeline**. The two active avalanche problems are **Wind Slab** and **Persistent Slab** — the Persistent Slab problem on the highest slopes carries the potential for very large, deadly avalanches from a weak layer that has been building for some time. Wind Slabs are also a trigger concern, particularly on slopes near ridges and drifted features where you can see snow actively moving. The system issued an **URGENT Auto-Send** due to the High danger rating at upper elevations, and all staff should avoid avalanche paths and slopes steeper than 30 degrees at upper elevations until conditions are assessed.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 5,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-014",
+      "scenario_name": "Mt Hood, OR — High Danger (2026-02-24)",
+      "center": "NWAC",
+      "parsed": {
+        "zone_name": "Mt Hood",
+        "center": "NWAC",
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "below_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          }
+        },
+        "avalanche_problems": [
+          "Storm Slab",
+          "Wet Loose"
+        ],
+        "bottom_line": "<p>A strong storm will bring very dangerous avalanche conditions to the Mt. Hood zone. Any steep slopes will be dangerous, especially in areas with wind drifting. Stick to simple, sheltered low-angle terrain, and avoid travel under large, steep slopes.&nbsp;</p>",
+        "hazard_discussion": "<p>This storm will continue to bring waves of moisture and fluctuating snow levels to the Mt. Hood zone. There is some uncertainty about snow levels, but expect them to range from 5500 to 6500 ft throughout the day. These are some of the highest snow levels we&rsquo;ve seen in a while, so expect new snow to fall upside-down and for wet avalanches to be easy to trigger, especially when snow starts changing to rain.&nbsp;</p>\n<p>The new snow is finally stacking up. Unfortunately, the new snow isn't as blower as last week's, but since the 21st, weather stations have picked up approximately 21 inches (2\" SWE) on a very slow warming trend. Avalanche activity has been mainly confined to wind-drifted features, and occasional storm slabs have been reported during periods of heavy precipitation. Signs of wet snow instabilities have been creeping further into the lower elevations, but wet avalanche observations have been minimal so far.&nbsp;</p>\n<p>Below the surface, we do have things to think about. On Sunday, I got good verification that weak layers do, in fact, exist above the 2/7 crust on the eastern side of Mt Hood near Cloud Cap. In general, I found these weak grains about 1.5-2 ft below the surface, sitting just above the 2/7 crust. This weak layer did show the ability to propagate with snowpack tests and was easy to identify with hand hardness profiles. While this layer was easy to identify here, it wasn't as obvious on the south side of the mountain, where the snowpack was generally deeper and stronger over this crust. This is a well-documented weak layer that has transitioned to a persistent slab avalanche problem just to our north. So far, these kinds of observations are few and confined to the eastern part of the Mt. Hood zone, but I wouldn&rsquo;t fully rule it out at upper elevations or in data-sparse areas.&nbsp;</p>\n<p><strong>&nbsp;Let us know what you see by submitting an observation <a href=\"https://nwac.us/observations/#/form\" target=\"_blank\" rel=\"noopener\">here</a> or on the AvyApp</strong></p>"
+      },
+      "expected": {
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "below_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          }
+        },
+        "avalanche_problems": [
+          "Storm Slab",
+          "Wet Loose"
+        ],
+        "alert_action": "auto_send",
+        "alert_reasoning": "High danger (level 4) at upper and middle elevations triggers automatic alert dispatch"
+      },
+      "computed_alert_action": "auto_send_urgent",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Mt. Hood (NWAC) | 5:00 AM**\n*Alert Status: URGENT Auto-Send Triggered*\n\nThe NWAC forecast has issued a **High (4/5)** danger rating above and near treeline, and **Considerable (3/5)** below treeline for the Mt. Hood zone, driven by two active avalanche problems: **Storm Slab** and **Wet Loose**. A strong incoming storm is producing very dangerous conditions, particularly on steep slopes and in wind-affected terrain. The forecaster directs travel to simple, sheltered, low-angle terrain only, with no travel beneath large, steep slopes. The **URGENT Auto-Send** alert was triggered by the High (4/5) danger rating, reflecting the forecaster's assessment that widespread hazardous conditions exist across the zone.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 5,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-015",
+      "scenario_name": "East Slopes North, WA — High Danger (2026-02-27)",
+      "center": "NWAC",
+      "parsed": {
+        "zone_name": "East Slopes North",
+        "center": "NWAC",
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "below_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab"
+        ],
+        "bottom_line": "<p>Stay off and out from under wind-loaded slopes, and pay attention to warning signs like natural avalanches, cracking, and collapsing. Stick to wind-sheltered terrain at low elevations, well out from under overhead avalanche paths. Very strong west winds are overloading the weak snowpack, causing very large and deadly natural avalanches.</p>",
+        "hazard_discussion": "<p>Ongoing westerly winds will dominate the weather at least through Friday. This wind event is so significant that the drifted slabs are adding stress to the weak, underlying snowpack. Stay diligent to look for recent avalanches, blowing snow, and give yourself greater margins of safety.</p>\n<p>Since midweek, there's been a widespread cycle of natural and triggered avalanches in the Washington Pass area, and possibly near Hart's Pass. On the 26th, observers reported numerous natural avalanches on leeward, wind-loaded slopes near Cutthroat Lake and in Cedar Creek. Many were large to very large, and some had wide crowns deep enough to have run on a suspected persistent weak layer. Some avalanches were shallower, more typical of wind slabs at the base of cliffs.&nbsp;</p>\n<p>A decent share of the recent avalanches are confirmed or suspected to have run within weak, faceted snow and surface hoar over the 2/7 crust. Over the weekend, there was a report of a widely propagating, but shallow avalanche near Heather Pass. &nbsp;On the 22nd, observers near Harts Pass triggered an avalanche on surface hoar, buried 8-10\" below the surface. As of the 25th, wind-drifted snow began to stress these weak layers, bury them deeper, and create very dangerous conditions.</p>\n<p>1-2 feet below the surface is a weak layer over a crust (February 7th). Immediately above the crust are weak faceted grains and, in some places, surface hoar. The January 28th crust is thicker and another 6-12\" deeper. &nbsp;On southerly aspects, there are more crusts and less dry, weak snow on the surface. West of Washington Pass, overall, the layers will be deeper, with thicker crusts and more snow between them. Farther east, in places like the Chewuch and Twisp River drainages, the snowpack is shallower and weaker. We have little recent information in the eastern mountains and suspect a very weak snowpack.</p>"
+      },
+      "expected": {
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "below_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          }
+        },
+        "avalanche_problems": [
+          "Persistent Slab"
+        ],
+        "alert_action": "auto_send",
+        "alert_reasoning": "High danger (level 4) at upper and middle elevations triggers automatic alert dispatch"
+      },
+      "computed_alert_action": "auto_send",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — East Slopes North (NWAC) | 5:00 AM**\n\nAvalanche danger is rated **High (4/5)** above and near treeline, and **Considerable (3/5)** below treeline for the East Slopes North zone. The active avalanche problem is **Persistent Slab**, driven by very strong west winds overloading an already weak snowpack and producing very large natural avalanches. The system has triggered an **Auto-Send alert** based on the High danger rating. The forecaster directs staying off and away from wind-loaded slopes at all elevations, limiting activity to wind-sheltered terrain at low elevations well clear of overhead avalanche paths, and treating any natural avalanches, cracking, or collapsing snow as immediate warning signs.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": true,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 6,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-016",
+      "scenario_name": "Togwotee Pass, WY — High Danger (2026-02-25)",
+      "center": "BTAC",
+      "parsed": {
+        "zone_name": "Togwotee Pass",
+        "center": "BTAC",
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": {
+            "rating": "None",
+            "level": 0
+          }
+        },
+        "avalanche_problems": [
+          "Storm Slab",
+          "Persistent Slab"
+        ],
+        "bottom_line": "<p>Very dangerous conditions exist as human triggered avalanches are very likely while remotely triggered avalanches are possible. Fast moving avalanches 1-2 feet deep and touchy conditions are expected as new snow lies on well connected bed surfaces. Larger avalanches are also capable of breaking deeper on buried weak layers. Travel in and around avalanche terrain today is not advised.&nbsp;</p>\n<p><em>A Winter Storming Warning is in effect from February 24, 5:00am until February 25, 5:00pm.</em></p>",
+        "hazard_discussion": "<p>The storm yesterday came in fiercely with rapid rates of snowfall of 1-2 inches per hour during the daytime and consistent, strong southwest/west wind. Snowfall totals range from 7-10 inches yesterday on Togwotee with an additional 3-6 inches possible today. Numerous avalanches were reported during the early part of the day as conditions were touchy (meaning the highest sensitivity in avalanche terminology). New snow moved easily and swiftly on any terrain over 30&deg; steep, including both sheltered and wind-loaded slopes. This is due to the well connected new to old snow interface consisting of melt freeze crusts on the southern half and preserved stellars on the north half of the compass rose. Warming temperatures yesterday and overnight will make the snow upside-down. The new snow is very unstable. If you do decide to travel into the backcountry, watch your slope angle carefully and avoid overhead exposure to steep terrain above you.&nbsp;</p>\n<p>Deeper in the snowpack, the January drought layers are being stressed by rapid loading of heavy, dense snow. Hard slabs are actively forming above the buried weak layers of facets and surface hoar. Avalanches stepping down to these weak layers will be destructive. Stay safe out there and let&rsquo;s hope this last pulse of snow comes in cleaner to create good riding conditions through the week as avalanche danger decreases.</p>"
+      },
+      "expected": {
+        "danger_rating": "High",
+        "danger_level": 4,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "High",
+            "level": 4
+          },
+          "near_treeline": {
+            "rating": "Considerable",
+            "level": 3
+          },
+          "below_treeline": null
+        },
+        "avalanche_problems": [
+          "Storm Slab",
+          "Persistent Slab"
+        ],
+        "alert_action": "auto_send",
+        "alert_reasoning": "High danger (level 4) at upper elevations triggers automatic alert dispatch; lower elevation not rated"
+      },
+      "computed_alert_action": "auto_send_urgent",
+      "ai_briefing": "**UAC Ops Briefing — Togwotee Pass (BTAC) | 5:00 AM Shift Start**\n\nDanger is rated **High (4/5) above treeline** and **Considerable (3/5) near treeline**, with no danger below treeline. Two active avalanche problems are in play: **Storm Slab** and **Persistent Slab** — human-triggered avalanches are very likely, remote triggering is possible, and fast-moving slides 1–2 feet deep are expected on well-connected bed surfaces, with larger breaks possible on deeper buried weak layers. The forecaster states that travel in and around avalanche terrain today is **not advised**. A **Winter Storming Warning is in effect from February 24, 5:00 AM through February 25, 5:00 PM**, and the system has issued an **URGENT Auto-Send alert** based on the High danger rating and overall severity of conditions.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": false,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 5,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-017",
+      "scenario_name": "Stevens Pass, WA — Extreme Danger (2022-01-07)",
+      "center": "NWAC",
+      "parsed": {
+        "zone_name": "Stevens Pass",
+        "center": "NWAC",
+        "danger_rating": "Extreme",
+        "danger_level": 5,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "near_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "below_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          }
+        },
+        "avalanche_problems": [
+          "Storm Slab"
+        ],
+        "bottom_line": "<p>Avoid all avalanche terrain and backcountry travel. Expect unusually dangerous conditions with widespread very large and destructive avalanches starting at upper elevations. A uniquely potent storm will maintain concern for roof avalanches and slides in unusual locations near towns and in the valleys.</p>",
+        "hazard_discussion": "<p>Since January 5th, over 31 inches of snow has accumulated with 3\" of water equivalent. Another 2.5\" of precipitation will fall as snow above 4,000ft by late Friday.&nbsp; There is minimal access to most of the zone as Highway 2 is closed. On Thursday, WSDOT forecasters reported multiple avalanches at least D3 in size hitting the closed highway west of Stevens Pass. In a portion of Tumwater Canyon, they reported over 30 debris piles on the highway up to 15 feet deep. In the neighboring East Central zone, we've received a report of an avalanche damaging a house south of Entiat and multiple reports of dangerous roof avalanches.</p>\n<p>&nbsp;</p>"
+      },
+      "expected": {
+        "danger_rating": "Extreme",
+        "danger_level": 5,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "near_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "below_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          }
+        },
+        "avalanche_problems": [
+          "Storm Slab"
+        ],
+        "alert_action": "auto_send_urgent",
+        "alert_reasoning": "Extreme danger (level 5) at all elevations triggers urgent automatic alert dispatch; avoid all avalanche terrain"
+      },
+      "computed_alert_action": "auto_send_urgent",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Stevens Pass (NWAC) | 5:00 AM**\n\nThe forecaster has rated avalanche danger at **Extreme (Level 5/5) at all elevation bands** — above treeline, near treeline, and below treeline — driven by a **Storm Slab** avalanche problem. Widespread very large and destructive avalanches are expected to initiate at upper elevations, and the forecaster specifically calls out concern for **roof avalanches and slides in unusual locations near towns and in valley bottoms** due to an unusually potent storm. The forecaster's direct guidance is to **avoid all avalanche terrain and all backcountry travel**. This assessment triggered an **URGENT Auto-Send alert**, reflecting the severity and immediate threat to life across the entire terrain spectrum.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": true,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 6,
+        "total_checks": 6
+      },
+      "error": null
+    },
+    {
+      "scenario_id": "gs-018",
+      "scenario_name": "Salt River/Wyoming Ranges, WY — Extreme Danger (2017-02-09)",
+      "center": "BTAC",
+      "parsed": {
+        "zone_name": "Salt River and Wyoming Ranges",
+        "center": "BTAC",
+        "danger_rating": "Extreme",
+        "danger_level": 5,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "near_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "below_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab"
+        ],
+        "bottom_line": "The avalanche danger will rise from High to Extreme today.  VERY DANGEROUS AVALANCHE CONDITIONS EXIST AND ALL AVALANCHE TERRAIN SHOULD BE AVOIDED TODAY. As a warm and wet system brings increasing temperatures and constant snow and rain to the area today, the avalanche hazard will continue to rapidly increase. Snowfall at the higher elevations will continue to load existing wind slabs, making them both larger and increasing the likelyhood of them releasing naturally. Below 8500 feet, rain will quickly weaken the snowpack, allowing for wet slabs to occur. These avalanches will release naturally today and given the above average snowpack, are likely to entrain large volumes of snow. One such slide has already occurred this morning in the Snake River Canyon near Wolf Creek, closing Snake River Canyon. Teton Pass remains closed as WYDOT continues to clean up debris from several slides that occurred two days ago. Also of note is that two snowmobilers were both uninjured after being caught in a slide at Togwotee yesterday.  One was fully buried with the exception of a visible part of his airbag that he had deployed. Beware of run out zones at lower elevations and use cautions around buildings as roofs will also be sliding. An avalanche warning has been issued by the center effective 1am this morning and continuing through at least 1am Friday.",
+        "hazard_discussion": "( Discussion is generated from the previous day's afternoon forecast. )A major warm and wet system is to impact the area tonight into Friday.  Precipitation should start this evening as snow at all elevations.  The snow is to turn to rain in the valleys with the rain/snow line rising to 8000 feet Thursday afternoon.  Winds from the southwest are to have 25 to 35 mph averages.   Over a foot of snow is expected at the higher elevations by Thursday evening. An avalanche warning has been issued for the area from 1am Thursday until 1am Friday.  The avalanche hazard will be HIGH. Rapid loading from wind and snow will further load existing slabs at higher leeward terrain.  Rain will quickly weaken the snowpack at lower elevations.  Natural avalanche activity is likely as wind slabs in higher terrain and as wet slabs in lower terrain.  These slides could entrain significant amounts of snow and impact highways and roads.  Also beware of the serious threat posed by roof slides. "
+      },
+      "expected": {
+        "danger_rating": "Extreme",
+        "danger_level": 5,
+        "danger_by_elevation": {
+          "above_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "near_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          },
+          "below_treeline": {
+            "rating": "Extreme",
+            "level": 5
+          }
+        },
+        "avalanche_problems": [
+          "Wind Slab",
+          "Wet Slab"
+        ],
+        "alert_action": "auto_send_urgent",
+        "alert_reasoning": "Extreme danger (level 5) at all elevations triggers urgent automatic alert dispatch; widespread natural avalanches expected"
+      },
+      "computed_alert_action": "auto_send_urgent",
+      "ai_briefing": "**PRE-SHIFT OPS BRIEFING — Salt River & Wyoming Ranges (BTAC) | 5:00 AM**\n\nThe forecaster has rated avalanche danger at **Extreme (5/5) at all elevation bands** — above treeline, near treeline, and below treeline — with active problems identified as **Wind Slab** and **Wet Slab**. A warming, wet system is driving rapid hazard increases: incoming snow at upper elevations is loading existing wind slabs, raising the likelihood of large natural releases, while rain below 8,500 feet is destabilizing the snowpack and triggering wet slab avalanches naturally. The forecaster states all avalanche terrain should be avoided today, notes a slide has already closed Snake River Canyon this morning, that Teton Pass remains closed from prior debris, and that roof avalanches are also a concern — staff should stay clear of runout zones and building roof edges. The system has issued an **URGENT Auto-Send alert** because a formal avalanche warning is in effect from 1:00 AM today through at least 1:00 AM Friday, reflecting the forecaster's assessment of extremely dangerous, life-threatening conditions across the entire zone.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "scores": {
+        "danger_level_match": true,
+        "problems_no_false_negatives": true,
+        "missing_problems": [],
+        "extra_problems": [],
+        "alert_action_match": true,
+        "briefing_names_danger": true,
+        "briefing_names_all_problems": true,
+        "briefing_urgency_ok": true,
+        "pass_count": 6,
+        "total_checks": 6
+      },
+      "error": null
+    }
+  ]
+}

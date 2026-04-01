@@ -1,0 +1,283 @@
+{
+  "run_date": "2026-04-01",
+  "prompt_version": "v1.0",
+  "zones": [
+    {
+      "zone_slug": "salt-lake",
+      "zone_name": "Salt Lake",
+      "fetched_at": "2026-04-01T22:08:57.406Z",
+      "danger_rating": "Moderate",
+      "danger_level": 2,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "Moderate",
+          "level": 2
+        },
+        "near_treeline": {
+          "rating": "Moderate",
+          "level": 2
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [
+        "Storm Slab",
+        "Wind Slab",
+        "Wet Slab"
+      ],
+      "alert_action": "human_review",
+      "alert_reasoning": "No alert generated — heightened awareness only — escalated due to 3 concurrent avalanche problems",
+      "bottom_line": "Avalanche danger has risen to MODERATE due to recent overnight snowfall and increasing winds across the upper elevations. It will be possible for humans to trigger small soft slab avalanches of new or wind-drifted snow. Keep an eye out for changing conditions and avoid steep slopes that may have shallow drifts of new or wind-blown snow.\r\rEven with overnight cooling, the snowpack remains wet and unconsolidated, with wet loose avalanches remaining a concern in steep terrain and terrain traps below 9000 feet.\r\rThrough the spring, we will shift to intermittent updates as conditions warrant. During more active periods, like this storm and loading event, we will return to issuing full forecasts with danger ratings. The avalanche season isn’t over, so continue to check in.\r",
+      "ai_briefing": "**UAC Ops Briefing — Salt Lake Zone | 5:00 AM Shift Start**\n\nAvalanche danger is rated **Moderate (2/5)** at both above and near treeline elevations; below treeline is rated None. The forecaster identifies three concurrent problems: **Storm Slab** and **Wind Slab** from recent overnight snow and increasing upper-elevation winds, and **Wet Slab** persisting in steep terrain and terrain traps below 9,000 feet despite overnight cooling. The system has flagged this for **Review Required** — no formal alert was issued, but heightened awareness is in place specifically because three avalanche problems are active simultaneously. Staff should avoid steep slopes with shallow new or wind-drifted snow and watch for changing conditions throughout the shift.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "ogden",
+      "zone_name": "Ogden",
+      "fetched_at": "2026-04-01T22:09:02.695Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [
+        "Wet Slab",
+        "Storm Slab",
+        "Wind Slab"
+      ],
+      "alert_action": "human_review",
+      "alert_reasoning": "No alert generated — escalated due to 3 concurrent avalanche problems",
+      "bottom_line": "\rDue to the rapid and early melt-off, we've stopped issuing daily forecasts for the season. Intermittent updates will be issued through the spring as conditions warrant. We will continue publishing observations as they come in, so please keep submitting them when you're out and about.\r\rIncoming storms will bring changing conditions, with the potential for increasing danger.\r\rSpring storms can still behave like winter. Treat each one the same way. Avalanches can form within the new snow, often tied to low-density layers, periods of higher snowfall intensity, and wind slabs that develop during the storm.&nbsp;Stay tuned and keep checking the forecast.\r\r",
+      "ai_briefing": "**UAC Ops Briefing — Ogden Zone | 5:00 AM Shift Start**\n\nThe forecaster has rated overall danger at **None (Level 0/5)** across all elevation bands — above treeline, near treeline, and below treeline — reflecting the end of the regular daily forecast season due to rapid snowmelt. Despite the None danger rating, three avalanche problem types are listed — **Wet Slab, Storm Slab, and Wind Slab** — flagging the potential for incoming storms to introduce changing and increasing conditions. The forecaster notes that spring storms can still behave like winter, with new snow avalanche potential tied to low-density layers, high snowfall intensity, and wind loading. **A Review Required alert was escalated by the system** because three concurrent avalanche problems were identified, warranting staff attention even without an active danger level.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "provo",
+      "zone_name": "Provo",
+      "fetched_at": "2026-04-01T22:09:08.782Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [
+        "Wet Slab",
+        "Storm Slab",
+        "Wind Slab"
+      ],
+      "alert_action": "human_review",
+      "alert_reasoning": "No alert generated — escalated due to 3 concurrent avalanche problems",
+      "bottom_line": "\rDue to the rapid and early melt-off, we've stopped issuing daily forecasts for the season. Intermittent updates will be issued through the spring as conditions warrant. We will continue publishing observations as they come in, so please keep submitting them when you're out and about.\r\rIncoming storms will bring changing conditions, with the potential for increasing danger.\r\rSpring storms can still behave like winter. Treat each one the same way. Avalanches can form within the new snow, often tied to low-density layers, periods of higher snowfall intensity, and wind slabs that develop during the storm.&nbsp;Stay tuned and keep checking the forecast.\r\r",
+      "ai_briefing": "**Provo Zone — 5am Ops Briefing**\n\nThe forecaster has rated overall danger at **None (Level 0/5)** across all elevation bands — above treeline, near treeline, and below treeline — reflecting the end of the regular daily forecast season due to rapid early melt-off. However, three concurrent avalanche problems are listed — **Wet Slab, Storm Slab, and Wind Slab** — and the forecaster notes that incoming spring storms can still produce winter-like conditions, with new snow potentially forming slabs tied to low-density layers, high-intensity snowfall periods, and wind loading. The system has flagged this for **Review Required** because the combination of three active problem types triggered an automatic escalation, even though no alert was generated. Intermittent forecast updates will continue through spring as conditions warrant — staff should monitor for changing danger with each new storm cycle.",
+      "ai_model": "claude-sonnet-4-6",
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "logan",
+      "zone_name": "Logan",
+      "fetched_at": "2026-04-01T22:09:16.248Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [
+        "Wet Slab"
+      ],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated",
+      "bottom_line": "Due to the rapid and early melt-off, we've stopped issuing daily forecasts for the season.&nbsp; Stay tuned to this channel, as we’ll continue to share snow observations, avalanche information, and condition updates.\r\r&nbsp;\r\r&nbsp;\r",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "uintas",
+      "zone_name": "Uintas",
+      "fetched_at": "2026-04-01T22:09:16.665Z",
+      "danger_rating": "Moderate",
+      "danger_level": 2,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "Moderate",
+          "level": 2
+        },
+        "near_treeline": {
+          "rating": "Moderate",
+          "level": 2
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [
+        "Storm Slab"
+      ],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated — heightened awareness only",
+      "bottom_line": "Around the compass, avalanche danger is&nbsp;MODERATE&nbsp;where new snow slabs up, and human-triggered avalanches are&nbsp;POSSIBLE. Today's avalanches, up to 1 foot deep by this afternoon, will run fast and far on \"greasy\", slick bed surfaces, and stack up more debris than we might expect.&nbsp;\r\rI am in an assessment mindset, today -- Along with some surfy turns, I'm watching the developing storm slab and how it is acting to my additional weight and bonding to the old snow surface.\r\r&nbsp;\r\r&nbsp;\r",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "skyline",
+      "zone_name": "Skyline",
+      "fetched_at": "2026-04-01T22:09:16.927Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated",
+      "bottom_line": "&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "moab",
+      "zone_name": "Moab",
+      "fetched_at": "2026-04-01T22:09:17.200Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated",
+      "bottom_line": "\rWe're through issuing regular avalanche forecasts for the season.\r\rYour primary concerns in the spring are loose wet avalanches from daytime heating, and wet slab avalanches.&nbsp;Plan to get in and out early before&nbsp;slopes become wet and sloppy.&nbsp;Consecutive nights without a freeze can increase the likelihood for wet slab avalanches.\r\rNew and wind drifted snow can also cause the danger to rise.&nbsp;Use the weather links below to aid in your trip planning.&nbsp;\r\r\r&nbsp;\r",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "southwest",
+      "zone_name": "Southwest",
+      "fetched_at": "2026-04-01T22:09:17.471Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated",
+      "bottom_line": "",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    },
+    {
+      "zone_slug": "abajos",
+      "zone_name": "Abajos",
+      "fetched_at": "2026-04-01T22:09:17.731Z",
+      "danger_rating": "None",
+      "danger_level": 0,
+      "danger_by_elevation": {
+        "above_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "near_treeline": {
+          "rating": "None",
+          "level": 0
+        },
+        "below_treeline": {
+          "rating": "None",
+          "level": 0
+        }
+      },
+      "avalanche_problems": [],
+      "alert_action": "no_alert",
+      "alert_reasoning": "No alert generated",
+      "bottom_line": "Due to the early season melt-off and over all lack of snow we have discontinued advisories for the season. Areas with enough snow to avalanche are increasingly difficult to access, but unseasonably warm temperatures and a lack of overnight refreezes mean that wet avalanches remain possible on slopes that have enough snow. Signs of instability include, rollerballs, loose-wet sluffs, and punchy, wet, or unsupportable snow. Stay off of steep slopes where these signs are present.&nbsp;\r\r\r\rAbajo Mountains on March 22, 2026.&nbsp;\r\r&nbsp;\r\r&nbsp;\r\r&nbsp;\r",
+      "ai_briefing": null,
+      "ai_model": null,
+      "prompt_version": "v1.0",
+      "error": null
+    }
+  ]
+}
