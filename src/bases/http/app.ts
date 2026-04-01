@@ -65,7 +65,7 @@ app.route("/api/proxy", proxy);
 app.use(
 	"/*",
 	serveStatic({
-		root: "./src/public",
+		root: "./src/projects/dashboard",
 		rewriteRequestPath: (path) => {
 			if (path === "/" || (!path.includes(".") && !path.startsWith("/api"))) {
 				return "/index.html";

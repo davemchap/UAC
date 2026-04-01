@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
 	// Global ignores
 	{
-		ignores: ["dist/", "node_modules/", "src/public/**", "**/*.js", "**/*.mjs"],
+		ignores: ["dist/", "node_modules/", "src/projects/**", "**/*.js", "**/*.mjs"],
 	},
 
 	// Base TypeScript strict + stylistic configs

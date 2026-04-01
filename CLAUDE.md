@@ -320,7 +320,7 @@ Do **not** attempt to use Docker or `pg_ctlcluster` — Docker is unavailable in
 - **Middleware**: `beads` — use for middleware chaining and task pipeline logic
 - **Database**: PostgreSQL via `postgres` library
 - **Tests**: `bun:test` with `mock.module()` for database mocking
-- **Static files**: `src/public/` (excluded from lint — vanilla JS/HTML/CSS)
+- **Static files**: `src/projects/dashboard/` (excluded from lint — vanilla JS/HTML/CSS)
 
 ## Project Discovery
 
