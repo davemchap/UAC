@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Pre-commit hook: lint and typecheck staged TypeScript files
+#
+# Defense in depth: catches lint/type errors before they reach the pipeline.
+# The CI pipeline still runs full checks (outer loop), but this hook provides
+# fast feedback in the inner loop so developers and agents fix issues immediately.
+#
+# Target: <10 seconds on staged files only.
+#
+# Setup: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+# --- Collect staged TypeScript/JavaScript files ---
+staged_ts_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' '*.js' '*.jsx' || true)
+
+if [ -z "$staged_ts_files" ]; then
+  # No TypeScript/JavaScript files staged -- nothing to lint
+  exit 0
+fi
+
+# --- Run full check suite (same gates as CI, including tests) ---
+if ! bun run check; then
+  echo ""
+  echo "========================================="
+  echo "  Pre-commit check FAILED"
+  echo "========================================="
+  echo ""
+  echo "Fix biome issues: bun run lint:biome -- --write (or bunx --bun @biomejs/biome@1.9.4 format --write .)"
+  echo "Fix lint issues:  bun run lint:fix"
+  echo "Fix type errors:  Review the errors above and fix the types"
+  echo ""
+  echo "Then stage your fixes and commit again."
+  exit 1
+fi
+
+# --- BEGIN BEADS INTEGRATION v0.63.3 ---
+# This section is managed by beads. Do not remove these markers.
+if command -v bd >/dev/null 2>&1; then
+  export BD_GIT_HOOK=1
+  _bd_timeout=${BEADS_HOOK_TIMEOUT:-300}
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "$_bd_timeout" bd hooks run pre-commit "$@"
+    _bd_exit=$?
+    if [ $_bd_exit -eq 124 ]; then
+      echo >&2 "beads: hook 'pre-commit' timed out after ${_bd_timeout}s — continuing without beads"
+      _bd_exit=0
+    fi
+  else
+    bd hooks run pre-commit "$@"
+    _bd_exit=$?
+  fi
+  if [ $_bd_exit -eq 3 ]; then
+    echo >&2 "beads: database not initialized — skipping hook 'pre-commit'"
+    _bd_exit=0
+  fi
+  if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
+fi
+# --- END BEADS INTEGRATION v0.63.3 ---
