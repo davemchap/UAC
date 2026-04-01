@@ -5,6 +5,18 @@ import { mock } from "bun:test";
 void mock.module("../components/db", () => ({
 	getSql: () => () => [],
 	getDb: () => ({}),
+	queries: {
+		getAllZones: () => Promise.resolve([]),
+		getZoneBySlug: () => Promise.resolve([]),
+		getZoneByZoneId: () => Promise.resolve([]),
+		getSnotelStationsByZoneId: () => Promise.resolve([]),
+		getLatestForecast: () => Promise.resolve([]),
+		getForecastProblems: () => Promise.resolve([]),
+		getWeatherReadings: () => Promise.resolve([]),
+		getSnowpackReadings: () => Promise.resolve([]),
+		getAllAlertThresholds: () => Promise.resolve([]),
+		getAllEscalationRules: () => Promise.resolve([]),
+	},
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
 	closeDatabase: () => Promise.resolve(),
