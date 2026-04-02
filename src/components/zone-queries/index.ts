@@ -3,8 +3,10 @@ import { getDb, queries } from "../db";
 import { avalancheForecasts, avalancheProblems, snowpackReadings, snotelStations, weatherReadings } from "../db/schema";
 import { dangerNameToLevel } from "../risk-assessment";
 import { generateAlert } from "../alerts";
+import { parseBulletin } from "../uac-bulletin";
 import type { RiskAssessment } from "../risk-assessment";
 import type { AlertDecision } from "../alerts";
+import type { ActiveBulletin } from "../uac-bulletin";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,6 +56,7 @@ export interface ZoneDetail {
 	dateIssued: string;
 	problems: { problemNumber: number; problemType: string; description: string | null }[];
 	aiAlert: AiAlertDetail | null;
+	activeBulletin: ActiveBulletin | null;
 }
 
 export interface ZoneSummariesResult {
@@ -327,5 +330,6 @@ export async function getZoneDetail(slug: string): Promise<ZoneDetail | null> {
 		dateIssued: forecast?.dateIssued ?? "",
 		problems: forecastProblems,
 		aiAlert: aiAlertDetail,
+		activeBulletin: parseBulletin(forecast?.specialBulletin),
 	};
 }

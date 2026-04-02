@@ -194,6 +194,21 @@ function renderZoneCard(zone) {
   `;
 }
 
+function renderBulletinBanner(bulletin) {
+	const isWarning = bulletin.type === "warning";
+	const title = isWarning ? "⚠ AVALANCHE WARNING" : "⚠ Avalanche Watch";
+	const period = bulletin.effectivePeriod ? `<div class="bulletin-period">Effective: ${bulletin.effectivePeriod}</div>` : "";
+	const area = bulletin.coverageArea ? `<div class="bulletin-area">Area: ${bulletin.coverageArea}</div>` : "";
+	return `
+    <div class="bulletin-banner bulletin-${bulletin.type}">
+      <div class="bulletin-title">${title}</div>
+      <div class="bulletin-message">${bulletin.lifeSafetyMessage}</div>
+      ${period}
+      ${area}
+    </div>
+  `;
+}
+
 // ---------------------------------------------------------------------------
 // Plain-language verdict (Gap 3)
 // ---------------------------------------------------------------------------
@@ -314,6 +329,10 @@ async function openModal(slug) {
 			? `<span class="danger-badge danger-${ai.dangerLevel} ai-badge">AI: ${ai.dangerRating}</span>`
 			: "";
 
+		const bulletinBanner = zone.activeBulletin
+			? renderBulletinBanner(zone.activeBulletin)
+			: "";
+
 		const aiElevationSection = ai ? `
         <div class="modal-section">
           <div class="modal-section-label">AI Danger by Elevation</div>
@@ -377,6 +396,8 @@ async function openModal(slug) {
           ${zone.alert.escalated ? `<div class="escalation-note">↑ Escalated: ${zone.alert.escalationReason}</div>` : ""}
         </div>
       </div>
+
+      ${bulletinBanner}
 
       ${plainVerdict ? `<div class="modal-section">${plainVerdict}</div>` : ""}
 

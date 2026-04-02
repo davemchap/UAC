@@ -2847,3 +2847,50 @@ h1 {
 	line-height: 1.5;
 	margin: 0;
 }
+
+/* Bulletin banner (Watch / Warning) */
+.bulletin-banner {
+	margin: 0.75rem 1.5rem;
+	padding: 1rem 1.25rem;
+	border-radius: 6px;
+	border-left: 5px solid;
+}
+
+.bulletin-warning {
+	background: rgba(220, 38, 38, 0.15);
+	border-color: #dc2626;
+}
+
+.bulletin-watch {
+	background: rgba(217, 119, 6, 0.15);
+	border-color: #d97706;
+}
+
+.bulletin-title {
+	font-size: 1rem;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	margin-bottom: 0.4rem;
+}
+
+.bulletin-warning .bulletin-title {
+	color: #ef4444;
+}
+
+.bulletin-watch .bulletin-title {
+	color: #f59e0b;
+}
+
+.bulletin-message {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #e8eaf0;
+	margin-bottom: 0.4rem;
+}
+
+.bulletin-period,
+.bulletin-area {
+	font-size: 0.8rem;
+	color: #9ca3af;
+	margin-top: 0.25rem;
+}

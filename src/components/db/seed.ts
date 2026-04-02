@@ -46,6 +46,7 @@ interface Advisory {
 	current_conditions?: string;
 	region: string;
 	Nid: string;
+	special_avalanche_bulletin?: string;
 }
 
 interface WeatherPeriod {
@@ -181,6 +182,7 @@ for (const [slug, zoneData] of Object.entries(snapshot.zones)) {
 			bottomLine: advisory.bottom_line ?? null,
 			currentConditions: advisory.current_conditions ?? null,
 			region: advisory.region,
+			specialBulletin: advisory.special_avalanche_bulletin ?? null,
 		})
 		.onConflictDoUpdate({
 			target: [avalancheForecasts.zoneId, avalancheForecasts.nid],

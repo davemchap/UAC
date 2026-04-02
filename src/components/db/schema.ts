@@ -35,6 +35,7 @@ export const avalancheForecasts = pgTable(
 		bottomLine: text("bottom_line"),
 		currentConditions: text("current_conditions"),
 		region: text("region"),
+		specialBulletin: text("special_bulletin"),
 		createdAt: timestamp("created_at").defaultNow(),
 		updatedAt: timestamp("updated_at").defaultNow(),
 	},

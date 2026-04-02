@@ -23,6 +23,7 @@ interface UacAdvisory {
 	current_conditions?: string;
 	region?: string;
 	Nid?: string;
+	special_avalanche_bulletin?: string;
 }
 
 interface UacResponse {
@@ -70,6 +71,7 @@ async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promis
 			bottomLine: advisory.bottom_line ?? null,
 			currentConditions: advisory.current_conditions ?? null,
 			region: advisory.region ?? null,
+			specialBulletin: advisory.special_avalanche_bulletin ?? null,
 		})
 		.onConflictDoUpdate({
 			target: [avalancheForecasts.zoneId, avalancheForecasts.nid],
