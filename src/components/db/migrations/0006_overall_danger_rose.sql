@@ -1,1 +1,1 @@
-ALTER TABLE "avalanche_forecasts" ADD COLUMN "overall_danger_rose" text;
+ALTER TABLE "avalanche_forecasts" ADD COLUMN IF NOT EXISTS "overall_danger_rose" text;
