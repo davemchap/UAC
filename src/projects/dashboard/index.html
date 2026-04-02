@@ -136,9 +136,27 @@
 			<div id="notif-list" class="notif-list"></div>
 		</div>
 
+	<!-- Review Panel -->
+	<div id="review-panel" class="side-panel hidden">
+		<div class="side-panel-header">
+			<span class="side-panel-title">Review AI Alert</span>
+			<button id="review-panel-close" class="side-panel-close" aria-label="Close">✕</button>
+		</div>
+		<div id="review-panel-body" class="review-panel-body"></div>
+	</div>
+
 		<main>
 			<div id="snapshot-date" class="snapshot-date"></div>
 			<div id="summary-bar" class="summary-bar hidden"></div>
+
+			<!-- Morning Briefing Section -->
+			<section id="briefing-section" class="briefing-section">
+				<div class="briefing-header">
+					<h2 class="briefing-title">☀ Morning Briefing</h2>
+					<span id="briefing-date-label" class="briefing-date-label"></span>
+				</div>
+				<div id="briefing-content"></div>
+			</section>
 
 			<div class="tab-bar">
 				<button id="tab-grid" class="tab-btn tab-active" onclick="switchTab('grid')">Grid</button>

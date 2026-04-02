@@ -1,4 +1,5 @@
 import { generateAlertsForAllZones } from "./alert-generator";
+import { generateMorningBriefings } from "./briefing-generator";
 import { ingestAllNwsZones } from "./nws";
 import { ingestAllSnotelStations } from "./snotel";
 import { ingestAllUacZones } from "./uac";
@@ -28,6 +29,7 @@ async function runSafe(name: string, fn: () => Promise<void>): Promise<void> {
 async function ingestUacThenGenerateAlerts(): Promise<void> {
 	await ingestAllUacZones();
 	await runSafe("AI alert generation", generateAlertsForAllZones);
+	await runSafe("Morning briefing generation", generateMorningBriefings);
 }
 
 // ---------------------------------------------------------------------------

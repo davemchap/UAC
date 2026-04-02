@@ -575,6 +575,144 @@ async function deleteRule(id) {
 	}
 }
 
+// ---------------------------------------------------------------------------
+// Morning Briefing
+// ---------------------------------------------------------------------------
+
+const ACTION_LABELS = {
+	no_alert: "No Alert",
+	human_review: "Review Required",
+	auto_send: "Auto-Sent",
+	auto_send_urgent: "URGENT Auto-Sent",
+};
+
+const DANGER_COLORS = { 0: "#aaa", 1: "#4caf50", 2: "#ffeb3b", 3: "#ff9800", 4: "#f44336", 5: "#7b1fa2" };
+
+function briefingActionBadge(action, reviewStatus) {
+	const label = ACTION_LABELS[action] ?? action;
+	const reviewed = reviewStatus ? ` <span class="review-tag review-${reviewStatus}">${reviewStatus}</span>` : "";
+	const cls = action === "human_review" && !reviewStatus ? "action-badge action-review" : "action-badge";
+	return `<span class="${cls}">${label}</span>${reviewed}`;
+}
+
+function renderBriefingCard(b) {
+	const color = DANGER_COLORS[b.dangerLevel ?? 0] ?? "#aaa";
+	const problems = (b.avalancheProblems ?? []).join(", ") || "None";
+	const reviewBtn =
+		b.alertAction === "human_review" && !b.reviewStatus
+			? `<button class="btn-review" onclick="openReviewPanel(${b.id})">Review &amp; Approve</button>`
+			: "";
+	return `
+		<div class="briefing-card" style="border-left: 4px solid ${color}">
+			<div class="briefing-card-header">
+				<strong class="briefing-zone-name">${b.zoneSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</strong>
+				${briefingActionBadge(b.alertAction, b.reviewStatus)}
+			</div>
+			<div class="briefing-danger">
+				<span style="color:${color};font-weight:600">${b.dangerRating ?? "—"} (Level ${b.dangerLevel ?? "?"})</span>
+				<span class="briefing-elev">ATL: ${b.dangerAboveTreelineRating ?? "?"} &middot; NTL: ${b.dangerNearTreelineRating ?? "?"} &middot; BTL: ${b.dangerBelowTreelineRating ?? "?"}</span>
+			</div>
+			<div class="briefing-problems"><em>Problems:</em> ${problems}</div>
+			${b.explanation ? `<p class="briefing-explanation">${b.explanation}</p>` : ""}
+			${reviewBtn}
+		</div>`;
+}
+
+async function loadBriefings() {
+	const content = document.getElementById("briefing-content");
+	const dateLabel = document.getElementById("briefing-date-label");
+	try {
+		const res = await fetch("/api/briefings/today");
+		const data = await res.json();
+		dateLabel.textContent = data.date ?? "";
+		const active = (data.briefings ?? []).filter((b) => b.status !== "no_alert");
+		if (active.length === 0) {
+			content.innerHTML = '<p class="briefing-empty">No briefing generated yet for today. Check back after 4:30 am.</p>';
+			return;
+		}
+		content.innerHTML = active.map(renderBriefingCard).join("");
+	} catch {
+		content.innerHTML = '<p class="briefing-empty">Unable to load morning briefing.</p>';
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Review Panel
+// ---------------------------------------------------------------------------
+
+function openReviewPanel(briefingId) {
+	const panel = document.getElementById("review-panel");
+	const body = document.getElementById("review-panel-body");
+	body.innerHTML = `
+		<div class="review-form">
+			<label class="review-label">Reviewer Name</label>
+			<input id="review-name" type="text" class="review-input" placeholder="Your name" />
+			<label class="review-label">AI Explanation</label>
+			<textarea id="review-explanation" class="review-textarea" rows="5"></textarea>
+			<p class="review-hint">Edit the explanation above if needed, then approve. Or reject with a reason below.</p>
+			<label class="review-label">Notes (optional)</label>
+			<input id="review-notes" type="text" class="review-input" placeholder="Reason for edit or rejection" />
+			<div class="review-actions">
+				<button class="btn-primary" onclick="submitReview(${briefingId}, 'approved')">Approve</button>
+				<button class="btn-primary" onclick="submitReview(${briefingId}, 'edited')">Approve with Edits</button>
+				<button class="btn-danger" onclick="submitReview(${briefingId}, 'rejected')">Reject</button>
+			</div>
+			<span id="review-status" class="save-status"></span>
+		</div>`;
+
+	// Pre-fill explanation from the rendered card
+	fetch("/api/briefings/today")
+		.then((r) => r.json())
+		.then((data) => {
+			const b = (data.briefings ?? []).find((x) => x.id === briefingId);
+			if (b) document.getElementById("review-explanation").value = b.explanation ?? "";
+		})
+		.catch(() => {});
+
+	panel.classList.remove("hidden");
+	document.getElementById("notif-overlay").classList.remove("hidden");
+}
+
+function closeReviewPanel() {
+	document.getElementById("review-panel").classList.add("hidden");
+	document.getElementById("notif-overlay").classList.add("hidden");
+}
+
+async function submitReview(briefingId, decision) {
+	const name = document.getElementById("review-name").value.trim();
+	const explanation = document.getElementById("review-explanation").value.trim();
+	const notes = document.getElementById("review-notes").value.trim();
+	const statusEl = document.getElementById("review-status");
+
+	if (!name) { statusEl.textContent = "Enter your name first."; return; }
+
+	try {
+		const res = await fetch(`/api/briefings/${briefingId}/review`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				reviewerName: name,
+				decision,
+				editedExplanation: decision === "edited" ? explanation : undefined,
+				notes: notes || undefined,
+			}),
+		});
+		const data = await res.json();
+		if (data.success) {
+			closeReviewPanel();
+			await loadBriefings();
+		} else {
+			statusEl.textContent = "✗ Failed to save review.";
+		}
+	} catch {
+		statusEl.textContent = "✗ Error submitting review.";
+	}
+}
+
+document.getElementById("review-panel-close").addEventListener("click", closeReviewPanel);
+
+void loadBriefings();
+
 document.getElementById("alert-config-btn").addEventListener("click", () => {
 	configPanelOpen ? closeConfigPanel() : openConfigPanel();
 });

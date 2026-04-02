@@ -134,6 +134,37 @@ export const fieldObservations = pgTable("field_observations", {
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const morningBriefings = pgTable(
+	"morning_briefings",
+	{
+		id: serial("id").primaryKey(),
+		zoneId: integer("zone_id").notNull(),
+		zoneSlug: text("zone_slug").notNull(),
+		briefingDate: text("briefing_date").notNull(), // YYYY-MM-DD
+		dangerRating: text("danger_rating"),
+		dangerLevel: integer("danger_level"),
+		dangerAboveTreelineRating: text("danger_above_treeline_rating"),
+		dangerAboveTreelineLevel: integer("danger_above_treeline_level"),
+		dangerNearTreelineRating: text("danger_near_treeline_rating"),
+		dangerNearTreelineLevel: integer("danger_near_treeline_level"),
+		dangerBelowTreelineRating: text("danger_below_treeline_rating"),
+		dangerBelowTreelineLevel: integer("danger_below_treeline_level"),
+		avalancheProblems: text("avalanche_problems").array(),
+		alertAction: text("alert_action").notNull(),
+		explanation: text("explanation"),
+		model: text("model"),
+		status: text("status").notNull().default("ready"), // ready | no_alert | briefing_failed
+		reviewStatus: text("review_status"), // approved | edited | rejected
+		reviewerName: text("reviewer_name"),
+		reviewedAt: timestamp("reviewed_at"),
+		originalExplanation: text("original_explanation"),
+		reviewerNotes: text("reviewer_notes"),
+		generatedAt: timestamp("generated_at").defaultNow(),
+		createdAt: timestamp("created_at").defaultNow(),
+	},
+	(t) => [unique().on(t.zoneId, t.briefingDate)],
+);
+
 export const aiAlerts = pgTable(
 	"ai_alerts",
 	{

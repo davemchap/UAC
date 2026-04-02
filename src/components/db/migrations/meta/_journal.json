@@ -29,6 +29,13 @@
 			"when": 1775095000000,
 			"tag": "0003_field_observations",
 			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1775100000000,
+			"tag": "0004_morning_briefings",
+			"breakpoints": true
 		}
 	]
 }

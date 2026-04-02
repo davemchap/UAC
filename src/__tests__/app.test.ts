@@ -5,6 +5,7 @@ import { mock } from "bun:test";
 void mock.module("../components/db", () => ({
 	getSql: () => () => [],
 	getDb: () => ({}),
+	morningBriefings: {},
 	queries: {
 		getAllZones: () => Promise.resolve([]),
 		getZoneBySlug: () => Promise.resolve([]),
@@ -16,6 +17,9 @@ void mock.module("../components/db", () => ({
 		getSnowpackReadings: () => Promise.resolve([]),
 		getAllAlertThresholds: () => Promise.resolve([]),
 		getAllEscalationRules: () => Promise.resolve([]),
+		getTodaysBriefings: () => Promise.resolve([]),
+		getBriefingById: () => Promise.resolve([]),
+		getBriefingForZoneDate: () => Promise.resolve([]),
 	},
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
