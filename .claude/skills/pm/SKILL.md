@@ -106,9 +106,71 @@ Wait for confirmation or corrections before moving to Phase 3.
 
 ---
 
-## Phase 3 — Gap Analysis
+## Phase 3 — COM-B Persona Simulation
 
-Compare the Research Summary against the existing board audit from Phase 1.
+Use the behavioral personas from John Cutler's COM-B diagnostic framework to simulate each user walking through the product backlog. This surfaces gaps the desk research alone won't find — specifically, features that exist but don't address the right behavioral barriers, and barriers with no coverage at all.
+
+### Load the COM-B personas
+
+Fetch the persona profiles:
+
+```
+WebFetch https://raw.githubusercontent.com/johnpcutler/com-b-diagnostic/main/personas_jobs.md
+with prompt: "List every persona with their name, goals, COM-B profile (capability constraints, opportunity constraints, motivation drivers), and key behaviors."
+```
+
+Also fetch the COM-B reference to understand the blocker codes:
+
+```
+WebFetch https://raw.githubusercontent.com/johnpcutler/com-b-diagnostic/main/com-b-abbreviations-reference.md
+with prompt: "List each COM-B code, its full name, and a one-line definition."
+```
+
+### For each relevant persona, run a behavioral walkthrough
+
+Select the personas that match your product's target users (not all 8 apply to every product). For each selected persona:
+
+1. **Adopt their profile** — internalize their capability constraints, opportunity constraints, and motivation drivers from the personas file.
+
+2. **Walk the backlog as that persona** — review each open issue and ask:
+   - Does this story address a real barrier I face (capability, opportunity, or motivation)?
+   - Does it make it *easier* for me to do the target behavior, or does it add friction?
+   - Does it speak to what actually motivates me, or does it assume the wrong motivation?
+   - Is anything in the backlog solving a problem I don't actually have?
+
+3. **Check for missing coverage** — for each COM-B blocker this persona faces, is there a story that directly addresses it?
+
+4. **Note interface failures** — John's framework highlights that "failures concentrate at the interfaces between actors." Check whether any stories address handoffs between personas (e.g., observer submits → ops reviews → traveler sees result).
+
+### Produce a COM-B simulation report
+
+```
+## COM-B Simulation: <Persona Name>
+**COM-B Profile summary**: <2-3 sentences on their key capability/opportunity/motivation factors>
+
+**Backlog coverage check**:
+| COM-B Blocker | Blocker Type | Covered by story? | Gap? |
+|---|---|---|---|
+| Limited time in field to fill forms | PO (physical opportunity) | #47 zero-friction submission | ✅ covered |
+| No feedback on whether report was used | RM (reflective motivation) | none | ❌ gap |
+
+**Stories solving the wrong problem for this persona**:
+- #52 leaderboard assumes competitive motivation — this persona is mission-driven, not rank-driven
+
+**Interface gaps**:
+- No story covers how this persona learns that their observation influenced a traveler decision in near-real-time
+
+**Suggested new stories**:
+- Observer receives a notification when their approved report causes a 'This changed my plans' event (addresses RM gap)
+```
+
+Repeat for each relevant persona. Consolidate findings before moving to Phase 4.
+
+---
+
+## Phase 4 — Gap Analysis
+
+Compare the COM-B simulation findings (Phase 3) + Research Summary (Phase 2) against the existing board audit (Phase 1).
 
 Identify:
 
@@ -150,9 +212,9 @@ Wait for confirmation.
 
 ---
 
-## Phase 4 — Create and Repair Issues
+## Phase 5 — Create and Repair Issues
 
-Act on what the user approved in Phase 3.
+Act on what the user approved in Phase 4.
 
 ### Repairing existing issues
 
@@ -228,7 +290,7 @@ After creating stories, add a reference to the parent epic in both directions:
 
 ---
 
-## Phase 5 — Summary Report
+## Phase 6 — Summary Report
 
 After all creates and repairs are complete, produce a final summary:
 
