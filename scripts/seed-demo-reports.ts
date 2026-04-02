@@ -10,11 +10,11 @@ import { observationReports, observerHandles } from "../src/components/db/schema
 const sql = postgres(process.env.DATABASE_URL!, { max: 3 });
 const db = drizzle(sql);
 
-// Public-domain avalanche / backcountry snow photos from Wikimedia Commons / NOAA
+// Reliable placeholder mountain/snow photos via picsum.photos (seeded IDs = consistent images)
 const PHOTOS = [
-	"https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Avalanche_on_Everest.jpg/640px-Avalanche_on_Everest.jpg",
-	"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/2015-02-24_Snow_cornice_wind_slab_Utah.jpg/640px-2015-02-24_Snow_cornice_wind_slab_Utah.jpg",
-	"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Snowpack_layering.jpg/640px-Snowpack_layering.jpg",
+	"https://picsum.photos/seed/avy1/640/480",
+	"https://picsum.photos/seed/snow2/640/480",
+	"https://picsum.photos/seed/pack3/640/480",
 	null,
 	null,
 ];
