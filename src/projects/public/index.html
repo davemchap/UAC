@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Utah Avalanche Conditions</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+    <style>
+      /* ── Reset ── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      /* ── Nordic V7 Design Tokens ── */
+      :root {
+        --bg:           #0a1628;
+        --bg-card:      #0f1f38;
+        --bg-card-alt:  #132540;
+        --border:       #1e3a5f;
+        --border-light: #254d7a;
+        --text:         #ddeeff;
+        --text-sub:     #7aaacf;
+        --text-muted:   #4a6f96;
+        --accent:       #3fa8e0;
+        --accent-light: #7ecff5;
+        --font:         "Inter", system-ui, -apple-system, sans-serif;
+
+        --d1: #2d6a34;  /* Low – forest green */
+        --d2: #b38700;  /* Moderate – amber */
+        --d3: #c95200;  /* Considerable – burnt orange */
+        --d4: #b71c1c;  /* High – red */
+        --d5: #4a0000;  /* Extreme – near black */
+        --d0: #1e3a5f;  /* Unknown */
+      }
+
+      /* ── Base ── */
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+      }
+
+      /* ── Layout ── */
+      .page-wrap { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+      /* ── Header ── */
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem 0 1.25rem;
+        border-bottom: 1px solid var(--border);
+        gap: 1rem;
+      }
+      .site-header-brand { display: flex; align-items: center; gap: 0.75rem; }
+      .brand-icon {
+        width: 36px; height: 36px;
+        background: linear-gradient(135deg, var(--accent) 0%, #1a5fa8 100%);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; flex-shrink: 0;
+      }
+      .brand-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+      .brand-sub { font-size: 0.72rem; color: var(--text-sub); margin-top: 1px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .header-meta { font-size: 0.75rem; color: var(--text-muted); text-align: right; }
+      .header-meta strong { color: var(--text-sub); display: block; margin-bottom: 2px; }
+
+      /* ── Hero strip ── */
+      .hero {
+        padding: 2rem 0 1.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-eyebrow {
+        font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem;
+      }
+      .hero-heading {
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+        color: var(--text);
+      }
+      .hero-heading em { font-style: normal; color: var(--accent-light); }
+      .hero-sub {
+        margin-top: 0.6rem; max-width: 540px;
+        font-size: 0.9rem; color: var(--text-sub); line-height: 1.6;
+      }
+      .hero-stats {
+        display: flex; gap: 2rem; margin-top: 1.25rem; flex-wrap: wrap;
+      }
+      .stat-pill {
+        display: flex; flex-direction: column; align-items: flex-start;
+        gap: 2px;
+      }
+      .stat-pill-value {
+        font-size: 1.6rem; font-weight: 800; letter-spacing: -0.04em;
+        line-height: 1; color: var(--text);
+      }
+      .stat-pill-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+      /* ── Section headers ── */
+      .section { margin-top: 2.5rem; }
+      .section-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1rem; padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .section-title {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--text-sub);
+      }
+      .section-badge {
+        font-size: 0.65rem; font-weight: 600; padding: 2px 8px;
+        border-radius: 99px; background: var(--bg-card-alt);
+        border: 1px solid var(--border-light); color: var(--text-sub);
+      }
+
+      /* ── Alert banner (high/extreme conditions) ── */
+      .alert-banner {
+        display: flex; align-items: flex-start; gap: 0.75rem;
+        padding: 0.85rem 1rem; border-radius: 8px; margin-bottom: 1.25rem;
+        background: #2a0a0a; border: 1px solid #7f1d1d;
+      }
+      .alert-banner-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+      .alert-banner-body { flex: 1; min-width: 0; }
+      .alert-banner-title { font-size: 0.8rem; font-weight: 700; color: #fca5a5; margin-bottom: 2px; }
+      .alert-banner-text { font-size: 0.78rem; color: #f87171; line-height: 1.5; }
+      .alert-banner.hidden { display: none; }
+
+      /* ── Zone grid ── */
+      .zones-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.85rem;
+      }
+
+      /* ── Zone card ── */
+      .zone-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem 1.1rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.15s, transform 0.12s;
+        cursor: default;
+      }
+      .zone-card::before {
+        content: "";
+        position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: var(--d-color, var(--d0));
+        border-radius: 10px 0 0 10px;
+      }
+      .zone-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
+
+      .zone-card-head {
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 0.5rem; margin-bottom: 0.6rem;
+      }
+      .zone-name { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+      .danger-badge {
+        flex-shrink: 0;
+        font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em;
+        padding: 3px 8px; border-radius: 4px; text-transform: uppercase;
+        background: var(--d-color, var(--d0)); color: #fff;
+        opacity: 0.95;
+      }
+
+      .zone-danger-name { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 0.55rem; }
+
+      .zone-problems { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5rem; }
+      .problem-tag {
+        font-size: 0.62rem; font-weight: 600; letter-spacing: 0.03em;
+        padding: 2px 7px; border-radius: 3px;
+        background: var(--bg-card-alt); border: 1px solid var(--border-light);
+        color: var(--text-sub);
+      }
+
+      .zone-ai-summary {
+        font-size: 0.75rem; color: var(--text-sub); line-height: 1.55;
+        margin-top: 0.45rem; padding-top: 0.45rem;
+        border-top: 1px solid var(--border);
+      }
+      .ai-label {
+        font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--accent); margin-bottom: 3px;
+        display: block;
+      }
+
+      .zone-alert-row {
+        display: flex; align-items: center; gap: 0.4rem;
+        margin-top: 0.45rem;
+      }
+      .alert-chip {
+        font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em;
+        padding: 2px 8px; border-radius: 3px; text-transform: uppercase;
+        border: 1px solid var(--border-light); color: var(--text-muted);
+        background: transparent;
+      }
+      .alert-chip.urgent { color: #fca5a5; border-color: #7f1d1d; background: #2a0a0a; }
+      .alert-chip.auto-send { color: #fde68a; border-color: #78350f; background: #1c0f00; }
+      .alert-chip.human-review { color: #93c5fd; border-color: #1e3a5f; }
+
+      /* ── Loading / empty states ── */
+      .loading-state {
+        text-align: center; padding: 3rem 1rem;
+        color: var(--text-muted); font-size: 0.85rem;
+      }
+      .spinner {
+        width: 28px; height: 28px;
+        border: 2px solid var(--border-light);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 0.75rem;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* ── Map section ── */
+      .map-wrap {
+        border-radius: 12px; overflow: hidden;
+        border: 1px solid var(--border);
+        height: 480px; position: relative;
+      }
+      #nordic-map { width: 100%; height: 100%; }
+
+      /* ── Danger scale legend ── */
+      .legend {
+        display: flex; flex-wrap: wrap; gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+      .legend-item {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 0.7rem; color: var(--text-sub);
+      }
+      .legend-dot {
+        width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0;
+      }
+
+      /* ── Map markers ── */
+      .nordic-marker {
+        width: 14px; height: 14px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.5);
+        cursor: pointer; transition: transform 0.1s;
+      }
+      .nordic-marker:hover { transform: scale(1.4); }
+
+      /* ── Map popup ── */
+      .maplibregl-popup-content {
+        background: var(--bg-card) !important;
+        border: 1px solid var(--border-light) !important;
+        border-radius: 8px !important;
+        padding: 0.7rem 0.9rem !important;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.5) !important;
+        font-family: var(--font) !important;
+        color: var(--text) !important;
+        font-size: 0.8rem !important;
+        min-width: 160px;
+      }
+      .maplibregl-popup-tip { border-top-color: var(--bg-card) !important; }
+      .maplibregl-popup-close-button {
+        color: var(--text-sub) !important; font-size: 1rem !important;
+        right: 6px !important; top: 4px !important;
+      }
+      .pop-name { font-weight: 700; margin-bottom: 4px; color: var(--text); }
+      .pop-danger { font-size: 0.72rem; color: var(--text-sub); margin-bottom: 6px; }
+      .pop-danger span {
+        display: inline-block; padding: 1px 7px; border-radius: 3px;
+        font-weight: 700; color: #fff; font-size: 0.68rem; text-transform: uppercase;
+      }
+      .pop-problems { font-size: 0.7rem; color: var(--text-muted); line-height: 1.5; }
+
+      /* ── Footer ── */
+      .site-footer {
+        margin-top: 3rem; padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.75rem;
+        font-size: 0.72rem; color: var(--text-muted);
+      }
+      .site-footer a { color: var(--text-sub); text-decoration: none; }
+      .site-footer a:hover { color: var(--accent-light); }
+
+      /* ── Responsive ── */
+      @media (max-width: 640px) {
+        .page-wrap { padding: 0 1rem 3rem; }
+        .hero-stats { gap: 1.25rem; }
+        .map-wrap { height: 340px; }
+        .site-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        .header-meta { text-align: left; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrap">
+
+      <!-- Header -->
+      <header class="site-header">
+        <div class="site-header-brand">
+          <div class="brand-icon">&#9968;</div>
+          <div>
+            <div class="brand-title">Utah Avalanche Conditions</div>
+            <div class="brand-sub">Utah Avalanche Center &mdash; All 9 Forecast Zones</div>
+          </div>
+        </div>
+        <div class="header-meta">
+          <strong id="snapshot-label">Loading&hellip;</strong>
+          <span id="snapshot-date"></span>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-eyebrow">Current Conditions</div>
+        <h1 class="hero-heading">Know before you go.<br /><em>Stay safe in the backcountry.</em></h1>
+        <p class="hero-sub">
+          Real-time avalanche danger ratings and alerts for Utah&rsquo;s Wasatch Range and surrounding zones.
+          No account required.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-pill">
+            <div class="stat-pill-value" id="stat-zones">—</div>
+            <div class="stat-pill-label">Zones Monitored</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-value" id="stat-active-alerts">—</div>
+            <div class="stat-pill-label">Active Alerts</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-value" id="stat-high-danger">—</div>
+            <div class="stat-pill-label">High / Extreme Zones</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Alert Banner (shown if any zone is High/Extreme) -->
+      <div id="alert-banner" class="alert-banner hidden" style="margin-top:1.5rem">
+        <div class="alert-banner-icon">&#9888;</div>
+        <div class="alert-banner-body">
+          <div class="alert-banner-title">ELEVATED DANGER CONDITIONS</div>
+          <div class="alert-banner-text" id="alert-banner-text"></div>
+        </div>
+      </div>
+
+      <!-- Zone Alerts Grid -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Zone Alerts</span>
+          <span class="section-badge" id="zones-count-badge">Loading</span>
+        </div>
+        <div id="zones-grid" class="zones-grid">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            Fetching current conditions&hellip;
+          </div>
+        </div>
+      </section>
+
+      <!-- Hotspot Map -->
+      <section class="section">
+        <div class="section-head">
+          <span class="section-title">Danger Zone Map</span>
+          <span class="section-badge">Interactive</span>
+        </div>
+        <div class="map-wrap">
+          <div id="nordic-map"></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#2d6a34"></div>Low (1)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#b38700"></div>Moderate (2)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c95200"></div>Considerable (3)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#b71c1c"></div>High (4)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#4a0000"></div>Extreme (5)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#1e3a5f"></div>No Data</div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="site-footer">
+        <div>Data sourced from the <a href="https://utahavalanchecenter.org" target="_blank" rel="noopener">Utah Avalanche Center</a>. Conditions can change rapidly &mdash; always check the latest forecast.</div>
+        <div>Powered by the Avalanche Forecast Analysis Engine</div>
+      </footer>
+
+    </div><!-- /.page-wrap -->
+
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+    <script>
+      // ── Danger level config ───────────────────────────────────────────────
+      const DANGER_COLORS = {
+        "-1": "#1e3a5f", 0: "#1e3a5f",
+        1: "#2d6a34", 2: "#b38700",
+        3: "#c95200", 4: "#b71c1c",
+        5: "#4a0000",
+      };
+
+      function dangerColor(level) {
+        return DANGER_COLORS[level] ?? DANGER_COLORS[0];
+      }
+
+      function alertChipClass(action) {
+        if (action === "auto_send_urgent") return "urgent";
+        if (action === "auto_send") return "auto-send";
+        if (action === "human_review") return "human-review";
+        return "";
+      }
+
+      function formatAlertLabel(action, label) {
+        if (action === "no_alert" || action === "flag_for_review") return null;
+        return label;
+      }
+
+      // ── Render zone cards ─────────────────────────────────────────────────
+      function renderZones(zones) {
+        const grid = document.getElementById("zones-grid");
+        if (!zones.length) {
+          grid.innerHTML = '<div class="loading-state">No zone data available.</div>';
+          return;
+        }
+
+        // Sort: highest danger first
+        const sorted = [...zones].sort((a, b) => b.dangerLevel - a.dangerLevel);
+
+        grid.innerHTML = sorted.map((z) => {
+          const color = dangerColor(z.dangerLevel);
+          const problems = z.aiAlert?.avalancheProblems ?? [];
+          const summary = z.aiAlert?.backcountrySummary ?? "";
+          const alertLabel = formatAlertLabel(z.alert.action, z.alert.label);
+          const chipClass = alertChipClass(z.alert.action);
+
+          const problemTags = problems.slice(0, 3).map(
+            (p) => `<span class="problem-tag">${escHtml(p)}</span>`
+          ).join("");
+
+          const aiBlock = summary
+            ? `<div class="zone-ai-summary"><span class="ai-label">AI Briefing</span>${escHtml(summary.slice(0, 160))}${summary.length > 160 ? "…" : ""}</div>`
+            : "";
+
+          const alertRow = alertLabel
+            ? `<div class="zone-alert-row"><span class="alert-chip ${chipClass}">${escHtml(alertLabel)}</span></div>`
+            : "";
+
+          return `
+            <div class="zone-card" style="--d-color:${color}">
+              <div class="zone-card-head">
+                <div class="zone-name">${escHtml(z.name)}</div>
+                <div class="danger-badge" style="background:${color}">${escHtml(z.dangerName)}</div>
+              </div>
+              ${problems.length ? `<div class="zone-problems">${problemTags}</div>` : ""}
+              ${aiBlock}
+              ${alertRow}
+            </div>`;
+        }).join("");
+      }
+
+      // ── Update hero stats ─────────────────────────────────────────────────
+      function updateStats(zones) {
+        const activeAlerts = zones.filter(
+          (z) => z.alert.action !== "no_alert" && z.alert.action !== "flag_for_review"
+        ).length;
+        const highDanger = zones.filter((z) => z.dangerLevel >= 4).length;
+
+        document.getElementById("stat-zones").textContent = zones.length;
+        document.getElementById("stat-active-alerts").textContent = activeAlerts;
+        document.getElementById("stat-high-danger").textContent = highDanger;
+        document.getElementById("zones-count-badge").textContent = `${zones.length} zones`;
+
+        // Show banner if any zone is High (4) or Extreme (5)
+        if (highDanger > 0) {
+          const highZones = zones
+            .filter((z) => z.dangerLevel >= 4)
+            .map((z) => `${z.name} (${z.dangerName})`);
+          document.getElementById("alert-banner-text").textContent =
+            `${highZones.join(", ")} — exercise extreme caution or avoid travel.`;
+          document.getElementById("alert-banner").classList.remove("hidden");
+        }
+      }
+
+      // ── Init map ──────────────────────────────────────────────────────────
+      async function initMap(zones) {
+        let boundaries = { features: [] };
+        try {
+          const res = await fetch("/api/zone-boundaries");
+          boundaries = await res.json();
+        } catch (_) { /* map still renders without boundaries */ }
+
+        const dangerBySlug = {};
+        for (const z of zones) dangerBySlug[z.slug] = z.dangerLevel ?? -1;
+
+        boundaries.features = (boundaries.features || []).map((f) => ({
+          ...f,
+          properties: { ...f.properties, appDangerLevel: dangerBySlug[f.properties?.slug] ?? -1 },
+        }));
+
+        const map = new maplibregl.Map({
+          container: "nordic-map",
+          style: "https://tiles.openfreemap.org/styles/liberty",
+          center: [-111.5, 40.5],
+          zoom: 7,
+          pitch: 35,
+          bearing: -5,
+          antialias: true,
+        });
+
+        map.on("load", () => {
+          // Terrain
+          map.addSource("terrain-dem", {
+            type: "raster-dem",
+            url: "https://demotiles.maplibre.org/terrain-tiles/tiles.json",
+            tileSize: 256,
+          });
+          map.setTerrain({ source: "terrain-dem", exaggeration: 1.2 });
+          map.addLayer({
+            id: "sky", type: "sky",
+            paint: {
+              "sky-type": "atmosphere",
+              "sky-atmosphere-sun": [0.0, 90.0],
+              "sky-atmosphere-sun-intensity": 12,
+            },
+          });
+
+          // Zone fill
+          if (boundaries.features.length) {
+            map.addSource("zone-boundaries", { type: "geojson", data: boundaries });
+            map.addLayer({
+              id: "zone-fill", type: "fill",
+              source: "zone-boundaries",
+              paint: {
+                "fill-color": [
+                  "match", ["get", "appDangerLevel"],
+                  -1, "#1e3a5f", 0, "#1e3a5f",
+                  1, "#2d6a34", 2, "#b38700",
+                  3, "#c95200", 4, "#b71c1c",
+                  5, "#4a0000",
+                  "#1e3a5f",
+                ],
+                "fill-opacity": 0.22,
+              },
+            });
+            map.addLayer({
+              id: "zone-border", type: "line",
+              source: "zone-boundaries",
+              paint: {
+                "line-color": [
+                  "match", ["get", "appDangerLevel"],
+                  -1, "#4a6f96", 0, "#4a6f96",
+                  1, "#2d6a34", 2, "#b38700",
+                  3, "#c95200", 4, "#b71c1c",
+                  5, "#4a0000",
+                  "#4a6f96",
+                ],
+                "line-width": 1.5,
+                "line-opacity": 0.75,
+              },
+            });
+
+            // Zone click popup
+            map.on("click", "zone-fill", (e) => {
+              const feat = e.features && e.features[0];
+              if (!feat) return;
+              const slug = feat.properties.slug;
+              const zone = zones.find((z) => z.slug === slug);
+              if (!zone) return;
+              showZonePopup(map, e.lngLat, zone);
+            });
+            map.on("mouseenter", "zone-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+            map.on("mouseleave", "zone-fill", () => { map.getCanvas().style.cursor = ""; });
+          }
+
+          // Zone markers
+          for (const z of zones) {
+            const el = document.createElement("div");
+            el.className = "nordic-marker";
+            el.style.background = dangerColor(z.dangerLevel);
+            el.title = `${z.name}: ${z.dangerName}`;
+            el.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              showZonePopup(map, { lng: z.lon, lat: z.lat }, z);
+            });
+            new maplibregl.Marker({ element: el }).setLngLat([z.lon, z.lat]).addTo(map);
+          }
+        });
+      }
+
+      function showZonePopup(map, lngLat, zone) {
+        const color = dangerColor(zone.dangerLevel);
+        const problems = zone.aiAlert?.avalancheProblems ?? [];
+        const probHtml = problems.length
+          ? `<div class="pop-problems">${problems.slice(0, 3).map(escHtml).join(" &middot; ")}</div>`
+          : "";
+        new maplibregl.Popup({ closeButton: true, maxWidth: "220px" })
+          .setLngLat(lngLat)
+          .setHTML(`
+            <div class="pop-name">${escHtml(zone.name)}</div>
+            <div class="pop-danger"><span style="background:${color}">${escHtml(zone.dangerName)}</span></div>
+            ${probHtml}
+          `)
+          .addTo(map);
+      }
+
+      // ── Utility ───────────────────────────────────────────────────────────
+      function escHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      // ── Bootstrap ─────────────────────────────────────────────────────────
+      async function bootstrap() {
+        try {
+          const res = await fetch("/api/map-data");
+          const data = await res.json();
+          if (!data.success) throw new Error("API returned failure");
+          const zones = data.zones ?? [];
+
+          renderZones(zones);
+          updateStats(zones);
+
+          // Snapshot date from API or fallback
+          const snapshotDate = data.snapshotDate ?? "";
+          if (snapshotDate) {
+            document.getElementById("snapshot-label").textContent = "Data as of";
+            document.getElementById("snapshot-date").textContent = snapshotDate;
+          } else {
+            document.getElementById("snapshot-label").textContent = "Live data";
+            document.getElementById("snapshot-date").textContent = "";
+          }
+
+          await initMap(zones);
+        } catch (err) {
+          document.getElementById("zones-grid").innerHTML =
+            '<div class="loading-state">Unable to load conditions. Please try again.</div>';
+          console.error("bootstrap error:", err);
+        }
+      }
+
+      bootstrap();
+    </script>
+  </body>
+</html>

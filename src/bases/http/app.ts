@@ -99,6 +99,31 @@ app.use(
 	}),
 );
 
+// Public landing page — no auth required
+app.use(
+	"/",
+	serveStatic({
+		root: "./src/projects/public",
+		rewriteRequestPath: () => "/index.html",
+	}),
+);
+
+app.use(
+	"/dashboard/*",
+	serveStatic({
+		root: "./src/projects/dashboard",
+		rewriteRequestPath: (path) => {
+			const stripped = path.replace(/^\/dashboard/, "") || "/";
+			if (stripped === "/observe") return "/observe.html";
+			if (stripped === "/report") return "/report.html";
+			if (stripped === "/" || (!stripped.includes(".") && !stripped.startsWith("/api"))) {
+				return "/index.html";
+			}
+			return stripped;
+		},
+	}),
+);
+
 app.use(
 	"/*",
 	serveStatic({
@@ -106,7 +131,7 @@ app.use(
 		rewriteRequestPath: (path) => {
 			if (path === "/observe") return "/observe.html";
 			if (path === "/report") return "/report.html";
-			if (path === "/" || (!path.includes(".") && !path.startsWith("/api"))) {
+			if (!path.includes(".") && !path.startsWith("/api")) {
 				return "/index.html";
 			}
 			return path;
