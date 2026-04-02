@@ -158,6 +158,11 @@ export async function triageReportAsync(reportId: number, input: ReportInput): P
 // Read reports
 // ---------------------------------------------------------------------------
 
+export async function getReportById(id: number): Promise<ReportRow | null> {
+	const rows = await queries.getReportById(id);
+	return rows.length > 0 ? (rows[0] as ReportRow) : null;
+}
+
 export async function getPendingReports(): Promise<ReportRow[]> {
 	return queries.getPendingReports() as Promise<ReportRow[]>;
 }
@@ -247,6 +252,14 @@ export async function recordImpact(reportId: number): Promise<{ impactCount: num
 
 export async function getLeaderboard(limit = 10): Promise<ObserverRow[]> {
 	return queries.getLeaderboard(limit) as Promise<ObserverRow[]>;
+}
+
+// ---------------------------------------------------------------------------
+// Counts
+// ---------------------------------------------------------------------------
+
+export async function getReportCounts(): Promise<{ approved: number; pending: number }> {
+	return queries.getReportCounts();
 }
 
 export { computeBadgeLevel };

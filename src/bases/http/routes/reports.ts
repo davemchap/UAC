@@ -5,6 +5,8 @@ import {
 	getAllApprovedReports,
 	getLeaderboard,
 	getPendingReports,
+	getReportById,
+	getReportCounts,
 	recordImpact,
 	rejectReport,
 	submitReport,
@@ -30,6 +32,19 @@ reports.get("/", async (c) => {
 		const status = c.req.query("status");
 		const rows = status === "pending" ? await getPendingReports() : await getAllApprovedReports();
 		return c.json({ success: true, reports: rows });
+	} catch (err) {
+		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
+	}
+});
+
+// GET /api/reports/:id — single report status (for observer feedback polling)
+reports.get("/:id", async (c) => {
+	try {
+		const id = Number(c.req.param("id"));
+		const report = await getReportById(id);
+		if (!report) return c.json({ success: false, error: "not found" }, 404);
+		const { status, aiSummary, zoneSlug, hazardType, severity, createdAt, handle } = report;
+		return c.json({ success: true, report: { status, aiSummary, zoneSlug, hazardType, severity, createdAt, handle } });
 	} catch (err) {
 		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
 	}

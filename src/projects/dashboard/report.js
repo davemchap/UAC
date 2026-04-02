@@ -320,6 +320,42 @@
 
 	const BADGE_LABELS = { scout: "Scout", spotter: "Spotter", sentinel: "Sentinel", guardian: "Guardian" };
 
+	const obsStatusTracker = document.getElementById("obs-status-tracker");
+	const obsStatusLabel = document.getElementById("obs-status-label");
+	const obsStatusId = document.getElementById("obs-status-id");
+
+	function startStatusPolling(reportId) {
+		localStorage.setItem("obs_last_report_id", String(reportId));
+		obsStatusTracker.classList.remove("hidden");
+		obsStatusLabel.textContent = "Checking status…";
+		obsStatusLabel.className = "obs-status-label";
+		obsStatusId.textContent = `Report #${reportId}`;
+
+		const maxAttempts = 15; // 15 × 8s = 2 minutes
+		let attempts = 0;
+		const interval = setInterval(async () => {
+			attempts++;
+			try {
+				const res = await fetch(`/api/reports/${reportId}`);
+				if (!res.ok) { clearInterval(interval); return; }
+				const data = await res.json();
+				const status = data.report && data.report.status;
+				if (status === "approved") {
+					clearInterval(interval);
+					obsStatusLabel.textContent = "✓ Your observation is live on the map!";
+					obsStatusLabel.className = "obs-status-label status-approved";
+				} else if (status === "rejected") {
+					clearInterval(interval);
+					obsStatusLabel.textContent = "Your observation wasn't published this time.";
+					obsStatusLabel.className = "obs-status-label status-rejected";
+				}
+			} catch (_) {
+				// network hiccup — keep polling
+			}
+			if (attempts >= maxAttempts) clearInterval(interval);
+		}, 8000);
+	}
+
 	function showSuccess(handle, report) {
 		form.classList.add("hidden");
 		successScreen.classList.remove("hidden");
@@ -336,6 +372,7 @@
 				? "Your report is live on the map."
 				: "Your report is queued for review. Add a handle next time to earn impact points!";
 		}
+		if (!isStaff) startStatusPolling(report.id);
 	}
 
 	// ---------------------------------------------------------------------------
@@ -373,6 +410,7 @@
 		submitSpinner.classList.add("hidden");
 		submitBtn.disabled = false;
 
+		obsStatusTracker.classList.add("hidden");
 		successScreen.classList.add("hidden");
 		form.classList.remove("hidden");
 		window.scrollTo(0, 0);
