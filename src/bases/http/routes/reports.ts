@@ -37,6 +37,16 @@ reports.get("/", async (c) => {
 	}
 });
 
+// GET /api/reports/count — public counts by status
+reports.get("/count", async (c) => {
+	try {
+		const counts = await getReportCounts();
+		return c.json({ success: true, ...counts });
+	} catch (err) {
+		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
+	}
+});
+
 // GET /api/reports/:id — single report status (for observer feedback polling)
 reports.get("/:id", async (c) => {
 	try {

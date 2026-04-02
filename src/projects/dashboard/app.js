@@ -1,17 +1,46 @@
 const DANGER_ICON = ["", "⬇", "➡", "⬆", "⬆⬆", "!!"];
 
+// ---------------------------------------------------------------------------
+// Saved zones (Gap 4)
+// ---------------------------------------------------------------------------
+
+let savedZones = new Set(JSON.parse(localStorage.getItem("saved-zones") || "[]"));
+let showSavedOnly = false;
+let _allZones = [];
+
+function toggleSavedZone(slug) {
+	if (savedZones.has(slug)) {
+		savedZones.delete(slug);
+	} else {
+		savedZones.add(slug);
+	}
+	localStorage.setItem("saved-zones", JSON.stringify([...savedZones]));
+	const grid = document.getElementById("zones-grid");
+	renderZones(grid, _allZones);
+}
+
+function toggleSavedFilter() {
+	showSavedOnly = !showSavedOnly;
+	const btn = document.getElementById("saved-filter-btn");
+	if (btn) btn.classList.toggle("active", showSavedOnly);
+	const grid = document.getElementById("zones-grid");
+	renderZones(grid, _allZones);
+}
+
 async function loadZones() {
 	const grid = document.getElementById("zones-grid");
 	const summaryBar = document.getElementById("summary-bar");
 	const snapshotDateEl = document.getElementById("snapshot-date");
 
 	try {
-		const [zonesRes, reportsRes] = await Promise.all([
+		const [zonesRes, reportsRes, countsRes] = await Promise.all([
 			fetch("/api/zones"),
 			fetch("/api/reports"),
+			fetch("/api/reports/count"),
 		]);
 		const data = await zonesRes.json();
 		const reportsData = await reportsRes.json();
+		const countsData = await countsRes.json();
 
 		if (!data.success) throw new Error("API returned error");
 
@@ -29,11 +58,25 @@ async function loadZones() {
 		}
 
 		renderSummaryBar(summaryBar, data.zones);
-		renderZones(grid, data.zones);
+		renderCommunityBanner(countsData);
+		_allZones = data.zones;
+		renderZones(grid, _allZones);
 
 		if (typeof window.addReportMarkers === "function") window.addReportMarkers();
 	} catch (err) {
 		grid.innerHTML = `<div class="error-msg">Failed to load forecast data. Check that the server is running.</div>`;
+	}
+}
+
+function renderCommunityBanner(countsData) {
+	const banner = document.getElementById("community-activity-banner");
+	if (!banner) return;
+	const pending = countsData && countsData.success ? countsData.pending : 0;
+	if (pending > 0) {
+		banner.textContent = `👥 ${pending} community observation${pending !== 1 ? "s" : ""} awaiting review`;
+		banner.classList.remove("hidden");
+	} else {
+		banner.classList.add("hidden");
 	}
 }
 
@@ -68,10 +111,24 @@ function renderSummaryBar(el, zones) {
 }
 
 function renderZones(grid, zones) {
-	grid.innerHTML = zones.map((z) => renderZoneCard(z)).join("");
+	const visible = showSavedOnly ? zones.filter((z) => savedZones.has(z.slug)) : zones;
+
+	if (showSavedOnly && visible.length === 0) {
+		grid.innerHTML = `<div class="error-msg" style="color:var(--text-muted)">No saved zones yet. Click ☆ on a zone card to bookmark it.</div>`;
+		return;
+	}
+
+	grid.innerHTML = visible.map((z) => renderZoneCard(z)).join("");
 
 	grid.querySelectorAll(".zone-card").forEach((card) => {
 		card.addEventListener("click", () => openModal(card.dataset.slug));
+	});
+
+	grid.querySelectorAll(".zone-save-btn").forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			toggleSavedZone(btn.dataset.slug);
+		});
 	});
 }
 
@@ -95,8 +152,11 @@ function renderZoneCard(zone) {
 		? `<span class="zone-report-chip" title="${zoneReports.length} field observation${zoneReports.length !== 1 ? "s" : ""}">👥 ${zoneReports.length} observation${zoneReports.length !== 1 ? "s" : ""}</span>`
 		: "";
 
+	const isSaved = savedZones.has(zone.slug);
+
 	return `
-    <div class="zone-card" data-slug="${zone.slug}">
+    <div class="zone-card${isSaved ? " zone-card-saved" : ""}" data-slug="${zone.slug}">
+      <button class="zone-save-btn" data-slug="${zone.slug}" title="${isSaved ? "Remove from My Zones" : "Save to My Zones"}" aria-label="${isSaved ? "Remove from My Zones" : "Save to My Zones"}">${isSaved ? "★" : "☆"}</button>
       <div class="zone-card-accent accent-${lvl}"></div>
       <div class="zone-card-body">
         <div class="zone-card-header">
@@ -703,6 +763,7 @@ function switchTab(tab) {
 }
 
 window.switchTab = switchTab;
+window.toggleSavedFilter = toggleSavedFilter;
 
 function timeAgoShort(dateStr) {
 	return timeAgo(dateStr);

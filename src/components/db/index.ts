@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { and, eq, desc, gte, asc } from "drizzle-orm";
+import { and, count, eq, desc, gte, asc } from "drizzle-orm";
 import postgres from "postgres";
 import { resolve } from "node:path";
 import * as schema from "./schema";
@@ -178,6 +178,18 @@ export const queries = {
 			.from(observationReports)
 			.where(eq(observationReports.status, "approved"))
 			.orderBy(asc(observationReports.zoneSlug), desc(observationReports.createdAt)),
+
+	getReportCounts: async () => {
+		const db = getDb();
+		const [approvedRow, pendingRow] = await Promise.all([
+			db.select({ count: count() }).from(observationReports).where(eq(observationReports.status, "approved")),
+			db.select({ count: count() }).from(observationReports).where(eq(observationReports.status, "pending")),
+		]);
+		return {
+			approved: approvedRow[0]?.count ?? 0,
+			pending: pendingRow[0]?.count ?? 0,
+		};
+	},
 };
 
 // Re-export schema tables for use in other components
