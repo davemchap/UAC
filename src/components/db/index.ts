@@ -12,7 +12,6 @@ import {
 	escalationRules,
 	fieldObservations,
 	forecastZones,
-	morningBriefings,
 	snowpackReadings,
 	snotelStations,
 	weatherReadings,
@@ -146,22 +145,6 @@ export const queries = {
 			.from(aiAlerts)
 			.where(and(eq(aiAlerts.zoneId, zoneId), gte(aiAlerts.createdAt, since)))
 			.orderBy(desc(aiAlerts.createdAt)),
-
-	getTodaysBriefings: (date: string) =>
-		getDb()
-			.select()
-			.from(morningBriefings)
-			.where(eq(morningBriefings.briefingDate, date))
-			.orderBy(desc(morningBriefings.dangerLevel)),
-
-	getBriefingById: (id: number) => getDb().select().from(morningBriefings).where(eq(morningBriefings.id, id)).limit(1),
-
-	getBriefingForZoneDate: (zoneId: number, date: string) =>
-		getDb()
-			.select()
-			.from(morningBriefings)
-			.where(and(eq(morningBriefings.zoneId, zoneId), eq(morningBriefings.briefingDate, date)))
-			.limit(1),
 };
 
 // Re-export schema tables for use in other components
@@ -169,7 +152,6 @@ export {
 	aiAlerts,
 	fieldObservations,
 	forecastZones,
-	morningBriefings,
 	snotelStations,
 	avalancheForecasts,
 	avalancheProblems,

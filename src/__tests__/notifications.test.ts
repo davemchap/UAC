@@ -71,14 +71,10 @@ const stubQueries = {
 	getSnowpackReadings: () => Promise.resolve([]),
 	getAllAlertThresholds: () => Promise.resolve([]),
 	getAllEscalationRules: () => Promise.resolve([]),
-	getTodaysBriefings: () => Promise.resolve([]),
-	getBriefingById: () => Promise.resolve([]),
-	getBriefingForZoneDate: () => Promise.resolve([]),
 };
 
 void mock.module("../components/db", () => ({
 	getDb: () => ({}),
-	morningBriefings: {},
 	queries: stubQueries,
 	getSql: () => {
 		const mockSql = (strings: TemplateStringsArray) => {

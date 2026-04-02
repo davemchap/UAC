@@ -6,7 +6,6 @@ import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
 import alertConfig from "./routes/alert-config";
-import briefings from "./routes/briefings";
 import notifications from "./routes/notifications";
 import observations from "./routes/observations";
 import proxy from "./routes/proxy";
@@ -73,7 +72,6 @@ app.get("/api", (c) =>
 );
 
 app.route("/api/zones", zones);
-app.route("/api/briefings", briefings);
 app.route("/api/notifications", notifications);
 app.route("/api/observations", observations);
 app.route("/api/alert-config", alertConfig);
