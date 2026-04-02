@@ -1,5 +1,24 @@
 const DANGER_ICON = ["", "⬇", "➡", "⬆", "⬆⬆", "!!"];
 
+// ---------------------------------------------------------------------------
+// Approved reports cache (loaded once on startup, refreshed on demand)
+// ---------------------------------------------------------------------------
+
+window._approvedReports = [];
+
+async function loadApprovedReports() {
+	try {
+		const res = await fetch("/api/reports");
+		if (!res.ok) return;
+		const data = await res.json();
+		if (data.success && Array.isArray(data.reports)) {
+			window._approvedReports = data.reports;
+		}
+	} catch {
+		// silently ignore — reports are non-critical
+	}
+}
+
 async function loadZones() {
 	const grid = document.getElementById("zones-grid");
 	const summaryBar = document.getElementById("summary-bar");
@@ -98,6 +117,96 @@ function renderZoneCard(zone) {
   `;
 }
 
+// ---------------------------------------------------------------------------
+// Plain-language verdict (Gap 3)
+// ---------------------------------------------------------------------------
+
+function buildPlainLanguageVerdict(dangerLevel, problems) {
+	const verdicts = {
+		1: "Generally safe avalanche conditions. Normal caution advised.",
+		2: "Heightened avalanche conditions on specific terrain features. Evaluate carefully before entering steeper terrain.",
+		3: "Dangerous avalanche conditions. Conservative terrain choices required. Avoid steep slopes and exposed ridgelines.",
+		4: "Very dangerous avalanche conditions. Travel in avalanche terrain is not recommended.",
+		5: "Extraordinary avalanche conditions. Avoid all avalanche terrain.",
+	};
+
+	const lvl = dangerLevel >= 1 && dangerLevel <= 5 ? dangerLevel : null;
+	if (!lvl) return "";
+
+	let text = verdicts[lvl];
+	if (problems && problems.length > 0) {
+		text += ` Primary concern: ${problems.join(", ")}.`;
+	}
+
+	return `<div class="plain-verdict danger-verdict-${lvl}">⚠ ${text}</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Observation-forecast correlation (Gap 5)
+// ---------------------------------------------------------------------------
+
+function buildModalReportsSection(zoneSlug, forecastProblems) {
+	const reports = (window._approvedReports || []).filter(
+		(r) => r.zoneSlug === zoneSlug,
+	);
+
+	if (reports.length === 0) return "";
+
+	// Normalize strings for comparison: lowercase, collapse spaces/underscores
+	function normalize(s) {
+		return s ? s.toLowerCase().replace(/[_\s]+/g, " ").trim() : "";
+	}
+
+	const obsHazards = reports
+		.map((r) => r.hazardType)
+		.filter(Boolean);
+
+	let correlationNote = "";
+	if (obsHazards.length > 0 && forecastProblems && forecastProblems.length > 0) {
+		const normalizedForecast = forecastProblems.map(normalize);
+		const matches = obsHazards.filter((h) =>
+			normalizedForecast.includes(normalize(h)),
+		);
+
+		if (matches.length > 0) {
+			const unique = [...new Set(matches)];
+			correlationNote = `<div class="obs-correlation aligned">✓ Field observations align with forecast — ${reports.length} observer${reports.length !== 1 ? "s" : ""} reported ${unique.join(", ")}</div>`;
+		} else {
+			correlationNote = `<div class="obs-correlation divergent">⚠ Observer data may diverge from forecast — review carefully</div>`;
+		}
+	}
+
+	const cards = reports
+		.slice(0, 5)
+		.map((r) => {
+			const hazard = r.hazardType ? `<span class="problem-tag">${r.hazardType}</span>` : "";
+			const severity = r.severity ? `<span class="obs-severity">${r.severity}</span>` : "";
+			const summary = r.aiSummary
+				? `<p class="obs-summary">${r.aiSummary}</p>`
+				: r.contentText
+					? `<p class="obs-summary">${r.contentText.slice(0, 140)}${r.contentText.length > 140 ? "…" : ""}</p>`
+					: "";
+			const handle = r.handle ? `<span class="obs-handle">@${r.handle}</span>` : "";
+			const impact = r.impactCount > 0 ? `<span class="obs-impact">▲ ${r.impactCount}</span>` : "";
+			return `
+			<div class="obs-card">
+				<div class="obs-card-header">
+					${hazard}${severity}
+					<span class="obs-card-meta">${handle}${impact}</span>
+				</div>
+				${summary}
+			</div>`;
+		})
+		.join("");
+
+	return `
+		<div class="modal-section">
+			<div class="modal-section-label">Field Observations (${reports.length})</div>
+			${correlationNote}
+			<div class="obs-cards">${cards}</div>
+		</div>`;
+}
+
 async function openModal(slug) {
 	const modal = document.getElementById("zone-modal");
 	const body = document.getElementById("modal-body");
@@ -174,6 +283,9 @@ async function openModal(slug) {
           <p class="modal-bottom-line alert-reasoning-text">${ai.alertReasoning}</p>
         </div>` : "";
 
+		const plainVerdict = buildPlainLanguageVerdict(lvl, zone.assessment.problems);
+		const reportsSection = buildModalReportsSection(slug, zone.assessment.problems);
+
 		body.innerHTML = `
       <div class="modal-header accent-${lvl}">
         <div class="modal-header-inner">
@@ -186,6 +298,10 @@ async function openModal(slug) {
           ${zone.alert.escalated ? `<div class="escalation-note">↑ Escalated: ${zone.alert.escalationReason}</div>` : ""}
         </div>
       </div>
+
+      ${plainVerdict ? `<div class="modal-section">${plainVerdict}</div>` : ""}
+
+      ${reportsSection}
 
       ${comparisonSection}
 
@@ -324,6 +440,7 @@ setInterval(() => {
 
 loadZones();
 void loadNotifications();
+void loadApprovedReports();
 
 // ---------------------------------------------------------------------------
 // Alert Configuration
