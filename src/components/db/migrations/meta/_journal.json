@@ -64,6 +64,13 @@
 			"when": 1775135000000,
 			"tag": "0008_add_special_bulletin",
 			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1775140000000,
+			"tag": "0009_ensure_observer_handles",
+			"breakpoints": true
 		}
 	]
 }
