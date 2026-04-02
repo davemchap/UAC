@@ -47,6 +47,16 @@ reports.get("/count", async (c) => {
 	}
 });
 
+// GET /api/reports/leaderboard — observer leaderboard
+reports.get("/leaderboard", async (c) => {
+	try {
+		const board = await getLeaderboard(20);
+		return c.json({ success: true, leaderboard: board });
+	} catch (err) {
+		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
+	}
+});
+
 // GET /api/reports/:id — single report status (for observer feedback polling)
 reports.get("/:id", async (c) => {
 	try {
@@ -93,16 +103,6 @@ reports.post("/:id/impact", async (c) => {
 		const id = Number(c.req.param("id"));
 		const result = await recordImpact(id);
 		return c.json({ success: true, ...result });
-	} catch (err) {
-		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
-	}
-});
-
-// GET /api/leaderboard
-reports.get("/leaderboard", async (c) => {
-	try {
-		const board = await getLeaderboard(20);
-		return c.json({ success: true, leaderboard: board });
 	} catch (err) {
 		return c.json({ success: false, error: err instanceof Error ? err.message : "unknown" }, 500);
 	}
