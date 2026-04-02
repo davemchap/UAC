@@ -33,8 +33,22 @@
 		{
 			"idx": 4,
 			"version": "7",
+			"when": 1775100000000,
+			"tag": "0004_observation_reports",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1775106000000,
+			"tag": "0005_alert_reviews",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
 			"when": 1775105141326,
-			"tag": "0004_overall_danger_rose",
+			"tag": "0006_overall_danger_rose",
 			"breakpoints": true
 		}
 	]

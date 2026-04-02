@@ -158,3 +158,46 @@ export const aiAlerts = pgTable(
 	},
 	(t) => [unique().on(t.zoneId, t.forecastNid)],
 );
+
+export const observationReports = pgTable("observation_reports", {
+	id: serial("id").primaryKey(),
+	handle: text("handle"),
+	contentText: text("content_text"),
+	contentImageUrl: text("content_image_url"),
+	lat: real("lat"),
+	lng: real("lng"),
+	status: text("status").notNull().default("pending"),
+	rejectionReason: text("rejection_reason"),
+	aiSummary: text("ai_summary"),
+	zoneSlug: text("zone_slug"),
+	hazardType: text("hazard_type"),
+	severity: text("severity"),
+	locationDescription: text("location_description"),
+	impactCount: integer("impact_count").notNull().default(0),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const alertReviews = pgTable("alert_reviews", {
+	id: serial("id").primaryKey(),
+	notificationId: integer("notification_id").notNull(),
+	zoneSlug: text("zone_slug").notNull(),
+	dangerLevel: integer("danger_level").notNull(),
+	aiAlertId: integer("ai_alert_id"),
+	originalText: text("original_text").notNull(),
+	editedText: text("edited_text"),
+	decision: text("decision").notNull(), // 'approved' | 'edited' | 'rejected'
+	rejectionReason: text("rejection_reason"),
+	reviewerUsername: text("reviewer_username").notNull(),
+	reviewerRole: text("reviewer_role").notNull(),
+	reviewedAt: timestamp("reviewed_at", { withTimezone: true }).defaultNow(),
+});
+
+export const observerHandles = pgTable("observer_handles", {
+	id: serial("id").primaryKey(),
+	handle: text("handle").unique().notNull(),
+	totalImpactPoints: integer("total_impact_points").notNull().default(0),
+	badgeLevel: text("badge_level").notNull().default("scout"),
+	rewardTriggered: boolean("reward_triggered").notNull().default(false),
+	observationCount: integer("observation_count").notNull().default(0),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});

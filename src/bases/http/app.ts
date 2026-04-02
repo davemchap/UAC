@@ -9,8 +9,11 @@ import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
 import observations from "./routes/observations";
 import proxy from "./routes/proxy";
+import reports from "./routes/reports";
+import reviews from "./routes/reviews";
 import zones from "./routes/zones";
 import map from "./routes/map";
+import { getZoneBoundaries } from "../../components/zone-lookup";
 
 export const app = new Hono();
 
@@ -74,9 +77,13 @@ app.get("/api", (c) =>
 app.route("/api/zones", zones);
 app.route("/api/notifications", notifications);
 app.route("/api/observations", observations);
+app.route("/api/reports", reports);
+app.route("/api/reviews", reviews);
 app.route("/api/alert-config", alertConfig);
 app.route("/api/proxy", proxy);
 app.route("/api", map);
+
+app.get("/api/zone-boundaries", (c) => c.json(getZoneBoundaries()));
 
 // ---------------------------------------------------------------------------
 // Static files
@@ -88,6 +95,7 @@ app.use(
 		root: "./src/projects/dashboard",
 		rewriteRequestPath: (path) => {
 			if (path === "/observe") return "/observe.html";
+			if (path === "/report") return "/report.html";
 			if (path === "/" || (!path.includes(".") && !path.startsWith("/api"))) {
 				return "/index.html";
 			}
