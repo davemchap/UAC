@@ -6,6 +6,7 @@ const DANGER_ICON = ["", "⬇", "➡", "⬆", "⬆⬆", "!!"];
 
 let savedZones = new Set(JSON.parse(localStorage.getItem("saved-zones") || "[]"));
 let showSavedOnly = false;
+let showActionableOnly = false;
 let _allZones = [];
 
 function toggleSavedZone(slug) {
@@ -23,6 +24,14 @@ function toggleSavedFilter() {
 	showSavedOnly = !showSavedOnly;
 	const btn = document.getElementById("saved-filter-btn");
 	if (btn) btn.classList.toggle("active", showSavedOnly);
+	const grid = document.getElementById("zones-grid");
+	renderZones(grid, _allZones);
+}
+
+function toggleActionableFilter() {
+	showActionableOnly = !showActionableOnly;
+	const btn = document.getElementById("actionable-filter-btn");
+	if (btn) btn.classList.toggle("active", showActionableOnly);
 	const grid = document.getElementById("zones-grid");
 	renderZones(grid, _allZones);
 }
@@ -111,10 +120,16 @@ function renderSummaryBar(el, zones) {
 }
 
 function renderZones(grid, zones) {
-	const visible = showSavedOnly ? zones.filter((z) => savedZones.has(z.slug)) : zones;
+	let visible = zones;
+	if (showSavedOnly) visible = visible.filter((z) => savedZones.has(z.slug));
+	if (showActionableOnly) visible = visible.filter((z) => z.alert.action !== "no_alert");
 
 	if (showSavedOnly && visible.length === 0) {
 		grid.innerHTML = `<div class="error-msg" style="color:var(--text-muted)">No saved zones yet. Click ☆ on a zone card to bookmark it.</div>`;
+		return;
+	}
+	if (showActionableOnly && visible.length === 0) {
+		grid.innerHTML = `<div class="error-msg" style="color:var(--text-muted)">No actionable zones right now. All zones are at No Alert.</div>`;
 		return;
 	}
 
@@ -816,6 +831,7 @@ function switchTab(tab) {
 
 window.switchTab = switchTab;
 window.toggleSavedFilter = toggleSavedFilter;
+window.toggleActionableFilter = toggleActionableFilter;
 
 function timeAgoShort(dateStr) {
 	return timeAgo(dateStr);
