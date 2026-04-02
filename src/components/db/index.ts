@@ -10,6 +10,7 @@ import {
 	avalancheForecasts,
 	avalancheProblems,
 	escalationRules,
+	fieldObservations,
 	forecastZones,
 	snowpackReadings,
 	snotelStations,
@@ -149,6 +150,7 @@ export const queries = {
 // Re-export schema tables for use in other components
 export {
 	aiAlerts,
+	fieldObservations,
 	forecastZones,
 	snotelStations,
 	avalancheForecasts,

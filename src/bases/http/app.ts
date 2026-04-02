@@ -7,6 +7,7 @@ import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
 import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
+import observations from "./routes/observations";
 import proxy from "./routes/proxy";
 import zones from "./routes/zones";
 import map from "./routes/map";
@@ -72,6 +73,7 @@ app.get("/api", (c) =>
 
 app.route("/api/zones", zones);
 app.route("/api/notifications", notifications);
+app.route("/api/observations", observations);
 app.route("/api/alert-config", alertConfig);
 app.route("/api/proxy", proxy);
 app.route("/api", map);
@@ -85,6 +87,7 @@ app.use(
 	serveStatic({
 		root: "./src/projects/dashboard",
 		rewriteRequestPath: (path) => {
+			if (path === "/observe") return "/observe.html";
 			if (path === "/" || (!path.includes(".") && !path.startsWith("/api"))) {
 				return "/index.html";
 			}

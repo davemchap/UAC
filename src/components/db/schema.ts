@@ -102,6 +102,38 @@ export const escalationRules = pgTable("escalation_rules", {
 	action: text("action").notNull(),
 });
 
+export const fieldObservations = pgTable("field_observations", {
+	id: serial("id").primaryKey(),
+	observerName: text("observer_name").notNull(),
+	observerEmail: text("observer_email").notNull(),
+	experienceLevel: text("experience_level").notNull(),
+	zoneSlug: text("zone_slug").notNull(),
+	areaName: text("area_name"),
+	aspect: text("aspect"),
+	elevationFt: integer("elevation_ft"),
+	observedAt: timestamp("observed_at", { withTimezone: true }).notNull(),
+	obsTypes: text("obs_types").array().notNull(),
+	avalancheType: text("avalanche_type"),
+	trigger: text("trigger"),
+	sizeR: integer("size_r"),
+	sizeD: integer("size_d"),
+	widthFt: integer("width_ft"),
+	verticalFt: integer("vertical_ft"),
+	depthIn: integer("depth_in"),
+	surfaceConditions: text("surface_conditions"),
+	snowDepthIn: integer("snow_depth_in"),
+	stormSnowIn: integer("storm_snow_in"),
+	weakLayers: boolean("weak_layers"),
+	weakLayersDesc: text("weak_layers_desc"),
+	skyCover: text("sky_cover"),
+	windSpeed: text("wind_speed"),
+	windDirection: text("wind_direction"),
+	temperatureF: integer("temperature_f"),
+	precip: text("precip"),
+	fieldNotes: text("field_notes"),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 export const aiAlerts = pgTable(
 	"ai_alerts",
 	{
