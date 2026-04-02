@@ -1,0 +1,1 @@
+ALTER TABLE "avalanche_forecasts" ADD COLUMN "overall_danger_rose" text;

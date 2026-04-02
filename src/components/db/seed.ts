@@ -32,6 +32,7 @@ interface Advisory {
 	date_issued: string;
 	date_issued_timestamp?: string;
 	overall_danger_rating: string;
+	overall_danger_rose?: string;
 	avalanche_problem_1?: string;
 	avalanche_problem_1_description?: string;
 	danger_rose_1?: string;
@@ -173,6 +174,7 @@ for (const [slug, zoneData] of Object.entries(snapshot.zones)) {
 			dateIssued: advisory.date_issued,
 			dateIssuedTimestamp: advisory.date_issued_timestamp ?? null,
 			overallDangerRating: advisory.overall_danger_rating,
+			overallDangerRose: advisory.overall_danger_rose ?? null,
 			avalancheProblem1: advisory.avalanche_problem_1 ?? null,
 			avalancheProblem2: advisory.avalanche_problem_2 ?? null,
 			avalancheProblem3: advisory.avalanche_problem_3 ?? null,
@@ -182,7 +184,11 @@ for (const [slug, zoneData] of Object.entries(snapshot.zones)) {
 		})
 		.onConflictDoUpdate({
 			target: [avalancheForecasts.zoneId, avalancheForecasts.nid],
-			set: { overallDangerRating: advisory.overall_danger_rating, updatedAt: new Date() },
+			set: {
+				overallDangerRating: advisory.overall_danger_rating,
+				overallDangerRose: advisory.overall_danger_rose ?? null,
+				updatedAt: new Date(),
+			},
 		})
 		.returning({ id: avalancheForecasts.id });
 

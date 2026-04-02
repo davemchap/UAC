@@ -28,6 +28,7 @@ export const avalancheForecasts = pgTable(
 		dateIssued: text("date_issued").notNull(),
 		dateIssuedTimestamp: text("date_issued_timestamp"),
 		overallDangerRating: text("overall_danger_rating").notNull(),
+		overallDangerRose: text("overall_danger_rose"),
 		avalancheProblem1: text("avalanche_problem_1"),
 		avalancheProblem2: text("avalanche_problem_2"),
 		avalancheProblem3: text("avalanche_problem_3"),

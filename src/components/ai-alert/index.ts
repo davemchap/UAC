@@ -11,6 +11,7 @@ export interface AiAlertInput {
 	forecastNid: string;
 	bottomLine: string;
 	currentConditions: string;
+	overallDangerRose: string | null;
 	problems: { problemType: string; description: string | null }[];
 	weather: {
 		temperature: number | null;
@@ -103,6 +104,45 @@ function dangerLevelToAction(level: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Danger rose parsing
+// ---------------------------------------------------------------------------
+
+// UAC danger rose: 24 comma-separated integers, 8 aspects × 3 elevation bands
+// Positions 0-7: above treeline, 8-15: near treeline, 16-23: below treeline
+// Values: 0=None, 2=Low, 4=Moderate, 6=Considerable, 8=High, 10=Extreme
+const ROSE_VALUE_TO_LEVEL: Record<number, number> = { 0: 0, 2: 1, 4: 2, 6: 3, 8: 4, 10: 5 };
+
+interface ElevationDanger {
+	aboveTreelineLevel: number;
+	aboveTreelineRating: string;
+	nearTreelineLevel: number;
+	nearTreelineRating: string;
+	belowTreelineLevel: number;
+	belowTreelineRating: string;
+}
+
+function parseOverallDangerRose(rose: string | null): ElevationDanger | null {
+	if (!rose) return null;
+	const values = rose.split(",").map(Number);
+	if (values.length !== 24) return null;
+
+	const maxLevel = (slice: number[]) => Math.max(...slice.map((v) => ROSE_VALUE_TO_LEVEL[v] ?? 0));
+
+	const atl = maxLevel(values.slice(0, 8));
+	const ntl = maxLevel(values.slice(8, 16));
+	const btl = maxLevel(values.slice(16, 24));
+
+	return {
+		aboveTreelineLevel: atl,
+		aboveTreelineRating: VALID_RATINGS[atl] ?? "None",
+		nearTreelineLevel: ntl,
+		nearTreelineRating: VALID_RATINGS[ntl] ?? "None",
+		belowTreelineLevel: btl,
+		belowTreelineRating: VALID_RATINGS[btl] ?? "None",
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Prompt
 // ---------------------------------------------------------------------------
 
@@ -125,6 +165,14 @@ function buildPrompt(input: AiAlertInput): string {
 
 	const snowpackLines = input.snowpack.length > 0 ? formatSnowpackData(input.snowpack) : "No snowpack data available.";
 
+	const elevationData = parseOverallDangerRose(input.overallDangerRose);
+	const elevationLines = elevationData
+		? `## UAC Danger by Elevation Band (from official danger rose — use these exactly)
+- Above Treeline: ${elevationData.aboveTreelineRating} (level ${elevationData.aboveTreelineLevel})
+- Near Treeline:  ${elevationData.nearTreelineRating} (level ${elevationData.nearTreelineLevel})
+- Below Treeline: ${elevationData.belowTreelineRating} (level ${elevationData.belowTreelineLevel})`
+		: "## UAC Danger by Elevation Band\nNot available — infer from forecast narrative.";
+
 	return `You are an avalanche danger assessment system. Analyze the following data for the ${input.zoneName} zone and produce a structured danger assessment.
 
 ## UAC Forecast Bottom Line
@@ -132,6 +180,8 @@ ${input.bottomLine || "Not available."}
 
 ## UAC Current Conditions
 ${input.currentConditions || "Not available."}
+
+${elevationLines}
 
 ## Avalanche Problems
 ${problemLines}
@@ -143,7 +193,10 @@ ${weatherLines}
 ${snowpackLines}
 
 ## Instructions
-IMPORTANT: The UAC Forecast Bottom Line is authoritative. If UAC indicates no avalanche danger, the season is over, forecasts are suspended, or conditions are safe (e.g. due to melt-off), you MUST set danger_level to 0 ("None") and avalanche_problems to an empty array. Do NOT invent danger from weather or snowpack data when UAC has determined there is no risk.
+IMPORTANT: The UAC Forecast Bottom Line and UAC Danger by Elevation Band are authoritative.
+- If UAC elevation data is provided, you MUST use those exact levels for danger_above_treeline_level, danger_near_treeline_level, and danger_below_treeline_level. Do not adjust them.
+- Set danger_level to the maximum of the three elevation levels.
+- If UAC indicates no avalanche danger, the season is over, forecasts are suspended, or conditions are safe (e.g. due to melt-off), you MUST set all danger levels to 0 ("None") and avalanche_problems to an empty array.
 
 Based on ALL the data above, produce a JSON object with these fields:
 - danger_level: integer 0-5 (0=None, 1=Low, 2=Moderate, 3=Considerable, 4=High, 5=Extreme)

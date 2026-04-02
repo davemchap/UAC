@@ -44,6 +44,7 @@ async function gatherZoneData(zoneId: number): Promise<AiAlertInput | null> {
 		forecastNid: forecast.nid,
 		bottomLine: forecast.bottomLine ?? "",
 		currentConditions: forecast.currentConditions ?? "",
+		overallDangerRose: forecast.overallDangerRose ?? null,
 		problems,
 		weather: weatherRows.map((w) => ({
 			temperature: w.temperature,

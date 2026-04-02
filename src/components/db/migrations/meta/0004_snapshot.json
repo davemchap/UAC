@@ -1,0 +1,683 @@
+{
+	"id": "6369e2ed-4739-42d1-9b83-1ceceb197250",
+	"prevId": "4b8beb96-a761-49bd-a351-d6fd2b38979d",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.ai_alerts": {
+			"name": "ai_alerts",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"zone_id": {
+					"name": "zone_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_rating": {
+					"name": "danger_rating",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_level": {
+					"name": "danger_level",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_above_treeline_rating": {
+					"name": "danger_above_treeline_rating",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_above_treeline_level": {
+					"name": "danger_above_treeline_level",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_near_treeline_rating": {
+					"name": "danger_near_treeline_rating",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_near_treeline_level": {
+					"name": "danger_near_treeline_level",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_below_treeline_rating": {
+					"name": "danger_below_treeline_rating",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"danger_below_treeline_level": {
+					"name": "danger_below_treeline_level",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"avalanche_problems": {
+					"name": "avalanche_problems",
+					"type": "text[]",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"alert_action": {
+					"name": "alert_action",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"alert_reasoning": {
+					"name": "alert_reasoning",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"backcountry_summary": {
+					"name": "backcountry_summary",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"model": {
+					"name": "model",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"forecast_nid": {
+					"name": "forecast_nid",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"ai_alerts_zone_id_forecast_nid_unique": {
+					"name": "ai_alerts_zone_id_forecast_nid_unique",
+					"nullsNotDistinct": false,
+					"columns": ["zone_id", "forecast_nid"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.alert_thresholds": {
+			"name": "alert_thresholds",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"danger_level": {
+					"name": "danger_level",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"action": {
+					"name": "action",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"alert_thresholds_danger_level_unique": {
+					"name": "alert_thresholds_danger_level_unique",
+					"nullsNotDistinct": false,
+					"columns": ["danger_level"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.avalanche_forecasts": {
+			"name": "avalanche_forecasts",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"zone_id": {
+					"name": "zone_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"nid": {
+					"name": "nid",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"date_issued": {
+					"name": "date_issued",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"date_issued_timestamp": {
+					"name": "date_issued_timestamp",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"overall_danger_rating": {
+					"name": "overall_danger_rating",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"overall_danger_rose": {
+					"name": "overall_danger_rose",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"avalanche_problem_1": {
+					"name": "avalanche_problem_1",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"avalanche_problem_2": {
+					"name": "avalanche_problem_2",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"avalanche_problem_3": {
+					"name": "avalanche_problem_3",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"bottom_line": {
+					"name": "bottom_line",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"current_conditions": {
+					"name": "current_conditions",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"region": {
+					"name": "region",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"avalanche_forecasts_zone_id_nid_unique": {
+					"name": "avalanche_forecasts_zone_id_nid_unique",
+					"nullsNotDistinct": false,
+					"columns": ["zone_id", "nid"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.avalanche_problems": {
+			"name": "avalanche_problems",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"forecast_id": {
+					"name": "forecast_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"problem_number": {
+					"name": "problem_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"problem_type": {
+					"name": "problem_type",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"danger_rose": {
+					"name": "danger_rose",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"avalanche_problems_forecast_id_problem_number_unique": {
+					"name": "avalanche_problems_forecast_id_problem_number_unique",
+					"nullsNotDistinct": false,
+					"columns": ["forecast_id", "problem_number"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.escalation_rules": {
+			"name": "escalation_rules",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"condition": {
+					"name": "condition",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"description": {
+					"name": "description",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"action": {
+					"name": "action",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"escalation_rules_condition_unique": {
+					"name": "escalation_rules_condition_unique",
+					"nullsNotDistinct": false,
+					"columns": ["condition"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.forecast_zones": {
+			"name": "forecast_zones",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"zone_id": {
+					"name": "zone_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"slug": {
+					"name": "slug",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"lat": {
+					"name": "lat",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"lon": {
+					"name": "lon",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"forecast_url": {
+					"name": "forecast_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"api_url": {
+					"name": "api_url",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"forecast_zones_zone_id_unique": {
+					"name": "forecast_zones_zone_id_unique",
+					"nullsNotDistinct": false,
+					"columns": ["zone_id"]
+				},
+				"forecast_zones_slug_unique": {
+					"name": "forecast_zones_slug_unique",
+					"nullsNotDistinct": false,
+					"columns": ["slug"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.snotel_stations": {
+			"name": "snotel_stations",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"triplet": {
+					"name": "triplet",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"zone_id": {
+					"name": "zone_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"snotel_stations_triplet_unique": {
+					"name": "snotel_stations_triplet_unique",
+					"nullsNotDistinct": false,
+					"columns": ["triplet"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.snowpack_readings": {
+			"name": "snowpack_readings",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"station_triplet": {
+					"name": "station_triplet",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"date": {
+					"name": "date",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"element_code": {
+					"name": "element_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"unit_code": {
+					"name": "unit_code",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"snowpack_readings_station_triplet_date_element_code_unique": {
+					"name": "snowpack_readings_station_triplet_date_element_code_unique",
+					"nullsNotDistinct": false,
+					"columns": ["station_triplet", "date", "element_code"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.weather_readings": {
+			"name": "weather_readings",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"zone_id": {
+					"name": "zone_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"period_number": {
+					"name": "period_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"start_time": {
+					"name": "start_time",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"end_time": {
+					"name": "end_time",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"temperature": {
+					"name": "temperature",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"temperature_unit": {
+					"name": "temperature_unit",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"short_forecast": {
+					"name": "short_forecast",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"wind_speed": {
+					"name": "wind_speed",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"wind_direction": {
+					"name": "wind_direction",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"is_daytime": {
+					"name": "is_daytime",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"weather_readings_zone_id_start_time_unique": {
+					"name": "weather_readings_zone_id_start_time_unique",
+					"nullsNotDistinct": false,
+					"columns": ["zone_id", "start_time"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}

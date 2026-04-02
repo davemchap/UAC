@@ -9,6 +9,7 @@ interface UacAdvisory {
 	date_issued?: string;
 	date_issued_timestamp?: string;
 	overall_danger_rating?: string;
+	overall_danger_rose?: string;
 	avalanche_problem_1?: string;
 	avalanche_problem_1_description?: string;
 	danger_rose_1?: string;
@@ -62,6 +63,7 @@ async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promis
 			dateIssued,
 			dateIssuedTimestamp: advisory.date_issued_timestamp ?? null,
 			overallDangerRating: dangerRating,
+			overallDangerRose: advisory.overall_danger_rose ?? null,
 			avalancheProblem1: advisory.avalanche_problem_1 ?? null,
 			avalancheProblem2: advisory.avalanche_problem_2 ?? null,
 			avalancheProblem3: advisory.avalanche_problem_3 ?? null,
@@ -71,7 +73,11 @@ async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promis
 		})
 		.onConflictDoUpdate({
 			target: [avalancheForecasts.zoneId, avalancheForecasts.nid],
-			set: { overallDangerRating: dangerRating, updatedAt: new Date() },
+			set: {
+				overallDangerRating: dangerRating,
+				overallDangerRose: advisory.overall_danger_rose ?? null,
+				updatedAt: new Date(),
+			},
 		})
 		.returning({ id: avalancheForecasts.id });
 
