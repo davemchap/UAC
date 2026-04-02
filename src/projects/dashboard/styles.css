@@ -2744,3 +2744,106 @@ h1 {
 	color: var(--app-text-faint, #6b7280);
 	margin-top: 0.25rem;
 }
+
+/* ---------------------------------------------------------------------------
+   Plain-language verdict (Gap 3)
+--------------------------------------------------------------------------- */
+
+.plain-verdict {
+	font-size: 0.9rem;
+	line-height: 1.6;
+	color: #e8eaf0;
+	padding: 0.75rem 1rem;
+	border-radius: 6px;
+	border-left: 4px solid transparent;
+	background: rgba(255, 255, 255, 0.04);
+	margin-bottom: 0;
+}
+
+.danger-verdict-1 { border-left-color: #4ade80; }
+.danger-verdict-2 { border-left-color: #facc15; }
+.danger-verdict-3 { border-left-color: #fb923c; }
+.danger-verdict-4 { border-left-color: #f87171; }
+.danger-verdict-5 { border-left-color: #fca5a5; }
+
+/* ---------------------------------------------------------------------------
+   Observation-forecast correlation (Gap 5)
+--------------------------------------------------------------------------- */
+
+.obs-correlation {
+	font-size: 0.8rem;
+	padding: 0.4rem 0.65rem;
+	border-radius: 4px;
+	margin-bottom: 0.5rem;
+}
+
+.obs-correlation.aligned {
+	background: rgba(74, 222, 128, 0.08);
+	border: 1px solid rgba(74, 222, 128, 0.25);
+	color: #86efac;
+}
+
+.obs-correlation.divergent {
+	background: rgba(251, 146, 60, 0.08);
+	border: 1px solid rgba(251, 146, 60, 0.25);
+	color: #fdba74;
+}
+
+/* ---------------------------------------------------------------------------
+   Observation cards (Gap 6)
+--------------------------------------------------------------------------- */
+
+.obs-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.obs-card {
+	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid #2e3344;
+	border-radius: 6px;
+	padding: 0.65rem 0.85rem;
+}
+
+.obs-card-header {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-bottom: 0.35rem;
+}
+
+.obs-card-meta {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.obs-handle {
+	font-size: 0.72rem;
+	color: #7c9cf8;
+}
+
+.obs-impact {
+	font-size: 0.72rem;
+	color: #4ade80;
+	font-weight: 600;
+}
+
+.obs-severity {
+	font-size: 0.72rem;
+	background: rgba(251, 146, 60, 0.12);
+	border: 1px solid rgba(251, 146, 60, 0.3);
+	color: #fdba74;
+	padding: 0.1rem 0.4rem;
+	border-radius: 4px;
+}
+
+.obs-summary {
+	font-size: 0.82rem;
+	color: #9aa3b2;
+	line-height: 1.5;
+	margin: 0;
+}
