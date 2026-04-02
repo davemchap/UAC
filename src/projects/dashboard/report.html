@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<title>Live from the Trail — UAC Watch</title>
+		<link rel="stylesheet" href="/styles.css" />
+		<style>
+			.mode-tab-bar {
+				display: flex;
+				gap: 0;
+				background: var(--app-card, #1a2035);
+				border: 1px solid var(--app-border, rgba(255,255,255,0.08));
+				border-radius: 10px;
+				padding: 4px;
+				margin-bottom: 1.25rem;
+			}
+			.mode-tab-btn {
+				flex: 1;
+				background: none;
+				border: none;
+				border-radius: 7px;
+				color: var(--app-text-muted, #9aa3b2);
+				cursor: pointer;
+				font-size: 0.9rem;
+				font-weight: 600;
+				padding: 0.5rem 1rem;
+				transition: background 0.15s, color 0.15s;
+			}
+			.mode-tab-btn.active {
+				background: var(--app-accent, #4a7cf7);
+				color: #fff;
+			}
+			.mode-hint {
+				color: var(--app-text-muted, #9aa3b2);
+				font-size: 0.85rem;
+				margin: -0.75rem 0 1.25rem;
+				text-align: center;
+			}
+			.mode-panel { display: block; }
+			.mode-panel.hidden { display: none; }
+
+			/* Detailed form sub-elements */
+			.obs-type-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				margin-bottom: 0.5rem;
+			}
+			.obs-type-btn {
+				background: var(--app-card, #1a2035);
+				border: 1px solid var(--app-border, rgba(255,255,255,0.08));
+				border-radius: 6px;
+				color: var(--app-text-muted, #9aa3b2);
+				cursor: pointer;
+				font-size: 0.85rem;
+				padding: 0.4rem 0.9rem;
+				transition: all 0.15s;
+			}
+			.obs-type-btn.active {
+				background: var(--app-accent-bg, #1e3a5f);
+				border-color: var(--app-accent, #4a7cf7);
+				color: var(--app-text, #e8eaf0);
+			}
+			.obs-sub-panels { margin-top: 1rem; }
+			.obs-sub-panel { display: none; }
+			.obs-sub-panel.active { display: block; }
+			.form-grid-2 {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 0.85rem;
+			}
+			.form-grid-2 .full { grid-column: 1 / -1; }
+			@media (max-width: 540px) { .form-grid-2 { grid-template-columns: 1fr; } .form-grid-2 .full { grid-column: 1; } }
+
+			.size-row {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				gap: 0.4rem;
+				margin-top: 0.35rem;
+			}
+			.size-btn {
+				background: var(--app-card, #1a2035);
+				border: 1px solid var(--app-border, rgba(255,255,255,0.08));
+				border-radius: 6px;
+				color: var(--app-text-muted, #9aa3b2);
+				cursor: pointer;
+				font-size: 0.78rem;
+				padding: 0.4rem 0;
+				text-align: center;
+				transition: all 0.15s;
+			}
+			.size-btn.active {
+				background: var(--app-accent-bg, #1e3a5f);
+				border-color: var(--app-accent, #4a7cf7);
+				color: var(--app-text, #e8eaf0);
+			}
+			.size-btn-sub { font-size: 0.68rem; color: var(--app-text-faint, #6b7280); display: block; }
+			.aspect-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+				margin-top: 0.35rem;
+			}
+		</style>
+	</head>
+	<body class="report-page">
+		<header class="report-header">
+			<a href="/" class="report-back">← Dashboard</a>
+			<h1 class="report-title">Live from the Trail</h1>
+		</header>
+
+		<main class="report-main">
+			<!-- Success state -->
+			<div id="success-screen" class="success-screen hidden">
+				<div class="success-icon">✓</div>
+				<h2 class="success-heading">Report Submitted</h2>
+				<p id="success-message" class="success-message">Your observation is queued for review.</p>
+				<div id="badge-block" class="badge-block hidden">
+					<div id="badge-label" class="badge-label"></div>
+					<div id="impact-pts" class="impact-pts"></div>
+				</div>
+				<div class="success-actions">
+					<a href="/" class="btn-primary-report">Back to Dashboard</a>
+					<button id="report-another" class="btn-secondary-report">Submit Another</button>
+				</div>
+			</div>
+
+			<!-- Form -->
+			<form id="report-form" class="report-form" novalidate>
+
+				<!-- Mode tabs -->
+				<div class="mode-tab-bar">
+					<button type="button" class="mode-tab-btn active" data-mode="quick">Quick</button>
+					<button type="button" class="mode-tab-btn" data-mode="detailed">Detailed</button>
+				</div>
+				<p class="mode-hint" id="hint-quick">Pin your spot, snap a photo, say what you saw.</p>
+				<p class="mode-hint hidden" id="hint-detailed">Full UAC-style report — for trained observers with structured data.</p>
+
+				<!-- ── QUICK MODE ── -->
+				<div id="panel-quick" class="mode-panel">
+					<section class="report-section">
+						<h2 class="section-heading">Location</h2>
+						<div class="location-row">
+							<button type="button" id="gps-btn" class="gps-btn">
+								<span id="gps-icon">📍</span>
+								<span id="gps-label">Use My Location</span>
+							</button>
+							<div id="gps-coords" class="gps-coords hidden"></div>
+						</div>
+						<div class="form-field" style="margin-top:0.75rem">
+							<label for="q-zone">Zone <span style="color:var(--app-text-faint,#6b7280);font-weight:400">(optional)</span></label>
+							<select id="q-zone" name="qZone">
+								<option value="">Auto-detect from GPS</option>
+								<option value="salt-lake">Salt Lake</option>
+								<option value="ogden">Ogden</option>
+								<option value="provo">Provo</option>
+								<option value="logan">Logan</option>
+								<option value="uintas">Uintas</option>
+								<option value="moab">Moab</option>
+								<option value="skyline">Skyline</option>
+								<option value="southeast-utah">Southeast Utah</option>
+								<option value="southwest-utah">Southwest Utah</option>
+							</select>
+						</div>
+					</section>
+
+					<section class="report-section">
+						<h2 class="section-heading">What did you see?</h2>
+						<div class="form-field">
+							<label for="q-text">Description</label>
+							<textarea id="q-text" name="contentText" rows="4" placeholder="Conditions, hazards, anything noteworthy…"></textarea>
+						</div>
+						<div class="form-field" style="margin-top:0.75rem">
+							<label class="photo-label" for="obs-photo">
+								<span class="photo-label-icon">📷</span>
+								<span id="photo-label-text">Add Photo</span>
+							</label>
+							<input type="file" id="obs-photo" name="photo" accept="image/*" capture="environment" class="file-input-hidden" />
+							<div id="photo-preview-wrap" class="photo-preview-wrap hidden">
+								<img id="photo-preview" class="photo-preview" alt="preview" />
+								<button type="button" id="remove-photo" class="remove-photo">✕ Remove</button>
+							</div>
+						</div>
+					</section>
+				</div>
+
+				<!-- ── DETAILED MODE ── -->
+				<div id="panel-detailed" class="mode-panel hidden">
+
+					<section class="report-section">
+						<h2 class="section-heading">Location &amp; Date</h2>
+						<div class="form-grid-2">
+							<div class="form-field full">
+								<div class="location-row">
+									<button type="button" id="gps-btn-d" class="gps-btn">
+										<span id="gps-icon-d">📍</span>
+										<span id="gps-label-d">Use My Location</span>
+									</button>
+									<div id="gps-coords-d" class="gps-coords hidden"></div>
+								</div>
+							</div>
+							<div class="form-field">
+								<label for="d-zone">UAC Forecast Zone</label>
+								<select id="d-zone" name="dZone">
+									<option value="">Select zone…</option>
+									<option value="salt-lake">Salt Lake</option>
+									<option value="ogden">Ogden</option>
+									<option value="logan">Logan</option>
+									<option value="uintas">Uintas</option>
+									<option value="provo">Provo</option>
+									<option value="skyline">Skyline</option>
+									<option value="moab">Moab</option>
+									<option value="abajos">Abajos</option>
+									<option value="southwest-utah">Southwest Utah</option>
+								</select>
+							</div>
+							<div class="form-field">
+								<label for="d-date">Date &amp; Time Observed</label>
+								<input type="datetime-local" id="d-date" name="observedAt" />
+							</div>
+							<div class="form-field">
+								<label for="d-area">Route / Area Name</label>
+								<input type="text" id="d-area" name="areaName" placeholder="e.g. Millcreek Canyon" />
+							</div>
+							<div class="form-field">
+								<label for="d-elevation">Elevation (ft)</label>
+								<input type="number" id="d-elevation" name="elevationFt" placeholder="9500" min="0" max="14000" />
+							</div>
+							<div class="form-field full">
+								<label>Aspect</label>
+								<div class="aspect-row" id="aspect-btns">
+									<button type="button" class="obs-type-btn" data-val="N">N</button>
+									<button type="button" class="obs-type-btn" data-val="NE">NE</button>
+									<button type="button" class="obs-type-btn" data-val="E">E</button>
+									<button type="button" class="obs-type-btn" data-val="SE">SE</button>
+									<button type="button" class="obs-type-btn" data-val="S">S</button>
+									<button type="button" class="obs-type-btn" data-val="SW">SW</button>
+									<button type="button" class="obs-type-btn" data-val="W">W</button>
+									<button type="button" class="obs-type-btn" data-val="NW">NW</button>
+								</div>
+								<input type="hidden" id="d-aspect" />
+							</div>
+							<div class="form-field">
+								<label for="d-experience">Experience Level</label>
+								<select id="d-experience" name="experienceLevel">
+									<option value="">Select…</option>
+									<option value="beginner">Beginner — recreational traveler</option>
+									<option value="intermediate">Intermediate — Avy 1 trained</option>
+									<option value="expert">Expert — Avy 2+ / professional</option>
+								</select>
+							</div>
+						</div>
+					</section>
+
+					<section class="report-section">
+						<h2 class="section-heading">What did you observe?</h2>
+						<div class="obs-type-row" id="obs-type-btns">
+							<button type="button" class="obs-type-btn" data-val="avalanche">Avalanche</button>
+							<button type="button" class="obs-type-btn" data-val="snowpack">Snowpack</button>
+							<button type="button" class="obs-type-btn" data-val="weather">Weather</button>
+							<button type="button" class="obs-type-btn" data-val="field_notes">Field Notes</button>
+						</div>
+
+						<div class="obs-sub-panels">
+							<!-- Avalanche -->
+							<div class="obs-sub-panel" id="sub-avalanche">
+								<div class="form-grid-2" style="margin-top:0.5rem">
+									<div class="form-field">
+										<label for="avy-type">Avalanche Type</label>
+										<select id="avy-type">
+											<option value="">Select…</option>
+											<option value="Soft Slab">Soft Slab</option>
+											<option value="Hard Slab">Hard Slab</option>
+											<option value="Wind Slab">Wind Slab</option>
+											<option value="Wet Slab">Wet Slab</option>
+											<option value="Wet Loose">Wet Loose</option>
+											<option value="Dry Loose">Dry Loose</option>
+											<option value="Cornice">Cornice</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="avy-trigger">Trigger</label>
+										<select id="avy-trigger">
+											<option value="">Select…</option>
+											<option value="Natural">Natural</option>
+											<option value="Skier">Skier</option>
+											<option value="Snowboarder">Snowboarder</option>
+											<option value="Snowmobiler">Snowmobiler</option>
+											<option value="Explosive">Explosive</option>
+											<option value="Unknown">Unknown</option>
+										</select>
+									</div>
+									<div class="form-field full">
+										<label>Relative Size (R — how much snow moved)</label>
+										<div class="size-row" id="avy-r-btns">
+											<button type="button" class="size-btn" data-val="R1">R1<span class="size-btn-sub">Snow gun</span></button>
+											<button type="button" class="size-btn" data-val="R2">R2<span class="size-btn-sub">Car</span></button>
+											<button type="button" class="size-btn" data-val="R3">R3<span class="size-btn-sub">House</span></button>
+											<button type="button" class="size-btn" data-val="R4">R4<span class="size-btn-sub">Locomotive</span></button>
+											<button type="button" class="size-btn" data-val="R5">R5<span class="size-btn-sub">Maximum</span></button>
+										</div>
+										<input type="hidden" id="avy-r" />
+									</div>
+									<div class="form-field full">
+										<label>Destructive Size (D — terrain damage potential)</label>
+										<div class="size-row" id="avy-d-btns">
+											<button type="button" class="size-btn" data-val="D1">D1<span class="size-btn-sub">Unlikely fatal</span></button>
+											<button type="button" class="size-btn" data-val="D2">D2<span class="size-btn-sub">Could bury</span></button>
+											<button type="button" class="size-btn" data-val="D3">D3<span class="size-btn-sub">Bury car</span></button>
+											<button type="button" class="size-btn" data-val="D4">D4<span class="size-btn-sub">Structural</span></button>
+											<button type="button" class="size-btn" data-val="D5">D5<span class="size-btn-sub">Largest known</span></button>
+										</div>
+										<input type="hidden" id="avy-d" />
+									</div>
+									<div class="form-field">
+										<label for="avy-width">Width (ft)</label>
+										<input type="number" id="avy-width" placeholder="200" min="0" />
+									</div>
+									<div class="form-field">
+										<label for="avy-vertical">Vertical (ft)</label>
+										<input type="number" id="avy-vertical" placeholder="500" min="0" />
+									</div>
+									<div class="form-field">
+										<label for="avy-crown">Crown Depth (in)</label>
+										<input type="number" id="avy-crown" placeholder="18" min="0" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Snowpack -->
+							<div class="obs-sub-panel" id="sub-snowpack">
+								<div class="form-grid-2" style="margin-top:0.5rem">
+									<div class="form-field full">
+										<label for="sp-surface">Surface Conditions</label>
+										<select id="sp-surface">
+											<option value="">Select…</option>
+											<option value="Powder">Powder</option>
+											<option value="Packed Powder">Packed Powder</option>
+											<option value="Wind Crust">Wind Crust</option>
+											<option value="Sun Crust">Sun Crust</option>
+											<option value="Melt-Freeze Crust">Melt-Freeze Crust</option>
+											<option value="Wet Snow">Wet Snow</option>
+											<option value="Ice">Ice</option>
+											<option value="Facets / Sugar Snow">Facets / Sugar Snow</option>
+											<option value="Graupel">Graupel</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="sp-depth">Total Snow Depth (in)</label>
+										<input type="number" id="sp-depth" placeholder="48" min="0" />
+									</div>
+									<div class="form-field">
+										<label for="sp-storm">Recent Storm Snow (in)</label>
+										<input type="number" id="sp-storm" placeholder="12" min="0" />
+									</div>
+									<div class="form-field full">
+										<label>Weak Layers Observed?</label>
+										<div class="obs-type-row" id="weak-layer-btns">
+											<button type="button" class="obs-type-btn" data-val="Yes">Yes</button>
+											<button type="button" class="obs-type-btn" data-val="No">No</button>
+										</div>
+										<input type="hidden" id="sp-weak-layers" />
+									</div>
+									<div class="form-field full" id="weak-layers-desc-wrap" style="display:none">
+										<label for="sp-weak-desc">Describe weak layer(s)</label>
+										<textarea id="sp-weak-desc" placeholder="e.g. Faceted snow 30cm below surface…" rows="2"></textarea>
+									</div>
+								</div>
+							</div>
+
+							<!-- Weather -->
+							<div class="obs-sub-panel" id="sub-weather">
+								<div class="form-grid-2" style="margin-top:0.5rem">
+									<div class="form-field">
+										<label for="wx-sky">Sky Cover</label>
+										<select id="wx-sky">
+											<option value="">Select…</option>
+											<option value="Clear">Clear</option>
+											<option value="Few">Few (1–2 oktas)</option>
+											<option value="Scattered">Scattered (3–4 oktas)</option>
+											<option value="Broken">Broken (5–7 oktas)</option>
+											<option value="Overcast">Overcast</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="wx-precip">Recent Precipitation</label>
+										<select id="wx-precip">
+											<option value="">Select…</option>
+											<option value="None">None</option>
+											<option value="Light">Light</option>
+											<option value="Moderate">Moderate</option>
+											<option value="Heavy">Heavy</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="wx-wind-speed">Wind Speed</label>
+										<select id="wx-wind-speed">
+											<option value="">Select…</option>
+											<option value="Calm">Calm (&lt;1 mph)</option>
+											<option value="Light">Light (1–15 mph)</option>
+											<option value="Moderate">Moderate (16–25 mph)</option>
+											<option value="Strong">Strong (26–45 mph)</option>
+											<option value="Extreme">Extreme (&gt;45 mph)</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="wx-wind-dir">Wind Direction</label>
+										<select id="wx-wind-dir">
+											<option value="">Select…</option>
+											<option value="N">N</option><option value="NE">NE</option>
+											<option value="E">E</option><option value="SE">SE</option>
+											<option value="S">S</option><option value="SW">SW</option>
+											<option value="W">W</option><option value="NW">NW</option>
+										</select>
+									</div>
+									<div class="form-field">
+										<label for="wx-temp">Temperature (°F)</label>
+										<input type="number" id="wx-temp" placeholder="28" min="-60" max="120" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Field Notes -->
+							<div class="obs-sub-panel" id="sub-field_notes">
+								<div class="form-field" style="margin-top:0.5rem">
+									<label for="d-notes">Field Notes</label>
+									<textarea id="d-notes" rows="5" placeholder="Red flags, terrain features, snowpack tests, gut feelings…"></textarea>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="report-section">
+						<h2 class="section-heading">Photo <span style="color:var(--app-text-faint,#6b7280);font-weight:400;font-size:0.85rem">optional</span></h2>
+						<div class="form-field">
+							<label class="photo-label" for="obs-photo-d">
+								<span class="photo-label-icon">📷</span>
+								<span id="photo-label-text-d">Add Photo</span>
+							</label>
+							<input type="file" id="obs-photo-d" accept="image/*" capture="environment" class="file-input-hidden" />
+							<div id="photo-preview-wrap-d" class="photo-preview-wrap hidden">
+								<img id="photo-preview-d" class="photo-preview" alt="preview" />
+								<button type="button" id="remove-photo-d" class="remove-photo">✕ Remove</button>
+							</div>
+						</div>
+					</section>
+				</div>
+
+				<!-- Handle — shared across both modes -->
+				<section class="report-section">
+					<h2 class="section-heading">Your Handle <span class="optional-tag">optional</span></h2>
+					<div class="form-field">
+						<input type="text" id="handle" name="handle" placeholder="e.g. powder_scout_42" maxlength="40" autocomplete="off" spellcheck="false" />
+						<p class="field-hint">Earn impact points when your reports help others. No account needed.</p>
+					</div>
+				</section>
+
+				<div id="form-error" class="form-error hidden"></div>
+
+				<button type="submit" id="submit-btn" class="submit-btn">
+					<span id="submit-label">Submit Report</span>
+					<span id="submit-spinner" class="spinner hidden"></span>
+				</button>
+			</form>
+		</main>
+
+		<script src="/report.js"></script>
+	</body>
+</html>

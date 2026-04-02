@@ -6,10 +6,23 @@ async function loadZones() {
 	const snapshotDateEl = document.getElementById("snapshot-date");
 
 	try {
-		const res = await fetch("/api/zones");
-		const data = await res.json();
+		const [zonesRes, reportsRes] = await Promise.all([
+			fetch("/api/zones"),
+			fetch("/api/reports"),
+		]);
+		const data = await zonesRes.json();
+		const reportsData = await reportsRes.json();
 
 		if (!data.success) throw new Error("API returned error");
+
+		window._approvedReports = reportsData.success ? reportsData.reports : [];
+		window._reportsByZone = {};
+		for (const r of window._approvedReports) {
+			if (r.zoneSlug) {
+				window._reportsByZone[r.zoneSlug] = window._reportsByZone[r.zoneSlug] || [];
+				window._reportsByZone[r.zoneSlug].push(r);
+			}
+		}
 
 		if (snapshotDateEl) {
 			snapshotDateEl.textContent = `Snapshot: ${data.snapshotDate}`;
@@ -17,6 +30,8 @@ async function loadZones() {
 
 		renderSummaryBar(summaryBar, data.zones);
 		renderZones(grid, data.zones);
+
+		if (typeof window.addReportMarkers === "function") window.addReportMarkers();
 	} catch (err) {
 		grid.innerHTML = `<div class="error-msg">Failed to load forecast data. Check that the server is running.</div>`;
 	}
@@ -75,6 +90,11 @@ function renderZoneCard(zone) {
 		? `<span class="danger-badge danger-${ai.dangerLevel} ai-badge">AI: ${ai.dangerRating}</span>`
 		: "";
 
+	const zoneReports = (window._reportsByZone || {})[zone.slug] || [];
+	const reportChip = zoneReports.length > 0
+		? `<span class="zone-report-chip" title="${zoneReports.length} field report${zoneReports.length !== 1 ? "s" : ""}">📡 ${zoneReports.length} report${zoneReports.length !== 1 ? "s" : ""}</span>`
+		: "";
+
 	return `
     <div class="zone-card" data-slug="${zone.slug}">
       <div class="zone-card-accent accent-${lvl}"></div>
@@ -84,6 +104,7 @@ function renderZoneCard(zone) {
           <div class="danger-badges">
             <span class="danger-badge danger-${lvl}">UAC: ${DANGER_ICON[lvl] || ""} ${zone.dangerName}</span>
             ${aiDanger}
+            ${reportChip}
           </div>
         </div>
         <div class="alert-badge alert-${zone.alert.action}">
@@ -202,10 +223,56 @@ async function openModal(slug) {
       ${reasoningSection}
 
       ${forecastLink ? `<div class="modal-footer">${forecastLink}</div>` : ""}
+
+      ${buildModalReportsSection(slug)}
     `;
 	} catch {
 		body.innerHTML = "<p style='color:var(--color-high)'>Failed to load zone detail.</p>";
 	}
+}
+
+function buildModalReportsSection(slug) {
+	const HAZARD_ICON = { avalanche: "🏔", wind_slab: "💨", cornice: "🪨", wet_snow: "💧", access_hazard: "⚠️", other: "📋" };
+	const SEV_CLASS = { critical: "hazard-critical", high: "hazard-avalanche", moderate: "hazard-wind_slab", low: "" };
+	const reports = ((window._reportsByZone || {})[slug] || [])
+		.slice()
+		.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+	if (reports.length === 0) return "";
+
+	const cards = reports.map((r) => {
+		const icon = HAZARD_ICON[r.hazardType] || "📋";
+		const sevClass = SEV_CLASS[r.severity] || "";
+		const thumb = r.contentImageUrl
+			? `<img class="modal-report-thumb" src="${r.contentImageUrl}" alt="field photo" />`
+			: "";
+		const userText = r.contentText
+			? `<div class="modal-report-user-text"><span class="report-field-label">Observer reported:</span> ${r.contentText}</div>`
+			: "";
+		const aiSummary = r.aiSummary
+			? `<div class="modal-report-ai-summary"><span class="report-field-label">AI analysis:</span> ${r.aiSummary}</div>`
+			: "";
+		return `
+			<div class="modal-report-card">
+				<div class="modal-report-header">
+					<span class="modal-report-icon">${icon}</span>
+					<span class="report-tag ${sevClass}">${r.severity || "unknown"}</span>
+					<span class="report-tag hazard-${r.hazardType}">${(r.hazardType || "other").replace("_", " ")}</span>
+					<span class="report-time" style="margin-left:auto">${timeAgo(r.createdAt)}</span>
+				</div>
+				${userText}
+				${thumb}
+				${aiSummary}
+				${r.handle ? `<div class="modal-report-handle">@${r.handle} · 👍 ${r.impactCount}</div>` : ""}
+			${window._staffSession ? `<div class="modal-report-delete-row"><button class="btn-delete-report" data-id="${r.id}">🗑 Delete</button></div>` : ""}
+			</div>`;
+	}).join("");
+
+	return `
+		<div class="modal-section">
+			<div class="modal-section-label">📡 Field Reports (${reports.length})</div>
+			<div class="modal-reports-list">${cards}</div>
+		</div>`;
 }
 
 
@@ -226,17 +293,7 @@ document.addEventListener("keydown", (e) => {
 // Expose for map.js marker click handlers
 window.openZoneModal = openModal;
 
-// Tab switching — lazy-init map on first activation
-function switchTab(tab) {
-	const isGrid = tab === "grid";
-	document.getElementById("view-grid").classList.toggle("hidden", !isGrid);
-	document.getElementById("view-map").classList.toggle("hidden", isGrid);
-	document.getElementById("tab-grid").classList.toggle("tab-active", isGrid);
-	document.getElementById("tab-map").classList.toggle("tab-active", !isGrid);
-	if (!isGrid && window.initMap) window.initMap();
-}
-
-window.switchTab = switchTab;
+// switchTab is defined below with reports support
 
 // ---------------------------------------------------------------------------
 // Notifications
@@ -578,6 +635,270 @@ async function deleteRule(id) {
 document.getElementById("alert-config-btn").addEventListener("click", () => {
 	configPanelOpen ? closeConfigPanel() : openConfigPanel();
 });
+
+// ---------------------------------------------------------------------------
+// Theme selector
+// ---------------------------------------------------------------------------
+
+const THEME_KEY = "uac-theme";
+
+function applyTheme(theme) {
+	document.body.dataset.theme = theme;
+	localStorage.setItem(THEME_KEY, theme);
+	document.querySelectorAll(".theme-option").forEach((btn) => {
+		btn.classList.toggle("active", btn.dataset.theme === theme);
+	});
+}
+
+(function initTheme() {
+	const saved = localStorage.getItem(THEME_KEY) || "";
+	applyTheme(saved);
+})();
+
+let themPickerOpen = false;
+const themeBtnEl = document.getElementById("theme-btn");
+const themePickerEl = document.getElementById("theme-picker");
+
+themeBtnEl.addEventListener("click", (e) => {
+	e.stopPropagation();
+	themPickerOpen = !themPickerOpen;
+	themePickerEl.classList.toggle("hidden", !themPickerOpen);
+});
+
+document.querySelectorAll(".theme-option").forEach((btn) => {
+	btn.addEventListener("click", (e) => {
+		e.stopPropagation();
+		applyTheme(btn.dataset.theme);
+		themePickerEl.classList.add("hidden");
+		themPickerOpen = false;
+	});
+});
+
+document.addEventListener("click", () => {
+	if (themPickerOpen) {
+		themePickerEl.classList.add("hidden");
+		themPickerOpen = false;
+	}
+});
+
+// ---------------------------------------------------------------------------
+// Tab: Reports (field reports queue + leaderboard)
+// ---------------------------------------------------------------------------
+
+function switchTab(tab) {
+	const isGrid = tab === "grid";
+	const isMap = tab === "map";
+	const isReports = tab === "reports";
+
+	document.getElementById("view-grid").classList.toggle("hidden", !isGrid);
+	document.getElementById("view-map").classList.toggle("hidden", !isMap);
+	document.getElementById("field-reports-section").classList.toggle("hidden", !isReports);
+
+	document.getElementById("tab-grid").classList.toggle("tab-active", isGrid);
+	document.getElementById("tab-map").classList.toggle("tab-active", isMap);
+	document.getElementById("tab-reports").classList.toggle("tab-active", isReports);
+
+	if (isMap && window.initMap) window.initMap();
+	if (isReports) void loadFieldReports();
+}
+
+window.switchTab = switchTab;
+
+function timeAgoShort(dateStr) {
+	return timeAgo(dateStr);
+}
+
+function renderReportCard(r) {
+	const handle = r.handle ? `<span class="report-handle">@${r.handle}</span>` : `<span class="report-handle" style="color:var(--app-text-faint)">anonymous</span>`;
+	const ts = r.createdAt ? `<span class="report-time">${timeAgoShort(r.createdAt)}</span>` : "";
+	const userText = r.contentText
+		? `<div class="report-user-text"><span class="report-field-label">Observer reported:</span> ${r.contentText}</div>`
+		: "";
+	const aiSummary = r.aiSummary
+		? `<div class="report-ai-summary"><span class="report-field-label">AI analysis:</span> ${r.aiSummary}</div>`
+		: "";
+	const hazardClass = r.hazardType ? `hazard-${r.hazardType}` : "";
+	const severityClass = r.severity === "critical" ? "hazard-critical" : "";
+	const meta = [
+		r.zoneSlug ? `<span class="report-tag">${r.zoneSlug}</span>` : "",
+		r.hazardType ? `<span class="report-tag ${hazardClass}">${r.hazardType.replace("_", " ")}</span>` : "",
+		r.severity ? `<span class="report-tag ${severityClass}">${r.severity}</span>` : "",
+		r.locationDescription ? `<span class="report-tag">📍 ${r.locationDescription}</span>` : "",
+	].filter(Boolean).join("");
+	const photo = r.contentImageUrl ? `<img class="report-thumbnail" src="${r.contentImageUrl}" alt="report photo" />` : "";
+
+	return `
+		<div class="report-card" data-report-id="${r.id}">
+			<div class="report-card-header">${handle}${ts}</div>
+			${userText}
+			${photo}
+			${aiSummary}
+			${meta ? `<div class="report-meta">${meta}</div>` : ""}
+			<div class="report-actions">
+				<button class="btn-approve" data-id="${r.id}">✓ Approve</button>
+				<button class="btn-reject" data-id="${r.id}">✗ Reject</button>
+				${window._staffSession ? `<button class="btn-delete-report" data-id="${r.id}" title="Delete report permanently">🗑 Delete</button>` : ""}
+			</div>
+		</div>
+	`;
+}
+
+async function loadFieldReports() {
+	const queue = document.getElementById("reports-queue");
+	const countEl = document.getElementById("pending-count");
+
+	try {
+		const baseFetches = [fetch("/api/reports/leaderboard"), fetch("/api/reports")];
+		const allFetches = window._staffSession
+			? [fetch("/api/reports?status=pending"), ...baseFetches]
+			: baseFetches;
+
+		const results = await Promise.all(allFetches);
+		const [pendingRes, lbRes, approvedRes] = window._staffSession
+			? results
+			: [null, results[0], results[1]];
+
+		if (window._staffSession && pendingRes) {
+			const pendingData = await pendingRes.json();
+			if (pendingData.success) {
+				const reports = pendingData.reports;
+				countEl.textContent = reports.length > 0 ? `${reports.length} pending` : "";
+				queue.innerHTML = reports.length > 0
+					? reports.map(renderReportCard).join("")
+					: `<div class="reports-queue-empty">No pending reports.</div>`;
+
+				queue.querySelectorAll(".btn-approve").forEach((btn) => {
+					btn.addEventListener("click", () => void moderateReport(Number(btn.dataset.id), "approve"));
+				});
+				queue.querySelectorAll(".btn-reject").forEach((btn) => {
+					btn.addEventListener("click", () => void moderateReport(Number(btn.dataset.id), "reject"));
+				});
+				queue.querySelectorAll(".btn-delete-report").forEach((btn) => {
+					btn.addEventListener("click", () => void deleteReportById(Number(btn.dataset.id)));
+				});
+			}
+		}
+
+		const lbData = await lbRes.json();
+		const approvedData = await approvedRes.json();
+		if (lbData.success) renderLeaderboard(lbData.leaderboard);
+		if (approvedData.success) renderTimeSeries(approvedData.reports);
+	} catch {
+		queue.innerHTML = `<div class="reports-queue-empty">Failed to load reports.</div>`;
+	}
+}
+
+function renderTimeSeries(reports) {
+	const container = document.getElementById("reports-timeline");
+	if (!container) return;
+
+	const HAZARD_ICON = { avalanche: "🏔", wind_slab: "💨", cornice: "🪨", wet_snow: "💧", access_hazard: "⚠️", other: "📋" };
+	const SEV_COLOR = { critical: "#f44336", high: "#ff7043", moderate: "#ffa726", low: "#66bb6a" };
+
+	const sorted = reports.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+	if (sorted.length === 0) {
+		container.innerHTML = `<div class="reports-queue-empty">No approved reports yet.</div>`;
+		return;
+	}
+
+	container.innerHTML = sorted.map((r) => {
+		const icon = HAZARD_ICON[r.hazardType] || "📋";
+		const color = SEV_COLOR[r.severity] || "#9aa3b2";
+		const thumb = r.contentImageUrl
+			? `<img class="ts-thumb" src="${r.contentImageUrl}" alt="photo" />`
+			: "";
+		const text = r.contentText ? r.contentText.slice(0, 100) + (r.contentText.length > 100 ? "…" : "") : "";
+		const zone = r.zoneSlug ? `<span class="report-tag">${r.zoneSlug}</span>` : "";
+		const hazard = r.hazardType ? `<span class="report-tag hazard-${r.hazardType}">${r.hazardType.replace("_", " ")}</span>` : "";
+		const sev = r.severity ? `<span class="report-tag" style="color:${color}">${r.severity}</span>` : "";
+		return `
+			<div class="ts-entry">
+				<div class="ts-spine">
+					<div class="ts-dot" style="background:${color}">${icon}</div>
+					<div class="ts-line"></div>
+				</div>
+				<div class="ts-body">
+					<div class="ts-meta">${zone}${hazard}${sev}<span class="report-time">${timeAgo(r.createdAt)}</span></div>
+					${thumb}
+					${text ? `<p class="ts-text">${text}</p>` : ""}
+					${r.handle ? `<div class="ts-handle">@${r.handle} · 👍 ${r.impactCount}</div>` : ""}
+				${window._staffSession ? `<button class="btn-delete-report" data-id="${r.id}" style="margin-top:0.35rem">🗑 Delete</button>` : ""}
+				</div>
+			</div>`;
+	}).join("");
+}
+
+async function moderateReport(id, action) {
+	try {
+		const res = await fetch(`/api/reports/${id}`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ action }),
+		});
+		if (res.ok) void loadFieldReports();
+	} catch {
+		// silently ignore
+	}
+}
+
+async function deleteReportById(id) {
+	try {
+		const res = await fetch(`/api/reports/${id}`, { method: "DELETE" });
+		if (!res.ok) return;
+
+		// Update local approved-reports cache immediately
+		if (window._approvedReports) {
+			window._approvedReports = window._approvedReports.filter((r) => r.id !== id);
+			window._reportsByZone = {};
+			for (const r of window._approvedReports) {
+				if (r.zoneSlug) {
+					window._reportsByZone[r.zoneSlug] = window._reportsByZone[r.zoneSlug] || [];
+					window._reportsByZone[r.zoneSlug].push(r);
+				}
+			}
+		}
+
+		// Refresh map markers
+		if (typeof window.addReportMarkers === "function") window.addReportMarkers();
+
+		// If Reports tab is visible, do a full reload; otherwise just update the timeline
+		const reportsSection = document.getElementById("field-reports-section");
+		if (reportsSection && !reportsSection.classList.contains("hidden")) {
+			void loadFieldReports();
+		} else {
+			renderTimeSeries(window._approvedReports || []);
+		}
+
+		// Refresh zone grid so report chips stay in sync
+		void loadZones();
+	} catch {
+		// silently ignore
+	}
+}
+
+window.deleteReportById = deleteReportById;
+
+function renderLeaderboard(entries) {
+	const grid = document.getElementById("leaderboard-grid");
+	if (!entries || entries.length === 0) {
+		grid.innerHTML = `<div class="reports-queue-empty">No observers yet. Be first to report!</div>`;
+		return;
+	}
+	const BADGE_ICONS = { guardian: "🥇", sentinel: "🥈", spotter: "🥉", scout: "—" };
+	grid.innerHTML = entries.map((e, i) => {
+		const rank = i + 1;
+		const rankClass = rank <= 3 ? "top-3" : "";
+		return `
+			<div class="leaderboard-entry">
+				<span class="lb-rank ${rankClass}">#${rank}</span>
+				<span class="lb-handle">@${e.handle}</span>
+				<span class="lb-pts">${e.totalImpactPoints}pt</span>
+				<span class="lb-badge ${e.badgeLevel}">${BADGE_ICONS[e.badgeLevel] || ""}</span>
+			</div>
+		`;
+	}).join("");
+}
 document.getElementById("alert-config-close").addEventListener("click", closeConfigPanel);
 document.getElementById("notif-overlay").addEventListener("click", () => {
 	closeNotifPanel();
@@ -590,3 +911,373 @@ document.getElementById("save-thresholds").addEventListener("click", () => void 
 document.getElementById("new-rule-btn").addEventListener("click", openNewRuleForm);
 document.getElementById("save-rule-btn").addEventListener("click", () => void saveRule());
 document.getElementById("cancel-rule-btn").addEventListener("click", cancelRuleForm);
+
+// ---------------------------------------------------------------------------
+// Staff Authentication (fake SSO flow — password: 1234)
+// ---------------------------------------------------------------------------
+
+const STAFF_PASSWORD = "1234";
+const ROLE_LABELS = {
+	ops: "Operations Staff",
+	patrol: "Ski Patrol / Snow Safety",
+};
+
+window._staffSession = null;
+
+function openLoginModal() {
+	const modal = document.getElementById("login-modal");
+	modal.classList.remove("hidden");
+	showLoginPhase("connecting");
+
+	// Simulate SSO connection delay, then show the form
+	setTimeout(() => showLoginPhase("form"), 1600);
+
+	document.getElementById("login-password").value = "";
+	document.getElementById("login-username").value = "";
+	document.getElementById("login-error").classList.add("hidden");
+}
+
+function closeLoginModal() {
+	document.getElementById("login-modal").classList.add("hidden");
+	showLoginPhase("connecting");
+}
+
+function showLoginPhase(phase) {
+	["connecting", "form", "authenticating", "success"].forEach((p) => {
+		document.getElementById(`login-phase-${p}`).classList.toggle("hidden", p !== phase);
+	});
+}
+
+function applyStaffSession(session) {
+	window._staffSession = session;
+
+	// Show staff badge, hide login button
+	document.getElementById("staff-login-btn").classList.add("hidden");
+	const badge = document.getElementById("staff-badge");
+	badge.classList.remove("hidden");
+	document.getElementById("staff-badge-label").textContent =
+		`🛡 ${ROLE_LABELS[session.role] || session.role}`;
+
+	// Unlock staff-only UI
+	document.querySelectorAll(".staff-only").forEach((el) => el.classList.remove("hidden"));
+}
+
+function clearStaffSession() {
+	window._staffSession = null;
+
+	document.getElementById("staff-login-btn").classList.remove("hidden");
+	document.getElementById("staff-badge").classList.add("hidden");
+
+	// Re-hide staff-only UI
+	document.querySelectorAll(".staff-only").forEach((el) => el.classList.add("hidden"));
+}
+
+async function submitLogin() {
+	const username = document.getElementById("login-username").value.trim();
+	const password = document.getElementById("login-password").value;
+	const role = document.getElementById("login-role").value;
+	const errorEl = document.getElementById("login-error");
+
+	if (!username) {
+		errorEl.textContent = "Username is required.";
+		errorEl.classList.remove("hidden");
+		return;
+	}
+
+	if (password !== STAFF_PASSWORD) {
+		errorEl.textContent = "Invalid credentials. Please try again.";
+		errorEl.classList.remove("hidden");
+		document.getElementById("login-password").value = "";
+		return;
+	}
+
+	errorEl.classList.add("hidden");
+	showLoginPhase("authenticating");
+
+	// Simulate auth round-trip
+	await new Promise((r) => setTimeout(r, 1200));
+
+	showLoginPhase("success");
+	document.getElementById("login-success-role").textContent =
+		`${ROLE_LABELS[role]} — ${username}`;
+
+	// Brief success display, then close and apply session
+	await new Promise((r) => setTimeout(r, 1400));
+	closeLoginModal();
+	applyStaffSession({ role, username });
+}
+
+// Wire up login modal events
+document.getElementById("staff-login-btn").addEventListener("click", openLoginModal);
+document.getElementById("staff-logout-btn").addEventListener("click", clearStaffSession);
+document.getElementById("login-submit-btn").addEventListener("click", () => void submitLogin());
+document.getElementById("login-cancel-btn").addEventListener("click", closeLoginModal);
+document.getElementById("login-modal-backdrop") ?.addEventListener("click", closeLoginModal);
+document.getElementById("login-password").addEventListener("keydown", (e) => {
+	if (e.key === "Enter") void submitLogin();
+});
+
+// Backdrop click — close on backdrop, not box
+document.querySelector(".login-modal-backdrop")?.addEventListener("click", closeLoginModal);
+
+// ---------------------------------------------------------------------------
+// Event delegation — staff delete buttons (timeline, modal, map popups)
+// ---------------------------------------------------------------------------
+
+document.getElementById("reports-timeline")?.addEventListener("click", (e) => {
+	const btn = e.target.closest(".btn-delete-report");
+	if (btn && window._staffSession) void deleteReportById(Number(btn.dataset.id));
+});
+
+document.getElementById("modal-body")?.addEventListener("click", (e) => {
+	const btn = e.target.closest(".btn-delete-report");
+	if (btn && window._staffSession) {
+		void deleteReportById(Number(btn.dataset.id));
+		// Close modal so stale content doesn't linger
+		closeModal();
+	}
+});
+
+// Map popup delete buttons use a distinct class to avoid double-firing with queue
+document.addEventListener("click", (e) => {
+	const btn = e.target.closest(".popup-delete-btn");
+	if (btn && window._staffSession) void deleteReportById(Number(btn.dataset.id));
+});
+
+// ---------------------------------------------------------------------------
+// Alert Review Panel
+// ---------------------------------------------------------------------------
+
+let _reviewNotif = null; // current notification being reviewed
+let _reviewZoneData = null; // fetched zone detail
+let _editMode = false;
+
+function openReviewPanel(notif) {
+	_reviewNotif = notif;
+	_editMode = false;
+
+	document.getElementById("review-reject-form").classList.add("hidden");
+	document.getElementById("review-status").classList.add("hidden");
+	document.getElementById("review-status").className = "review-status hidden";
+
+	const zoneLabel = document.getElementById("review-panel-zone");
+	zoneLabel.innerHTML = `
+		<span>${notif.zoneName}</span>
+		<span class="danger-badge danger-${notif.dangerLevel}">${notif.dangerName}</span>
+		<span class="alert-badge alert-human_review">Review Required</span>
+	`;
+
+	const escEl = document.getElementById("review-panel-escalation");
+	if (notif.escalated && notif.escalationReason) {
+		escEl.textContent = `↑ Escalated: ${notif.escalationReason}`;
+		escEl.classList.remove("hidden");
+	} else {
+		escEl.classList.add("hidden");
+	}
+
+	// Reset textarea to readonly until edit mode
+	const textarea = document.getElementById("review-draft-text");
+	textarea.value = "Loading…";
+	textarea.readOnly = true;
+	document.getElementById("review-reasoning").textContent = "";
+	document.getElementById("review-source").innerHTML = "";
+
+	document.getElementById("review-panel").classList.remove("hidden");
+
+	void loadReviewZoneData(notif.zoneSlug);
+}
+
+function closeReviewPanel() {
+	document.getElementById("review-panel").classList.add("hidden");
+	_reviewNotif = null;
+	_reviewZoneData = null;
+	_editMode = false;
+}
+
+async function loadReviewZoneData(slug) {
+	try {
+		const res = await fetch(`/api/zones/${slug}`);
+		const data = await res.json();
+		if (!data.success) throw new Error("zone not found");
+		_reviewZoneData = data.zone;
+		renderReviewPanel(data.zone);
+	} catch {
+		document.getElementById("review-draft-text").value = "Failed to load zone data.";
+	}
+}
+
+function renderReviewPanel(zone) {
+	const ai = zone.aiAlert;
+	const assessment = zone.assessment;
+
+	const textarea = document.getElementById("review-draft-text");
+	textarea.value = ai?.backcountrySummary ?? "(No AI summary available)";
+	textarea.readOnly = !_editMode;
+
+	document.getElementById("review-reasoning").textContent = ai?.alertReasoning ?? "";
+
+	const DANGER_NAMES = { 0: "None", 1: "Low", 2: "Moderate", 3: "Considerable", 4: "High", 5: "Extreme" };
+	const elevRows = ai ? [
+		["Above treeline", ai.dangerAboveTreelineRating, ai.dangerAboveTreelineLevel],
+		["Near treeline",  ai.dangerNearTreelineRating,  ai.dangerNearTreelineLevel],
+		["Below treeline", ai.dangerBelowTreelineRating, ai.dangerBelowTreelineLevel],
+	] : [];
+
+	const problemTags = (assessment?.problems ?? [])
+		.map((p) => `<span class="problem-tag">${p}</span>`)
+		.join("");
+
+	document.getElementById("review-source").innerHTML = `
+		<div class="review-source-row">
+			<span class="review-source-label">UAC Danger</span>
+			<span class="danger-badge danger-${assessment?.dangerLevel}">${assessment?.dangerName ?? "—"}</span>
+		</div>
+		${elevRows.map(([label, rating, level]) => `
+		<div class="review-source-row">
+			<span class="review-source-label">${label}</span>
+			<span class="danger-badge danger-${level}">${rating}</span>
+		</div>`).join("")}
+		<div class="review-source-row" style="flex-direction:column;align-items:flex-start;gap:0.35rem">
+			<span class="review-source-label">UAC Problems</span>
+			<div style="display:flex;flex-wrap:wrap;gap:0.3rem">${problemTags || "—"}</div>
+		</div>
+		${ai?.avalancheProblems?.length ? `
+		<div class="review-source-row" style="flex-direction:column;align-items:flex-start;gap:0.35rem">
+			<span class="review-source-label">AI Problems</span>
+			<div style="display:flex;flex-wrap:wrap;gap:0.3rem">${ai.avalancheProblems.map((p) => `<span class="problem-tag ai-tag">${p}</span>`).join("")}</div>
+		</div>` : ""}
+	`;
+}
+
+function enterEditMode() {
+	_editMode = true;
+	const textarea = document.getElementById("review-draft-text");
+	textarea.readOnly = false;
+	textarea.focus();
+	document.getElementById("review-edit-btn").textContent = "✎ Editing…";
+	document.getElementById("review-edit-btn").disabled = true;
+}
+
+async function submitReview(decision) {
+	if (!_reviewNotif || !_reviewZoneData) return;
+
+	const originalText = _reviewZoneData.aiAlert?.backcountrySummary ?? "";
+	const editedText = document.getElementById("review-draft-text").value.trim();
+	const rejectionReason = decision === "rejected"
+		? document.getElementById("review-reject-reason").value
+		: undefined;
+	const rejectionNote = decision === "rejected"
+		? document.getElementById("review-reject-note").value.trim() || undefined
+		: undefined;
+	const session = window._staffSession;
+
+	try {
+		const res = await fetch("/api/reviews", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				notificationId: _reviewNotif.id,
+				zoneSlug: _reviewNotif.zoneSlug,
+				dangerLevel: _reviewNotif.dangerLevel,
+				aiAlertId: _reviewZoneData.aiAlert?.id ?? undefined,
+				originalText,
+				editedText: decision === "edited" ? editedText : undefined,
+				decision,
+				rejectionReason: rejectionNote
+					? `${rejectionReason}: ${rejectionNote}`
+					: rejectionReason,
+				reviewerUsername: session?.username ?? "unknown",
+				reviewerRole: session?.role ?? "unknown",
+			}),
+		});
+		const data = await res.json();
+		if (!data.success) throw new Error(data.error);
+
+		// Also acknowledge the notification
+		await fetch(`/api/notifications/${_reviewNotif.id}/acknowledge`, { method: "POST" });
+
+		showReviewStatus(decision);
+		setTimeout(() => {
+			closeReviewPanel();
+			void loadNotifications();
+		}, 1800);
+	} catch {
+		const statusEl = document.getElementById("review-status");
+		statusEl.textContent = "✗ Failed to submit review. Try again.";
+		statusEl.className = "review-status status-err";
+	}
+}
+
+function showReviewStatus(decision) {
+	const messages = {
+		approved: "✓ Alert approved — dispatching to recreationists",
+		edited:   "✓ Edited alert approved — dispatching",
+		rejected: "✗ Alert rejected — will not dispatch",
+	};
+	const statusEl = document.getElementById("review-status");
+	statusEl.textContent = messages[decision] ?? "Done";
+	statusEl.className = `review-status ${decision === "rejected" ? "status-err" : "status-ok"}`;
+	document.getElementById("review-actions").style.display = "none";
+	document.getElementById("review-reject-form").classList.add("hidden");
+}
+
+// Wire review panel buttons
+document.getElementById("review-panel-close").addEventListener("click", closeReviewPanel);
+
+document.getElementById("review-approve-btn").addEventListener("click", () => void submitReview("approved"));
+
+document.getElementById("review-edit-btn").addEventListener("click", () => {
+	if (!_editMode) {
+		enterEditMode();
+	} else {
+		void submitReview("edited");
+	}
+});
+
+document.getElementById("review-reject-btn").addEventListener("click", () => {
+	document.getElementById("review-reject-form").classList.toggle("hidden");
+});
+
+document.getElementById("review-reject-confirm-btn").addEventListener("click", () => void submitReview("rejected"));
+
+// ---------------------------------------------------------------------------
+// Override renderNotifItem to add Review button for staff + human_review items
+// ---------------------------------------------------------------------------
+
+const _originalRenderNotifItem = renderNotifItem;
+window.renderNotifItemWithReview = function(n) {
+	const base = _originalRenderNotifItem(n);
+	if (!window._staffSession || n.action !== "human_review" || n.acknowledged) return base;
+	// Inject a Review button into the notif item
+	return base.replace(
+		'</div>\n\t</div>',
+		`\t<div class="notif-review-row">
+			<button class="notif-review-btn" data-notif-id="${n.id}">Review Alert →</button>
+		</div>
+	</div>`,
+	);
+};
+
+// Patch loadNotifications to use the extended renderer when staff is logged in
+const _originalLoadNotifications = loadNotifications;
+async function loadNotificationsPatched() {
+	await _originalLoadNotifications();
+	if (!window._staffSession) return;
+	// Re-attach Review button click handlers after render
+	document.querySelectorAll(".notif-review-btn").forEach((btn) => {
+		btn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			const id = Number(btn.dataset.notifId);
+			// Find the notification from current rendered data — re-fetch to be safe
+			void fetch("/api/notifications?limit=50").then((r) => r.json()).then((data) => {
+				if (!data.success) return;
+				const notif = data.notifications.find((n) => n.id === id);
+				if (notif) openReviewPanel(notif);
+			});
+		});
+	});
+}
+
+// Replace the polling and initial call with the patched version
+// (The original setInterval and initial call already ran — we patch future calls)
+window._loadNotificationsPatched = loadNotificationsPatched;

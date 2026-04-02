@@ -1,10 +1,43 @@
 import { describe, expect, test } from "bun:test";
 import { mock } from "bun:test";
 
+// Flat mock helpers for getDb — avoids deep nesting (sonarjs/no-nested-functions)
+const mockInsertReturning = () =>
+	Promise.resolve([
+		{
+			id: 1,
+			handle: null,
+			contentText: null,
+			contentImageUrl: null,
+			lat: null,
+			lng: null,
+			status: "pending",
+			rejectionReason: null,
+			aiSummary: null,
+			zoneSlug: null,
+			hazardType: null,
+			severity: null,
+			locationDescription: null,
+			impactCount: 0,
+			createdAt: new Date(),
+		},
+	]);
+const mockInsertValues = () => ({ returning: mockInsertReturning });
+const mockInsert = () => ({ values: mockInsertValues });
+const mockUpdateReturning = () => Promise.resolve([]);
+const mockUpdateWhere = () => ({ returning: mockUpdateReturning });
+const mockUpdateSet = () => ({ where: mockUpdateWhere });
+const mockUpdate = () => ({ set: mockUpdateSet });
+const mockSelectWhere = () => ({ limit: () => Promise.resolve([]) });
+const mockSelectOrderBy = () => ({ limit: () => Promise.resolve([]) });
+const mockSelectFrom = () => ({ where: mockSelectWhere, orderBy: mockSelectOrderBy });
+const mockSelect = () => ({ from: mockSelectFrom });
+const mockDb = { insert: mockInsert, update: mockUpdate, select: mockSelect };
+
 // Mock the db module before importing the app
 void mock.module("../components/db", () => ({
 	getSql: () => () => [],
-	getDb: () => ({}),
+	getDb: () => mockDb,
 	queries: {
 		getAllZones: () => Promise.resolve([]),
 		getZoneBySlug: () => Promise.resolve([]),
@@ -16,7 +49,16 @@ void mock.module("../components/db", () => ({
 		getSnowpackReadings: () => Promise.resolve([]),
 		getAllAlertThresholds: () => Promise.resolve([]),
 		getAllEscalationRules: () => Promise.resolve([]),
+		getPendingReports: () => Promise.resolve([]),
+		getApprovedReportsByZone: () => Promise.resolve([]),
+		getReportById: () => Promise.resolve([]),
+		getLeaderboard: () => Promise.resolve([]),
+		getObserverByHandle: () => Promise.resolve([]),
+		getAllApprovedReports: () => Promise.resolve([]),
 	},
+	alertReviews: {},
+	observationReports: {},
+	observerHandles: {},
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
 	closeDatabase: () => Promise.resolve(),

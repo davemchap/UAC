@@ -125,6 +125,9 @@ void mock.module("../components/db", () => ({
 		};
 		return mockSql;
 	},
+	alertReviews: {},
+	observationReports: {},
+	observerHandles: {},
 	checkDatabaseHealth: () => Promise.resolve(true),
 	initializeDatabase: () => Promise.resolve(),
 	closeDatabase: () => Promise.resolve(),
