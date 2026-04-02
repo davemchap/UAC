@@ -9,24 +9,32 @@
 	</head>
 	<body>
 		<header>
-			<!-- Top utility bar -->
-			<div class="app-nav">
-				<div class="app-brand">
-					<span class="app-wordmark">UAC Watch</span>
-					<a href="https://utahavalanchecenter.org" target="_blank" rel="noopener" class="uac-logo-mark" aria-label="Utah Avalanche Center">
-						<img src="https://utahavalanchecenter.org/themes/custom/basscss/images/uac_logo.svg" alt="UAC" />
-					</a>
+			<div class="app-header">
+				<!-- Left: UAC logo -->
+				<a href="https://utahavalanchecenter.org" target="_blank" rel="noopener" class="uac-logo-mark" aria-label="Utah Avalanche Center">
+					<img src="https://utahavalanchecenter.org/themes/custom/basscss/images/uac_logo.svg" alt="UAC" />
+				</a>
+
+				<!-- Center: title + description -->
+				<div class="header-hero">
+					<h1>Avalanche Forecast Analysis Engine</h1>
+					<p class="description">
+						Real-time monitoring across all 9 UAC forecast zones.
+						Aggregates snowpack, weather, and danger ratings to surface critical conditions.
+					</p>
 				</div>
+
+				<!-- Right: staff controls -->
 				<div class="app-nav-utils">
 					<div id="staff-badge" class="staff-badge hidden">
-					<span id="staff-badge-label"></span>
-					<button id="staff-logout-btn" class="staff-logout-btn">Log out</button>
-				</div>
-				<button id="staff-login-btn" class="staff-login-btn" aria-label="Staff Login">
-					<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-					Staff Login
-				</button>
-				<button id="alert-config-btn" class="alert-config-btn staff-only hidden" aria-label="Alert Configuration">
+						<span id="staff-badge-label"></span>
+						<button id="staff-logout-btn" class="staff-logout-btn">Log out</button>
+					</div>
+					<button id="staff-login-btn" class="staff-login-btn" aria-label="Staff Login">
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+						<span class="login-btn-label">Staff Login</span>
+					</button>
+					<button id="alert-config-btn" class="alert-config-btn staff-only hidden" aria-label="Alert Configuration">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="12" cy="12" r="3"/>
 							<path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
@@ -42,15 +50,9 @@
 					</button>
 				</div>
 			</div>
-
-			<!-- Hero title + primary CTA -->
-			<div class="header-hero">
-				<h1>Avalanche Forecast Analysis Engine</h1>
-				<p class="description">
-					Real-time monitoring across all 9 UAC forecast zones.
-					Aggregates snowpack, weather, and danger ratings to surface critical conditions.
-				</p>
-				<a href="/report" class="trail-cta" aria-label="Submit Field Report">🏔 Live from the Trail</a>
+			<!-- CTA: always centered, full-width row -->
+			<div class="header-cta-row">
+				<a href="/report" class="trail-cta" aria-label="Submit Field Report">Observation</a>
 			</div>
 		</header>
 
@@ -158,7 +160,7 @@
 			<div class="tab-bar">
 				<button id="tab-grid" class="tab-btn tab-active" onclick="switchTab('grid')">Grid</button>
 				<button id="tab-map" class="tab-btn" onclick="switchTab('map')">Map</button>
-				<button id="tab-reports" class="tab-btn" onclick="switchTab('reports')">Reports</button>
+				<button id="tab-reports" class="tab-btn" onclick="switchTab('reports')">Observations</button>
 			</div>
 
 			<div id="view-grid">
@@ -174,14 +176,14 @@
 		<div id="field-reports-section" class="reports-section hidden">
 
 			<div class="staff-only hidden">
-				<div class="reports-section-heading">📡 Pending Reports Queue <span id="pending-count" class="report-tag" style="font-size:0.75rem"></span></div>
+				<div class="reports-section-heading">👥 Pending Observations Queue <span id="pending-count" class="report-tag" style="font-size:0.75rem"></span></div>
 				<div id="reports-queue" class="reports-queue">
 					<div class="reports-queue-empty">Loading…</div>
 				</div>
 			</div>
 
 			<div style="margin-top:2rem">
-				<div class="reports-section-heading">📈 Recent Reports Timeline</div>
+				<div class="reports-section-heading">📈 Recent Observations Timeline</div>
 				<div id="reports-timeline" class="reports-timeline">
 					<div class="reports-queue-empty">Loading…</div>
 				</div>

@@ -167,7 +167,7 @@ function buildPinElement(r) {
 		img.className = "report-pin-img";
 		head.appendChild(img);
 	} else {
-		head.textContent = "📡";
+		head.textContent = "👥";
 		head.classList.add("report-pin-icon");
 	}
 

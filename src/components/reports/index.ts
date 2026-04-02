@@ -14,6 +14,7 @@ export interface ReportInput {
 	lat?: number | null;
 	lng?: number | null;
 	zoneSlug?: string | null;
+	staffRole?: string | null;
 }
 
 export interface ReportRow {
@@ -109,7 +110,7 @@ export async function submitReport(input: ReportInput): Promise<ReportRow> {
 			lat,
 			lng,
 			zoneSlug,
-			status: "pending",
+			status: input.staffRole ? "approved" : "pending",
 			impactCount: 0,
 		})
 		.returning();

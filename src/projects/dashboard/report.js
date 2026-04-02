@@ -195,7 +195,8 @@
 			return null;
 		}
 
-		return { contentText, contentImageUrl: photoBase64 || null, lat: gpsLat, lng: gpsLng, handle, zoneSlug };
+		const staffRole = window._staffSession?.role ?? null;
+		return { contentText, contentImageUrl: photoBase64 || null, lat: gpsLat, lng: gpsLng, handle, zoneSlug, staffRole };
 	}
 
 	function buildDetailedPayload() {
@@ -259,7 +260,8 @@
 		}
 
 		const photo = photoBase64D || photoBase64 || null;
-		return { contentText: lines.join("\n"), contentImageUrl: photo, lat: gpsLat, lng: gpsLng, handle, zoneSlug: zone };
+		const staffRole = window._staffSession?.role ?? null;
+		return { contentText: lines.join("\n"), contentImageUrl: photo, lat: gpsLat, lng: gpsLng, handle, zoneSlug: zone, staffRole };
 	}
 
 	// ---------------------------------------------------------------------------
@@ -321,13 +323,18 @@
 	function showSuccess(handle, report) {
 		form.classList.add("hidden");
 		successScreen.classList.remove("hidden");
+		const isStaff = !!window._staffSession;
 		if (handle) {
-			successMessage.textContent = `Thanks, ${handle}! Your report is queued for review.`;
+			successMessage.textContent = isStaff
+				? `Thanks, ${handle}! Your report is live on the map.`
+				: `Thanks, ${handle}! Your report is queued for review.`;
 			badgeBlock.classList.remove("hidden");
 			badgeLabel.textContent = `🏔 ${BADGE_LABELS[report.badgeLevel] || "Scout"}`;
-			impactPts.textContent = "Impact points earned when approved.";
+			impactPts.textContent = isStaff ? "Impact points credited." : "Impact points earned when approved.";
 		} else {
-			successMessage.textContent = "Your report is queued for review. Add a handle next time to earn impact points!";
+			successMessage.textContent = isStaff
+				? "Your report is live on the map."
+				: "Your report is queued for review. Add a handle next time to earn impact points!";
 		}
 	}
 

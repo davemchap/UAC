@@ -9,45 +9,78 @@ body {
 	background: #0f1117;
 	color: #e8eaf0;
 	min-height: 100vh;
-	padding: 2rem;
+	padding: 0 1.5rem 2rem;
 }
 
 header {
-	max-width: 960px;
-	margin: 1.5rem auto 2rem;
+	max-width: 1200px;
+	margin: 0 auto;
 }
 
-/* Top utility bar */
-.app-nav {
+/* ── 3-column header: [logo] [hero] [staff controls] ── */
+.app-header {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 2rem;
+	align-items: flex-start;
+	gap: 1.5rem;
+	padding: 1.25rem 0 1.5rem;
 }
 
-.app-wordmark {
-	font-size: 0.95rem;
-	font-weight: 700;
-	color: var(--app-text-muted, #9aa3b2);
-	letter-spacing: 0.02em;
-}
-
-.app-nav-utils {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-}
-
-/* Hero title block */
+/* Center: title + description + CTA */
 .header-hero {
-	text-align: center;
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 0.75rem;
+	align-items: flex-start;
+	gap: 0.6rem;
+	padding-top: 0.1rem; /* fine-tune top alignment with logo */
 }
 
-/* Keep old class names working */
+/* Right: staff controls */
+.app-nav-utils {
+	flex-shrink: 0;
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5rem;
+	padding-top: 0.1rem;
+}
+
+/* ── Mobile layout ── */
+@media (max-width: 640px) {
+	body { padding: 0 1rem 1.5rem; }
+
+	.app-header {
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		padding: 1rem 0 1.25rem;
+	}
+
+	/* Row 1: logo + staff controls side by side */
+	.uac-logo-mark {
+		width: 52px !important;
+		height: 52px !important;
+		flex-shrink: 0;
+	}
+
+	.app-nav-utils {
+		margin-left: auto; /* push controls to right edge */
+		align-items: center;
+		padding-top: 0;
+	}
+
+	.login-btn-label { display: none; } /* icon-only on mobile */
+
+	/* Row 2: hero takes full width */
+	.header-hero {
+		flex: 0 0 100%;
+		align-items: center;
+		text-align: center;
+	}
+
+	h1 { font-size: 1.4rem; }
+}
+
+/* Keep legacy class names working */
 .header-title-block { text-align: center; }
 .header-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; }
 
@@ -64,21 +97,36 @@ header {
 }
 .observe-link:hover { background: #2a4f80; color: #bfdbfe; }
 
+.header-cta-row {
+	display: flex;
+	justify-content: center;
+	padding-bottom: 1.5rem;
+}
+
 .trail-cta {
 	background: var(--app-accent, #4a7cf7);
 	border: none;
 	border-radius: 10px;
 	color: #fff;
-	font-size: 1rem;
+	font-size: 1.05rem;
 	font-weight: 700;
-	padding: 0.65rem 1.75rem;
+	padding: 0.7rem 2rem;
 	text-decoration: none;
 	white-space: nowrap;
-	letter-spacing: 0.02em;
+	letter-spacing: 0.04em;
 	box-shadow: 0 4px 16px rgba(74, 124, 247, 0.35);
 	transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
-	display: inline-block;
-	margin-top: 0.25rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+}
+/* Bold + sign rendered via pseudo so it's visually heavier than the text */
+.trail-cta::before {
+	content: "+";
+	font-size: 1.3em;
+	font-weight: 800;
+	line-height: 1;
+	margin-right: -0.1em;
 }
 .trail-cta:hover {
 	background: var(--app-btn-primary-hover, #2d5ab8);
@@ -87,11 +135,12 @@ header {
 }
 
 h1 {
-	font-size: 2rem;
+	font-size: 1.85rem;
 	font-weight: 700;
 	letter-spacing: -0.5px;
-	margin-bottom: 1rem;
+	margin-bottom: 0;
 	color: #ffffff;
+	line-height: 1.2;
 }
 
 .description {
@@ -2591,17 +2640,11 @@ h1 {
    UAC logo mark — top left margin
 --------------------------------------------------------------------------- */
 
-.app-brand {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 0.5rem;
-}
-
 .uac-logo-mark {
 	display: block;
-	width: 140px;
-	height: 140px;
+	flex-shrink: 0;
+	width: 96px;
+	height: 96px;
 	background: #fff;
 	border-radius: 12px;
 	padding: 8px;

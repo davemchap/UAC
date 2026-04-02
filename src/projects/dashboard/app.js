@@ -92,7 +92,7 @@ function renderZoneCard(zone) {
 
 	const zoneReports = (window._reportsByZone || {})[zone.slug] || [];
 	const reportChip = zoneReports.length > 0
-		? `<span class="zone-report-chip" title="${zoneReports.length} field report${zoneReports.length !== 1 ? "s" : ""}">📡 ${zoneReports.length} report${zoneReports.length !== 1 ? "s" : ""}</span>`
+		? `<span class="zone-report-chip" title="${zoneReports.length} field observation${zoneReports.length !== 1 ? "s" : ""}">👥 ${zoneReports.length} observation${zoneReports.length !== 1 ? "s" : ""}</span>`
 		: "";
 
 	return `
@@ -270,7 +270,7 @@ function buildModalReportsSection(slug) {
 
 	return `
 		<div class="modal-section">
-			<div class="modal-section-label">📡 Field Reports (${reports.length})</div>
+			<div class="modal-section-label">👥 Field Observations (${reports.length})</div>
 			<div class="modal-reports-list">${cards}</div>
 		</div>`;
 }
