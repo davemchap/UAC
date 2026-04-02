@@ -493,7 +493,6 @@ setInterval(() => {
 
 loadZones();
 void loadNotifications();
-void loadApprovedReports();
 
 // ---------------------------------------------------------------------------
 // Alert Configuration
