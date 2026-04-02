@@ -47,8 +47,15 @@
 		{
 			"idx": 6,
 			"version": "7",
-			"when": 1775105141326,
+			"when": 1775110000000,
 			"tag": "0006_overall_danger_rose",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1775130000000,
+			"tag": "0007_ai_alerts_status",
 			"breakpoints": true
 		}
 	]

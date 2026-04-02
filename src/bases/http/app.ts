@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
+import aiAlerts from "./routes/ai-alerts";
 import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
 import observations from "./routes/observations";
@@ -75,6 +76,7 @@ app.get("/api", (c) =>
 );
 
 app.route("/api/zones", zones);
+app.route("/api/ai-alerts", aiAlerts);
 app.route("/api/notifications", notifications);
 app.route("/api/observations", observations);
 app.route("/api/reports", reports);
@@ -88,6 +90,14 @@ app.get("/api/zone-boundaries", (c) => c.json(getZoneBoundaries()));
 // ---------------------------------------------------------------------------
 // Static files
 // ---------------------------------------------------------------------------
+
+app.use(
+	"/command-center/*",
+	serveStatic({
+		root: "./src/projects/command-center",
+		rewriteRequestPath: (path) => path.replace(/^\/command-center/, "") || "/index.html",
+	}),
+);
 
 app.use(
 	"/*",
