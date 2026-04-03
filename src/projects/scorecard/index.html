@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast Usability Scorecard — UAC</title>
+  <link rel="stylesheet" href="/scorecard/scorecard.css" />
+</head>
+<body>
+  <header class="sc-header">
+    <a href="https://utahavalanchecenter.org" target="_blank" rel="noopener" class="sc-logo" aria-label="Utah Avalanche Center">
+      <img src="https://utahavalanchecenter.org/themes/custom/basscss/images/uac_logo.svg" alt="UAC" />
+    </a>
+    <div class="sc-header-text">
+      <h1>Forecast Usability Scorecard</h1>
+      <p>How readable is today's forecast for each audience?</p>
+    </div>
+    <div class="sc-controls">
+      <label for="zone-select" class="sr-only">Zone</label>
+      <select id="zone-select" class="sc-select">
+        <option value="">All Zones</option>
+      </select>
+      <a href="/dashboard" class="sc-back-link">← Dashboard</a>
+    </div>
+  </header>
+
+  <!-- Problem statement banner (shown per solution tab) -->
+  <div class="sc-problem-banner" id="problem-banner" aria-live="polite"></div>
+
+  <!-- Tab navigation -->
+  <nav class="sc-tabs" role="tablist" aria-label="Scorecard solutions">
+    <button class="sc-tab active" role="tab" aria-selected="true" aria-controls="tab-readability" id="btn-readability" data-tab="readability">
+      <span class="sc-tab-icon">&#9685;</span>
+      Readability Lens
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-journey" id="btn-journey" data-tab="journey">
+      <span class="sc-tab-icon">&#8594;</span>
+      Persona Journey
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-coach" id="btn-coach" data-tab="coach">
+      <span class="sc-tab-icon">&#9733;</span>
+      Forecaster Coach
+    </button>
+  </nav>
+
+  <main class="sc-main">
+    <!-- Loading state -->
+    <div class="sc-loading" id="sc-loading" aria-live="polite">
+      <div class="sc-spinner"></div>
+      <p>Scoring forecasts across personas…</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="sc-error hidden" id="sc-error" role="alert"></div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 1: Readability Lens                                             -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel active" id="tab-readability" role="tabpanel" aria-labelledby="btn-readability">
+      <div class="sc-solution-meta">
+        <div class="sc-hypothesis">
+          <span class="sc-meta-label">Hypothesis</span>
+          <span class="sc-meta-text">We believe surfacing phrase-level readability breakdowns by persona will reduce confusing technical language, which we will know is true when the Casual Recreationist score increases by 20+ points within 30 publishing days.</span>
+        </div>
+        <div class="sc-metrics-row" id="readability-persona-scores"></div>
+      </div>
+
+      <div class="sc-readability-layout">
+        <div class="sc-forecast-column" id="readability-forecast-text">
+          <div class="sc-forecast-header">
+            <h2 id="readability-zone-title">Select a zone</h2>
+            <div class="sc-persona-legend" id="readability-legend"></div>
+          </div>
+          <div class="sc-forecast-body" id="readability-body"></div>
+        </div>
+        <aside class="sc-sidebar" id="readability-sidebar">
+          <h3 class="sc-sidebar-title">Persona Scores</h3>
+          <div id="readability-cards"></div>
+          <div class="sc-trend-section">
+            <h4 class="sc-trend-title">Score Distribution</h4>
+            <div id="readability-trend"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Suggestion drawer -->
+      <div class="sc-drawer hidden" id="suggestion-drawer" role="dialog" aria-modal="true" aria-label="Suggestion">
+        <div class="sc-drawer-inner">
+          <button class="sc-drawer-close" id="drawer-close" aria-label="Close suggestion">&times;</button>
+          <div class="sc-drawer-content" id="drawer-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 2: Persona Journey                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-journey" role="tabpanel" aria-labelledby="btn-journey">
+      <div class="sc-solution-meta">
+        <div class="sc-hypothesis">
+          <span class="sc-meta-label">Hypothesis</span>
+          <span class="sc-meta-text">We believe showing a simulated step-by-step decision path for each persona will improve structural clarity, which we will know is true when the % of persona journeys ending in a correct decision increases by 20 points within 60 days.</span>
+        </div>
+      </div>
+
+      <div class="sc-journey-header">
+        <h2 id="journey-zone-title">Select a zone</h2>
+        <p class="sc-journey-subtitle">How does each persona navigate today's forecast?</p>
+      </div>
+
+      <div class="sc-journey-map" id="journey-map">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Journey detail drawer -->
+      <div class="sc-drawer hidden" id="journey-drawer" role="dialog" aria-modal="true" aria-label="Journey detail">
+        <div class="sc-drawer-inner">
+          <button class="sc-drawer-close" id="journey-drawer-close" aria-label="Close">&times;</button>
+          <div class="sc-drawer-content" id="journey-drawer-content"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 3: Forecaster Coach                                             -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-coach" role="tabpanel" aria-labelledby="btn-coach">
+      <div class="sc-solution-meta">
+        <div class="sc-hypothesis">
+          <span class="sc-meta-label">Hypothesis</span>
+          <span class="sc-meta-text">We believe pairing each low-scoring section with a specific suggested rewrite and before/after score impact will drive sustained forecast quality improvement, which we will know is true when 70% of forecasters apply at least one suggestion per week within 60 days.</span>
+        </div>
+      </div>
+
+      <div class="sc-coach-layout">
+        <div class="sc-coach-hero" id="coach-hero">
+          <!-- Grade card rendered by JS -->
+        </div>
+        <div class="sc-coach-body">
+          <div class="sc-persona-grades" id="coach-persona-grades"></div>
+          <div class="sc-suggestions-panel" id="coach-suggestions">
+            <h3 class="sc-suggestions-title">Coaching Suggestions</h3>
+            <div id="suggestions-list"></div>
+          </div>
+        </div>
+        <aside class="sc-coach-sidebar">
+          <div class="sc-progress-section">
+            <h3 class="sc-sidebar-title">Score Breakdown</h3>
+            <div id="coach-progress-bars"></div>
+          </div>
+          <div class="sc-design-principles">
+            <h4 class="sc-principles-title">Coach's Principles</h4>
+            <ul class="sc-principles-list">
+              <li>Scores serve writing, not judgment</li>
+              <li>Forecasters are domain experts</li>
+              <li>Suggestions are offers, not mandates</li>
+              <li>Historical context is motivating</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="/scorecard/scorecard.js"></script>
+</body>
+</html>

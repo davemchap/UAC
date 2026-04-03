@@ -12,6 +12,7 @@ import observations from "./routes/observations";
 import proxy from "./routes/proxy";
 import reports from "./routes/reports";
 import reviews from "./routes/reviews";
+import scorecard from "./routes/scorecard";
 import zones from "./routes/zones";
 import map from "./routes/map";
 import { getZoneBoundaries } from "../../components/zone-lookup";
@@ -76,6 +77,7 @@ app.get("/api", (c) =>
 );
 
 app.route("/api/zones", zones);
+app.route("/api/scorecard", scorecard);
 app.route("/api/ai-alerts", aiAlerts);
 app.route("/api/notifications", notifications);
 app.route("/api/observations", observations);
@@ -91,20 +93,32 @@ app.get("/api/zone-boundaries", (c) => c.json(getZoneBoundaries()));
 // Static files
 // ---------------------------------------------------------------------------
 
+const INDEX_HTML = "/index.html";
+
 app.use(
 	"/command-center/*",
 	serveStatic({
 		root: "./src/projects/command-center",
-		rewriteRequestPath: (path) => path.replace(/^\/command-center/, "") || "/index.html",
+		rewriteRequestPath: (path) => path.replace(/^\/command-center/, "") || INDEX_HTML,
 	}),
 );
+
+app.use(
+	"/scorecard/*",
+	serveStatic({
+		root: "./src/projects/scorecard",
+		rewriteRequestPath: (path) => path.replace(/^\/scorecard/, "") || INDEX_HTML,
+	}),
+);
+
+app.get("/scorecard", (c) => c.redirect("/scorecard/"));
 
 // Public landing page — no auth required
 app.use(
 	"/",
 	serveStatic({
 		root: "./src/projects/public",
-		rewriteRequestPath: () => "/index.html",
+		rewriteRequestPath: () => INDEX_HTML,
 	}),
 );
 
@@ -117,7 +131,7 @@ app.use(
 			if (stripped === "/observe") return "/observe.html";
 			if (stripped === "/report") return "/report.html";
 			if (stripped === "/" || (!stripped.includes(".") && !stripped.startsWith("/api"))) {
-				return "/index.html";
+				return INDEX_HTML;
 			}
 			return stripped;
 		},
@@ -132,7 +146,7 @@ app.use(
 			if (path === "/observe") return "/observe.html";
 			if (path === "/report") return "/report.html";
 			if (!path.includes(".") && !path.startsWith("/api")) {
-				return "/index.html";
+				return INDEX_HTML;
 			}
 			return path;
 		},
