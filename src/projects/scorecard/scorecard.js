@@ -184,9 +184,17 @@ function renderPersonaSidebar(containerId, personas) {
 
 function renderAnnotatedForecast(containerId, data) {
   const el = document.getElementById(containerId);
-  const text = [data.personas[0]?.flags ? buildAnnotatedText(data) : null].filter(Boolean)[0]
-    ?? "<p class='sc-no-data'>No forecast text available for this zone.</p>";
-  el.innerHTML = text;
+
+  const forecastText = getForecastDisplayText(data);
+  if (!forecastText) {
+    el.innerHTML = `<div class="sc-empty-state">
+      <p class="sc-empty-title">No forecast text available for this zone.</p>
+      <p class="sc-empty-hint">Forecast text will appear here once UAC publishes a forecast for this zone. Check back after the next ingestion cycle.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = buildAnnotatedText(data, forecastText);
 
   // Wire hover tooltips
   el.querySelectorAll(".sc-highlight").forEach((span) => {
@@ -194,17 +202,13 @@ function renderAnnotatedForecast(containerId, data) {
   });
 }
 
-function buildAnnotatedText(data) {
+function buildAnnotatedText(data, forecastText) {
   // Collect all flags across all personas, keyed by start position
   const allFlags = data.personas.flatMap((p) => p.flags ?? []);
   if (allFlags.length === 0) {
-    const text = [data.personas[0]?.personaRole ? "" : ""].join("");
-    const forecastText = getForecastDisplayText(data);
     return `<p class="sc-forecast-clean">${escHtml(forecastText)}</p>
       <p class="sc-clean-note">No readability flags found — this forecast scores well across all personas.</p>`;
   }
-
-  const forecastText = getForecastDisplayText(data);
   // Build highlighted HTML — apply highlights in reverse order to preserve indices
   const sorted = [...allFlags].sort((a, b) => b.startIndex - a.startIndex);
   let result = forecastText;
@@ -222,9 +226,8 @@ function buildAnnotatedText(data) {
 }
 
 function getForecastDisplayText(data) {
-  // Use the first persona's flags as reference — all work on the same text
-  return (data.bottomLine ?? "") + (data.currentConditions ? "\n\n" + data.currentConditions : "")
-    || "No forecast text available.";
+  const parts = [data.bottomLine, data.currentConditions].filter(Boolean);
+  return parts.length > 0 ? parts.join("\n\n") : null;
 }
 
 function openSuggestionDrawer(dataset) {

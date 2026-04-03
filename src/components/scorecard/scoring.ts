@@ -443,6 +443,53 @@ function buildCoachingSuggestions(text: string, personaScore: PersonaScore): Coa
 }
 
 // ---------------------------------------------------------------------------
+// Section-level scoring
+// ---------------------------------------------------------------------------
+
+/**
+ * Score a single forecast section for a persona.
+ * Returns sub-scores (clarity, jargonLoad, actionability) for that section.
+ */
+function scoreSectionForPersona(
+	sectionText: string,
+	persona: Persona,
+): { clarity: number; jargonLoad: number; actionability: number } {
+	const gradeLevel = estimateGradeLevel(sectionText);
+	const sentenceFlags = findLongSentenceFlags(sectionText, persona);
+	const jargonFlags = findJargonFlags(sectionText, persona);
+	const actionability = scoreActionability(sectionText);
+
+	const gradePenalty = Math.max(0, (gradeLevel - persona.maxGradeLevel) * 4);
+	const sentencePenalty = sentenceFlags.length * 5;
+	const clarity = Math.max(10, Math.min(100, 90 - gradePenalty - sentencePenalty));
+	const jargonLoad = Math.max(10, Math.min(100, 100 - jargonFlags.length * 15));
+
+	return { clarity, jargonLoad, actionability };
+}
+
+/**
+ * Weighted average of section scores.
+ * Sections are weighted by their importance to each persona literacy level.
+ * Jordan (low literacy) heavily weights the bottom line; technical personas weight problems more.
+ */
+function weightedSectionScore(
+	sections: { clarity: number; jargonLoad: number; actionability: number }[],
+	weights: number[],
+): { clarity: number; jargonLoad: number; actionability: number } {
+	const totalWeight = weights.reduce((s, w) => s + w, 0);
+	if (totalWeight === 0 || sections.length === 0) return { clarity: 50, jargonLoad: 50, actionability: 50 };
+
+	const weighted = (key: "clarity" | "jargonLoad" | "actionability") =>
+		Math.round(sections.reduce((sum, s, i) => sum + s[key] * (weights[i] ?? 0), 0) / totalWeight);
+
+	return {
+		clarity: weighted("clarity"),
+		jargonLoad: weighted("jargonLoad"),
+		actionability: weighted("actionability"),
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Main scoring function
 // ---------------------------------------------------------------------------
 
@@ -452,30 +499,43 @@ export function scoreForecast(
 	problems: string[],
 	bottomLine: string,
 ): PersonaScore[] {
-	const fullText = [forecastText, ...problems, bottomLine].filter(Boolean).join("\n\n");
-	const gradeLevel = estimateGradeLevel(fullText);
-	const actionabilityBase = scoreActionability(fullText);
+	// Score each logical section independently so section-level problems don't
+	// get diluted by unrelated well-written sections.
+	const problemsText = problems.filter(Boolean).join("\n\n");
+	// forecastText is already bottomLine + currentConditions joined upstream;
+	// bottomLine is passed separately for the section-aware bottom-line weight.
+	const sections = [
+		{ label: "bottom_line", text: bottomLine },
+		{ label: "problems", text: problemsText },
+		{ label: "conditions", text: forecastText },
+	].filter((s) => s.text.trim().length > 0);
+
+	// Full concatenated text is still used for global flag positions (highlights)
+	const fullText = [forecastText, problemsText, bottomLine].filter(Boolean).join("\n\n");
 
 	return PERSONA_IDS.map((personaId): PersonaScore => {
 		const persona = PERSONAS[personaId];
 
-		// Collect all flags
+		// Section-level sub-scores
+		const sectionScores = sections.map((s) => scoreSectionForPersona(s.text, persona));
+
+		// Section weights by literacy level.
+		// Low-literacy readers depend on bottom line; technical readers weight problems heavily.
+		const weights: Record<typeof persona.literacyLevel, number[]> = {
+			low: [0.5, 0.2, 0.3],
+			high: [0.25, 0.45, 0.3],
+			expert: [0.15, 0.5, 0.35],
+			forecaster: [0.1, 0.5, 0.4],
+		};
+		const sectionWeights = weights[persona.literacyLevel].slice(0, sections.length);
+		const { clarity, jargonLoad, actionability } = weightedSectionScore(sectionScores, sectionWeights);
+
+		// Flags: collect across full text for highlight positions
 		const jargonFlags = findJargonFlags(fullText, persona);
 		const sentenceFlags = findLongSentenceFlags(fullText, persona);
 		const allFlags = [...jargonFlags, ...sentenceFlags];
 
-		// Clarity: penalize for grade level overage and sentence length violations
-		const gradePenalty = Math.max(0, (gradeLevel - persona.maxGradeLevel) * 4);
-		const sentencePenalty = sentenceFlags.length * 5;
-		const clarity = Math.max(10, Math.min(100, 90 - gradePenalty - sentencePenalty));
-
-		// Jargon load: penalized per unknown term found
-		const jargonLoad = Math.max(10, Math.min(100, 100 - jargonFlags.length * 15));
-
-		// Actionability
-		const actionability = actionabilityBase;
-
-		// Overall weighted score
+		// Overall weighted score — clarity and jargon load dominate for low-literacy personas
 		const overall = Math.round(clarity * 0.4 + jargonLoad * 0.35 + actionability * 0.25);
 
 		// Decision outcome heuristic
