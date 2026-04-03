@@ -42,6 +42,24 @@ export interface ScorecardResult {
 // Text utilities
 // ---------------------------------------------------------------------------
 
+/**
+ * Strip HTML entities and control characters from UAC forecast text.
+ * Must be applied before scoring AND before returning text to the frontend
+ * so that flag character positions are consistent with what is displayed.
+ */
+export function normalizeText(text: string | null | undefined): string {
+	if (!text) return "";
+	return text
+		.replace(/&nbsp;/g, " ")
+		.replace(/&amp;/g, "&")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&[a-z]+;/gi, " ")
+		.replace(/\r/g, "")
+		.replace(/[ \t]{2,}/g, " ")
+		.trim();
+}
+
 function countWords(text: string): number {
 	return text.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -511,7 +529,8 @@ export function scoreForecast(
 	].filter((s) => s.text.trim().length > 0);
 
 	// Full concatenated text is still used for global flag positions (highlights)
-	const fullText = [forecastText, problemsText, bottomLine].filter(Boolean).join("\n\n");
+	// Note: forecastText already contains bottomLine — do not add it again or flags duplicate
+	const fullText = [forecastText, problemsText].filter(Boolean).join("\n\n");
 
 	return PERSONA_IDS.map((personaId): PersonaScore => {
 		const persona = PERSONAS[personaId];

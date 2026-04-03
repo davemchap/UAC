@@ -3,6 +3,7 @@ import {
 	scoreForecast,
 	simulateJourney,
 	buildCoachingSuggestions,
+	normalizeText,
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
 } from "../../../components/scorecard";
@@ -17,11 +18,13 @@ scorecard.get("/", async (c) => {
 	const forecasts = await getLatestForecastsForScoring();
 
 	const results = forecasts.map((f) => {
+		const bottomLine = normalizeText(f.bottomLine);
+		const currentConditions = normalizeText(f.currentConditions);
 		const problems = [f.avalancheProblem1, f.avalancheProblem2, f.avalancheProblem3].filter(Boolean) as string[];
-		const forecastText = [f.bottomLine, f.currentConditions].filter(Boolean).join("\n\n");
-		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, f.bottomLine ?? "");
+		const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
+		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, bottomLine);
 		const journeys = personaScores.map((ps) =>
-			simulateJourney(f.overallDangerRating, problems, f.bottomLine ?? "", f.currentConditions ?? "", ps),
+			simulateJourney(f.overallDangerRating, problems, bottomLine, currentConditions, ps),
 		);
 		const coaching = personaScores.flatMap((ps) => buildCoachingSuggestions(forecastText, ps));
 
@@ -32,8 +35,8 @@ scorecard.get("/", async (c) => {
 			zoneSlug: f.zoneSlug,
 			dateIssued: f.dateIssued,
 			overallDangerRating: f.overallDangerRating,
-			bottomLine: f.bottomLine ?? null,
-			currentConditions: f.currentConditions ?? null,
+			bottomLine: bottomLine || null,
+			currentConditions: currentConditions || null,
 			personas: personaScores,
 			journeys,
 			coaching,
@@ -56,19 +59,15 @@ scorecard.get("/:zoneSlug", async (c) => {
 		return c.json({ success: false, error: "No forecast found for zone" }, 404);
 	}
 
+	const bottomLine = normalizeText(forecast.bottomLine);
+	const currentConditions = normalizeText(forecast.currentConditions);
 	const problems = [forecast.avalancheProblem1, forecast.avalancheProblem2, forecast.avalancheProblem3].filter(
 		Boolean,
 	) as string[];
-	const forecastText = [forecast.bottomLine, forecast.currentConditions].filter(Boolean).join("\n\n");
-	const personaScores = scoreForecast(forecastText, forecast.overallDangerRating, problems, forecast.bottomLine ?? "");
+	const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
+	const personaScores = scoreForecast(forecastText, forecast.overallDangerRating, problems, bottomLine);
 	const journeys = personaScores.map((ps) =>
-		simulateJourney(
-			forecast.overallDangerRating,
-			problems,
-			forecast.bottomLine ?? "",
-			forecast.currentConditions ?? "",
-			ps,
-		),
+		simulateJourney(forecast.overallDangerRating, problems, bottomLine, currentConditions, ps),
 	);
 	const coaching = personaScores.flatMap((ps) => buildCoachingSuggestions(forecastText, ps));
 
@@ -81,8 +80,8 @@ scorecard.get("/:zoneSlug", async (c) => {
 			zoneSlug: forecast.zoneSlug,
 			dateIssued: forecast.dateIssued,
 			overallDangerRating: forecast.overallDangerRating,
-			bottomLine: forecast.bottomLine ?? null,
-			currentConditions: forecast.currentConditions ?? null,
+			bottomLine: bottomLine || null,
+			currentConditions: currentConditions || null,
 			personas: personaScores,
 			journeys,
 			coaching,

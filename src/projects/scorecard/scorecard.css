@@ -277,6 +277,28 @@ mark.sc-highlight:hover, mark.sc-highlight:focus { background: rgba(255,255,255,
 .sc-principles-list li { font-size: 0.78rem; color: var(--sc-text-dim); padding-left: 10px; position: relative; }
 .sc-principles-list li::before { content: "·"; position: absolute; left: 0; color: var(--sc-accent); }
 
+/* ---- Report preview (Journey + Coach tabs) ---- */
+.sc-report-details {
+  margin: 0 24px 16px;
+  border: 1px solid var(--sc-border);
+  border-radius: var(--sc-radius);
+  background: var(--sc-surface);
+}
+.sc-report-summary {
+  padding: 10px 16px; font-size: 0.82rem; font-weight: 600;
+  color: var(--sc-text-muted); cursor: pointer; user-select: none;
+  list-style: none;
+}
+.sc-report-summary::-webkit-details-marker { display: none; }
+.sc-report-summary::before { content: "▶ "; font-size: 0.7rem; color: var(--sc-accent); }
+details[open] .sc-report-summary::before { content: "▼ "; }
+.sc-report-body {
+  padding: 12px 16px 16px;
+  font-size: 0.84rem; line-height: 1.6; color: var(--sc-text);
+  border-top: 1px solid var(--sc-border);
+  white-space: pre-wrap;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
   .sc-readability-layout { grid-template-columns: 1fr; }

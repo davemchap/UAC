@@ -228,7 +228,7 @@ function buildAnnotatedText(data, forecastText) {
   }
   result += escHtml(forecastText.slice(pos));
 
-  return `<div class="sc-forecast-annotated">${result.replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</div>`;
+  return `<div class="sc-forecast-annotated">${result.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>")}</div>`;
 }
 
 function getForecastDisplayText(data) {
@@ -261,9 +261,18 @@ function openSuggestionDrawer(dataset) {
 // Tab 2: Persona Journey
 // ---------------------------------------------------------------------------
 
+function renderReportPreview(bodyId, data) {
+  const el = document.getElementById(bodyId);
+  if (!el) return;
+  const text = getForecastDisplayText(data);
+  if (!text) { el.textContent = "No report text available."; return; }
+  el.innerHTML = escHtml(text).replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
+}
+
 function renderJourney(data) {
   document.getElementById("journey-zone-title").textContent =
     `${data.zoneName} — ${formatDate(data.dateIssued)}`;
+  renderReportPreview("journey-report-body", data);
 
   const map = document.getElementById("journey-map");
   if (!data.journeys?.length) {
@@ -354,6 +363,7 @@ function stateIcon(state) {
 // ---------------------------------------------------------------------------
 
 function renderCoach(data) {
+  renderReportPreview("coach-report-body", data);
   renderCoachHero(data);
   renderCoachPersonaGrades(data);
   renderCoachSuggestions(data);

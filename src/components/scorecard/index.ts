@@ -1,4 +1,4 @@
-export { scoreForecast, simulateJourney, buildCoachingSuggestions } from "./scoring";
+export { scoreForecast, simulateJourney, buildCoachingSuggestions, normalizeText } from "./scoring";
 export { getLatestForecastsForScoring, getForecastForScoringByZone } from "./queries";
 export { PERSONAS, PERSONA_IDS } from "./personas";
 export type {
