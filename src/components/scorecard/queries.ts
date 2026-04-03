@@ -12,6 +12,7 @@ export interface ForecastForScoring {
 	zoneId: number;
 	zoneName: string;
 	zoneSlug: string;
+	forecasterName: string | null;
 	dateIssued: string;
 	overallDangerRating: string;
 	bottomLine: string | null;
@@ -43,6 +44,7 @@ export async function getLatestForecastsForScoring(): Promise<ForecastForScoring
 				zoneId: zone.zoneId,
 				zoneName: zone.name,
 				zoneSlug: zone.slug,
+				forecasterName: f.forecasterName,
 				dateIssued: f.dateIssued,
 				overallDangerRating: f.overallDangerRating,
 				bottomLine: f.bottomLine,
@@ -77,6 +79,7 @@ export async function getForecastForScoringByZone(zoneSlug: string): Promise<For
 		zoneId: zone.zoneId,
 		zoneName: zone.name,
 		zoneSlug: zone.slug,
+		forecasterName: f.forecasterName,
 		dateIssued: f.dateIssued,
 		overallDangerRating: f.overallDangerRating,
 		bottomLine: f.bottomLine,

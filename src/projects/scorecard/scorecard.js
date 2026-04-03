@@ -9,6 +9,7 @@
 
 let allData = [];
 let activeZoneSlug = null;
+let activeForecaster = null;
 let activeTab = "readability";
 
 // ---------------------------------------------------------------------------
@@ -19,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   switchTab(location.hash.replace("#", "") || "readability");
   loadData();
   wireTabButtons();
+  wireForecasterSelect();
   wireZoneSelect();
   wireDrawerClose();
 });
@@ -34,8 +36,9 @@ async function loadData() {
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const json = await res.json();
     allData = json.data ?? [];
-    populateZoneSelect(allData);
-    renderAll(activeZoneSlug ? getZoneData(activeZoneSlug) : allData[0]);
+    populateForecasterSelect(allData);
+    populateZoneSelect(getFilteredData());
+    renderAll(activeZoneSlug ? getZoneData(activeZoneSlug) : getFilteredData()[0]);
   } catch (err) {
     showError(`Failed to load scorecard data: ${err.message}`);
   } finally {
@@ -61,12 +64,47 @@ function getZoneData(slug) {
   return allData.find((d) => d.zoneSlug === slug) ?? allData[0];
 }
 
+function getFilteredData() {
+  if (!activeForecaster) return allData;
+  return allData.filter((d) => d.forecasterName === activeForecaster);
+}
+
+// ---------------------------------------------------------------------------
+// Forecaster select
+// ---------------------------------------------------------------------------
+
+function populateForecasterSelect(data) {
+  const sel = document.getElementById("forecaster-select");
+  const names = [...new Set(data.map((d) => d.forecasterName).filter(Boolean))].sort();
+  // Reset to just the default option
+  sel.innerHTML = '<option value="">All Forecasters</option>';
+  names.forEach((name) => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  });
+}
+
+function wireForecasterSelect() {
+  document.getElementById("forecaster-select").addEventListener("change", (e) => {
+    activeForecaster = e.target.value || null;
+    activeZoneSlug = null;
+    const filtered = getFilteredData();
+    populateZoneSelect(filtered);
+    document.getElementById("zone-select").value = "";
+    renderAll(filtered[0]);
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Zone select
 // ---------------------------------------------------------------------------
 
 function populateZoneSelect(data) {
   const sel = document.getElementById("zone-select");
+  // Reset to just the default option
+  sel.innerHTML = '<option value="">All Zones</option>';
   data.forEach((d) => {
     const opt = document.createElement("option");
     opt.value = d.zoneSlug;
@@ -79,7 +117,7 @@ function wireZoneSelect() {
   document.getElementById("zone-select").addEventListener("change", (e) => {
     activeZoneSlug = e.target.value || null;
     if (activeZoneSlug) loadZone(activeZoneSlug);
-    else renderAll(allData[0]);
+    else renderAll(getFilteredData()[0]);
   });
 }
 
