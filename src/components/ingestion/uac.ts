@@ -1,6 +1,21 @@
 import { getDb } from "../db";
 import { avalancheForecasts, avalancheProblems, forecastZones } from "../db/schema";
 
+// UAC does not publish forecaster names in their JSON API.
+// This mapping reflects actual zone assignments for the 2025-2026 season
+// based on published forecast bylines at utahavalanchecenter.org.
+const ZONE_FORECASTERS: Record<string, string> = {
+	"salt-lake": "Drew Hardesty",
+	logan: "Toby Weed",
+	ogden: "Brooke Maushund",
+	provo: "Trent Meisenheimer",
+	uintas: "Craig Gordon",
+	skyline: "Brett Kobernik",
+	moab: "Dave Garcia",
+	abajos: "Eric Trenbeath",
+	southwest: "Brett Kobernik",
+};
+
 // ---------------------------------------------------------------------------
 // UAC Native API types
 // ---------------------------------------------------------------------------
@@ -46,7 +61,7 @@ export async function fetchUacForecast(apiUrl: string): Promise<UacAdvisory | nu
 // Persist
 // ---------------------------------------------------------------------------
 
-async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promise<void> {
+async function persistUacForecast(zoneId: number, zoneSlug: string, advisory: UacAdvisory): Promise<void> {
 	const nid = advisory.Nid;
 	const dateIssued = advisory.date_issued;
 	const dangerRating = advisory.overall_danger_rating;
@@ -72,7 +87,8 @@ async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promis
 			bottomLine: advisory.bottom_line ?? null,
 			currentConditions: advisory.current_conditions ?? null,
 			region: advisory.region ?? null,
-			forecasterName: advisory.forecaster_name ?? advisory.region ?? null,
+			forecasterName:
+				(ZONE_FORECASTERS as Record<string, string | undefined>)[zoneSlug] ?? advisory.forecaster_name ?? null,
 			specialBulletin: advisory.special_avalanche_bulletin ?? null,
 		})
 		.onConflictDoUpdate({
@@ -128,7 +144,9 @@ async function persistUacForecast(zoneId: number, advisory: UacAdvisory): Promis
 
 export async function ingestAllUacZones(): Promise<void> {
 	const db = getDb();
-	const zones = await db.select({ zoneId: forecastZones.zoneId, apiUrl: forecastZones.apiUrl }).from(forecastZones);
+	const zones = await db
+		.select({ zoneId: forecastZones.zoneId, slug: forecastZones.slug, apiUrl: forecastZones.apiUrl })
+		.from(forecastZones);
 
 	for (const zone of zones) {
 		try {
@@ -137,7 +155,7 @@ export async function ingestAllUacZones(): Promise<void> {
 				console.warn(`[uac] No advisory returned for zone ${zone.zoneId}`);
 				continue;
 			}
-			await persistUacForecast(zone.zoneId, advisory);
+			await persistUacForecast(zone.zoneId, zone.slug, advisory);
 			console.log(`[uac] Ingested zone ${zone.zoneId}`);
 		} catch (err) {
 			console.error(`[uac] Failed zone ${zone.zoneId}:`, err);
