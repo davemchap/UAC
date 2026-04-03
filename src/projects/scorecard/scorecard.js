@@ -10,6 +10,20 @@
 let allData = [];
 let activeZoneSlug = null;
 let activeForecaster = null;
+
+// Dismissed suggestions: { [zoneSlug]: Set<string> } — persisted in sessionStorage
+function getDismissed(zoneSlug) {
+  try {
+    const raw = sessionStorage.getItem(`sc-dismissed-${zoneSlug}`);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch { return new Set(); }
+}
+function addDismissed(zoneSlug, key) {
+  const set = getDismissed(zoneSlug);
+  set.add(key);
+  try { sessionStorage.setItem(`sc-dismissed-${zoneSlug}`, JSON.stringify([...set])); } catch {}
+}
+function suggestionKey(s) { return `${s.personaId}:${s.section}`; }
 let activeTab = "readability";
 
 // ---------------------------------------------------------------------------
@@ -38,7 +52,7 @@ async function loadData() {
     allData = json.data ?? [];
     populateForecasterSelect(allData);
     populateZoneSelect(getFilteredData());
-    renderAll(activeZoneSlug ? getZoneData(activeZoneSlug) : getFilteredData()[0]);
+    renderSummaryOrZone();
   } catch (err) {
     showError(`Failed to load scorecard data: ${err.message}`);
   } finally {
@@ -97,7 +111,7 @@ function wireForecasterSelect() {
     populateZoneSelect(filtered);
     document.getElementById("zone-select").value = "";
     updateActiveFilterPill();
-    renderAll(filtered[0]);
+    renderSummaryOrZone();
   });
 }
 
@@ -121,7 +135,7 @@ function updateActiveFilterPill() {
     populateZoneSelect(filtered);
     document.getElementById("zone-select").value = "";
     updateActiveFilterPill();
-    renderAll(filtered[0]);
+    renderSummaryOrZone();
   };
   x.addEventListener("click", clearFilter);
   x.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); clearFilter(); } });
@@ -147,7 +161,7 @@ function wireZoneSelect() {
   document.getElementById("zone-select").addEventListener("change", (e) => {
     activeZoneSlug = e.target.value || null;
     if (activeZoneSlug) loadZone(activeZoneSlug);
-    else renderAll(getFilteredData()[0]);
+    else renderSummaryOrZone();
   });
 }
 
@@ -179,6 +193,81 @@ function switchTab(tab) {
 }
 
 // ---------------------------------------------------------------------------
+// Summary / dispatch
+// ---------------------------------------------------------------------------
+
+function renderSummaryOrZone() {
+  if (activeZoneSlug) { loadZone(activeZoneSlug); return; }
+  const filtered = getFilteredData();
+  if (!filtered.length) { renderAll(null); return; }
+  renderSummary(filtered);
+}
+
+function renderSummary(zones) {
+  const summaryEl = document.getElementById("sc-summary");
+  const tabsEl = document.querySelector(".sc-tabs");
+  // Hide tabs + tab panels, show summary
+  tabsEl.classList.add("hidden");
+  document.querySelectorAll(".sc-tab-panel").forEach((p) => p.classList.add("hidden"));
+  summaryEl.classList.remove("hidden");
+  const emptyEl = document.getElementById("sc-filter-empty");
+  if (emptyEl) emptyEl.classList.add("hidden");
+
+  // Derive persona columns from first zone
+  const personas = zones[0]?.personas ?? [];
+  const dangerColors = { Low: "#16a34a", Moderate: "#ca8a04", Considerable: "#ea580c", High: "#dc2626", Extreme: "#7c3aed", None: "#8a9bac" };
+
+  summaryEl.innerHTML = `
+    <div class="sc-summary-header">
+      <h2 class="sc-summary-title">${activeForecaster ? `${escHtml(activeForecaster)}'s Zones` : "All Zones"} — Today's Scores</h2>
+      <p class="sc-summary-hint">Select a zone for detailed analysis</p>
+    </div>
+    <div class="sc-summary-table-wrap">
+      <table class="sc-summary-table">
+        <thead>
+          <tr>
+            <th>Zone</th>
+            <th>Forecaster</th>
+            <th>Danger</th>
+            ${personas.map((p) => `<th style="color:${p.color}">${p.personaRole}</th>`).join("")}
+            <th>Avg</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${zones.map((z) => {
+            const avg = Math.round(z.personas.reduce((s, p) => s + p.overall, 0) / z.personas.length);
+            const avgColor = avg >= 80 ? "#16a34a" : avg >= 60 ? "#ca8a04" : "#dc2626";
+            const danger = z.overallDangerRating ?? "—";
+            const dColor = dangerColors[danger] ?? "#8a9bac";
+            return `<tr class="sc-summary-row" data-slug="${escAttr(z.zoneSlug)}" tabindex="0" role="button" aria-label="View ${escHtml(z.zoneName)}">
+              <td class="sc-summary-zone">${escHtml(z.zoneName)}</td>
+              <td class="sc-summary-forecaster">${escHtml(z.forecasterName ?? "—")}</td>
+              <td><span class="sc-summary-danger" style="color:${dColor}">${escHtml(danger)}</span></td>
+              ${z.personas.map((p) => `<td><span class="sc-summary-score" style="color:${p.color}">${p.overall}</span></td>`).join("")}
+              <td><span class="sc-summary-avg" style="color:${avgColor}">${avg}</span></td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>`;
+
+  summaryEl.querySelectorAll(".sc-summary-row").forEach((row) => {
+    const select = () => {
+      activeZoneSlug = row.dataset.slug;
+      document.getElementById("zone-select").value = activeZoneSlug;
+      loadZone(activeZoneSlug);
+    };
+    row.addEventListener("click", select);
+    row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); } });
+  });
+}
+
+function hideSummary() {
+  document.getElementById("sc-summary").classList.add("hidden");
+  document.querySelector(".sc-tabs").classList.remove("hidden");
+}
+
+// ---------------------------------------------------------------------------
 // Render dispatcher
 // ---------------------------------------------------------------------------
 
@@ -203,6 +292,7 @@ function renderAll(data) {
     }
     return;
   }
+  hideSummary();
   // Clear empty state if present
   const emptyEl = document.getElementById("sc-filter-empty");
   if (emptyEl) emptyEl.classList.add("hidden");
@@ -383,7 +473,7 @@ function openSuggestionDrawer(dataset) {
     <div class="sc-drawer-reason">${escHtml(dataset.reason ?? "")}</div>
     <div class="sc-drawer-suggestion-label">Suggestion</div>
     <div class="sc-drawer-suggestion">${escHtml(dataset.suggestion ?? "")}</div>
-    <button class="sc-copy-btn" onclick="copyToClipboard('${escAttr(dataset.suggestion ?? "")}')">
+    <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(dataset.suggestion ?? "")}')">
       Copy suggestion
     </button>
   `;
@@ -558,23 +648,56 @@ function renderCoachSuggestions(data) {
     return;
   }
 
-  list.innerHTML = suggestions.map((s) => {
+  const zoneSlug = data.zoneSlug ?? "";
+  const dismissed = getDismissed(zoneSlug);
+  const visible = suggestions.filter((s) => !dismissed.has(suggestionKey(s)));
+  const hiddenCount = suggestions.length - visible.length;
+
+  if (!visible.length) {
+    list.innerHTML = `<p class='sc-no-data'>No suggestions — ${hiddenCount ? `${hiddenCount} dismissed. ` : ""}This forecast scores well across all personas.</p>`;
+    if (hiddenCount) {
+      const restore = document.createElement("button");
+      restore.className = "sc-restore-btn";
+      restore.textContent = `Show ${hiddenCount} dismissed`;
+      restore.onclick = () => { try { sessionStorage.removeItem(`sc-dismissed-${zoneSlug}`); } catch {} renderCoachSuggestions(data); };
+      list.appendChild(restore);
+    }
+    return;
+  }
+
+  list.innerHTML = visible.map((s) => {
     const persona = data.personas.find((p) => p.personaId === s.personaId);
-    return `<div class="sc-suggestion-card">
+    const key = escAttr(suggestionKey(s));
+    return `<div class="sc-suggestion-card" data-key="${key}">
       <div class="sc-suggestion-header">
         <span class="sc-suggestion-persona" style="color:${persona?.color ?? '#666'}">${s.personaName}</span>
-        <span class="sc-suggestion-section">${s.section}</span>
+        <span class="sc-suggestion-section">${escHtml(sectionLabel(s.section))}</span>
         <span class="sc-suggestion-impact">+${s.scoreImpact} pts</span>
       </div>
       <div class="sc-suggestion-problem">${escHtml(s.problem)}</div>
       ${s.originalText ? `<div class="sc-suggestion-original">"${escHtml(s.originalText)}"</div>` : ""}
       <div class="sc-suggestion-text">${escHtml(s.suggestion)}</div>
       <div class="sc-suggestion-actions">
-        <button class="sc-copy-btn" onclick="copyToClipboard('${escAttr(s.suggestion)}')">Copy</button>
-        <button class="sc-dismiss-btn" onclick="this.closest('.sc-suggestion-card').style.opacity='0.4'">Not helpful</button>
+        <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(s.suggestion)}')">Copy</button>
+        <button class="sc-dismiss-btn" data-zone="${escAttr(zoneSlug)}" data-key="${key}">Not helpful</button>
       </div>
     </div>`;
   }).join("");
+
+  if (hiddenCount) {
+    const restore = document.createElement("button");
+    restore.className = "sc-restore-btn";
+    restore.textContent = `Show ${hiddenCount} dismissed`;
+    restore.onclick = () => { try { sessionStorage.removeItem(`sc-dismissed-${zoneSlug}`); } catch {} renderCoachSuggestions(data); };
+    list.appendChild(restore);
+  }
+
+  list.querySelectorAll(".sc-dismiss-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      addDismissed(btn.dataset.zone, btn.dataset.key);
+      renderCoachSuggestions(data);
+    });
+  });
 }
 
 function renderCoachProgressBars(data) {
@@ -660,6 +783,16 @@ function escAttr(str) {
   return String(str ?? "").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).catch(() => {});
+function copyToClipboard(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }).catch(() => {
+    const orig = btn.textContent;
+    btn.textContent = "Failed";
+    btn.style.background = "#dc2626";
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ""; btn.disabled = false; }, 2000);
+  });
 }
