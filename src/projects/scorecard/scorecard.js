@@ -203,24 +203,30 @@ function renderAnnotatedForecast(containerId, data) {
 }
 
 function buildAnnotatedText(data, forecastText) {
-  // Collect all flags across all personas, keyed by start position
+  // Collect all flags across all personas
   const allFlags = data.personas.flatMap((p) => p.flags ?? []);
   if (allFlags.length === 0) {
     return `<p class="sc-forecast-clean">${escHtml(forecastText)}</p>
       <p class="sc-clean-note">No readability flags found — this forecast scores well across all personas.</p>`;
   }
-  // Build highlighted HTML — apply highlights in reverse order to preserve indices
-  const sorted = [...allFlags].sort((a, b) => b.startIndex - a.startIndex);
-  let result = forecastText;
+
+  // Forward pass: sort ascending, skip overlapping flags, escape plain segments
+  const sorted = [...allFlags]
+    .filter((f) => f.startIndex >= 0 && f.startIndex < f.endIndex && f.endIndex <= forecastText.length)
+    .sort((a, b) => a.startIndex - b.startIndex);
+
+  let result = "";
+  let pos = 0;
   for (const flag of sorted) {
-    if (flag.startIndex >= result.length) continue;
+    if (flag.startIndex < pos) continue; // skip overlapping
     const persona = data.personas.find((p) => p.personaId === flag.personaId);
     const color = persona?.color ?? "#999";
-    const before = result.slice(0, flag.startIndex);
-    const match = result.slice(flag.startIndex, Math.min(flag.endIndex, result.length));
-    const after = result.slice(Math.min(flag.endIndex, result.length));
-    result = `${before}<mark class="sc-highlight" style="border-bottom:2px solid ${color};background:${color}15" data-persona-id="${flag.personaId}" data-reason="${escAttr(flag.reason)}" data-suggestion="${escAttr(flag.suggestion)}" data-phrase="${escAttr(match)}" tabindex="0" role="button" aria-label="Readability flag: ${escAttr(flag.reason)}">${escHtml(match)}</mark>${after}`;
+    const phrase = forecastText.slice(flag.startIndex, flag.endIndex);
+    result += escHtml(forecastText.slice(pos, flag.startIndex));
+    result += `<mark class="sc-highlight" style="border-bottom:2px solid ${color};background:${color}15" data-persona-id="${flag.personaId}" data-reason="${escAttr(flag.reason)}" data-suggestion="${escAttr(flag.suggestion)}" data-phrase="${escAttr(phrase)}" tabindex="0" role="button" aria-label="Readability flag: ${escAttr(flag.reason)}">${escHtml(phrase)}</mark>`;
+    pos = flag.endIndex;
   }
+  result += escHtml(forecastText.slice(pos));
 
   return `<div class="sc-forecast-annotated">${result.replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>")}</div>`;
 }
