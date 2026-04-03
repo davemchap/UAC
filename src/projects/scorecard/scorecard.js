@@ -78,6 +78,9 @@ function populateForecasterSelect(data) {
   const names = [...new Set(data.map((d) => d.forecasterName).filter(Boolean))].sort();
   // Reset to just the default option
   sel.innerHTML = '<option value="">All Forecasters</option>';
+  if (names.length === 0) {
+    console.warn("[scorecard] No forecasterName values found in API response");
+  }
   names.forEach((name) => {
     const opt = document.createElement("option");
     opt.value = name;
@@ -93,8 +96,35 @@ function wireForecasterSelect() {
     const filtered = getFilteredData();
     populateZoneSelect(filtered);
     document.getElementById("zone-select").value = "";
+    updateActiveFilterPill();
     renderAll(filtered[0]);
   });
+}
+
+function updateActiveFilterPill() {
+  const existing = document.getElementById("sc-forecaster-pill");
+  if (existing) existing.remove();
+  if (!activeForecaster) return;
+  const controls = document.querySelector(".sc-controls");
+  const pill = document.createElement("span");
+  pill.id = "sc-forecaster-pill";
+  pill.className = "sc-active-filter";
+  pill.innerHTML = `Viewing: ${escHtml(activeForecaster)} <span class="sc-active-filter-x" role="button" aria-label="Clear forecaster filter" tabindex="0">&times;</span>`;
+  // Insert before the back link
+  const backLink = controls.querySelector(".sc-back-link");
+  controls.insertBefore(pill, backLink);
+  const x = pill.querySelector(".sc-active-filter-x");
+  const clearFilter = () => {
+    activeForecaster = null;
+    document.getElementById("forecaster-select").value = "";
+    const filtered = getFilteredData();
+    populateZoneSelect(filtered);
+    document.getElementById("zone-select").value = "";
+    updateActiveFilterPill();
+    renderAll(filtered[0]);
+  };
+  x.addEventListener("click", clearFilter);
+  x.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); clearFilter(); } });
 }
 
 // ---------------------------------------------------------------------------
@@ -153,7 +183,35 @@ function switchTab(tab) {
 // ---------------------------------------------------------------------------
 
 function renderAll(data) {
-  if (!data) return;
+  if (!data) {
+    // Show empty state when filter produces no results
+    const forecasterLabel = activeForecaster ? activeForecaster : null;
+    if (forecasterLabel) {
+      const main = document.querySelector(".sc-main");
+      // Hide tab panels
+      document.querySelectorAll(".sc-tab-panel").forEach((p) => p.classList.add("hidden"));
+      // Show or update empty state
+      let emptyEl = document.getElementById("sc-filter-empty");
+      if (!emptyEl) {
+        emptyEl = document.createElement("div");
+        emptyEl.id = "sc-filter-empty";
+        emptyEl.className = "sc-filter-empty";
+        main.appendChild(emptyEl);
+      }
+      emptyEl.classList.remove("hidden");
+      emptyEl.innerHTML = `<p class="sc-empty-title">No forecasts found for <strong>${escHtml(forecasterLabel)}</strong>.</p><p class="sc-empty-hint">Try selecting a different forecaster or zone.</p>`;
+    }
+    return;
+  }
+  // Clear empty state if present
+  const emptyEl = document.getElementById("sc-filter-empty");
+  if (emptyEl) emptyEl.classList.add("hidden");
+  // Restore tab panels
+  document.querySelectorAll(".sc-tab-panel").forEach((p) => {
+    const tabId = p.id.replace("tab-", "");
+    p.classList.toggle("hidden", tabId !== activeTab);
+    p.classList.toggle("active", tabId === activeTab);
+  });
   renderReadability(data);
   renderJourney(data);
   renderCoach(data);
@@ -170,6 +228,7 @@ function renderReadability(data) {
   renderPersonaLegend("readability-legend", data.personas);
   renderPersonaScoreRow("readability-persona-scores", data.personas);
   renderPersonaSidebar("readability-cards", data.personas);
+  renderScoreDistribution(data);
   renderAnnotatedForecast("readability-body", data);
 }
 
@@ -230,6 +289,29 @@ function renderPersonaSidebar(containerId, personas) {
         <span class="sc-sub-score">Action <b>${p.actionability}</b></span>
         <span class="sc-sub-score">Jargon <b>${p.jargonLoad}</b></span>
       </div>
+    </div>`
+  ).join("");
+}
+
+function renderScoreDistribution(data) {
+  const el = document.getElementById("readability-trend");
+  if (!el) return;
+  const dims = [
+    { key: "clarity", label: "Clarity" },
+    { key: "actionability", label: "Actionability" },
+    { key: "jargonLoad", label: "Jargon-free" },
+  ];
+  el.innerHTML = dims.map((dim) =>
+    `<div class="sc-dist-row">
+      <span class="sc-dist-label">${dim.label}</span>
+      <div class="sc-dist-bars">
+        ${data.personas.map((p) =>
+          `<div class="sc-dist-bar-wrap" title="${escAttr(p.personaRole)}: ${p[dim.key]}">
+            <div class="sc-dist-bar" style="width:${p[dim.key]}%;background:${p.color}"></div>
+          </div>`
+        ).join("")}
+      </div>
+      <span class="sc-dist-avg">${Math.round(data.personas.reduce((s, p) => s + p[dim.key], 0) / data.personas.length)}</span>
     </div>`
   ).join("");
 }

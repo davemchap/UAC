@@ -314,6 +314,34 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   white-space: pre-wrap;
 }
 
+/* ---- Active filter pill ---- */
+.sc-active-filter {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--sc-header-bg); color: var(--sc-header-text);
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 12px;
+  padding: 4px 10px; font-size: 0.78rem; font-weight: 500; white-space: nowrap;
+}
+.sc-active-filter-x {
+  cursor: pointer; font-size: 1rem; line-height: 1;
+  opacity: 0.7; margin-left: 2px;
+}
+.sc-active-filter-x:hover { opacity: 1; }
+
+/* ---- Filter empty state ---- */
+.sc-filter-empty {
+  padding: 48px 24px; text-align: center;
+}
+.sc-filter-empty .sc-empty-title { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+.sc-filter-empty .sc-empty-hint { font-size: 0.85rem; color: var(--sc-text-muted); }
+
+/* ---- Score Distribution ---- */
+.sc-dist-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sc-dist-label { font-size: 0.7rem; color: var(--sc-text-muted); width: 80px; flex-shrink: 0; }
+.sc-dist-bars { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.sc-dist-bar-wrap { background: var(--sc-border); border-radius: 3px; height: 6px; overflow: hidden; }
+.sc-dist-bar { height: 100%; border-radius: 3px; transition: width 0.4s; }
+.sc-dist-avg { font-size: 0.72rem; font-weight: 600; color: var(--sc-text-muted); width: 24px; text-align: right; }
+
 /* ---- Responsive ---- */
 @media (max-width: 900px) {
   .sc-readability-layout { grid-template-columns: 1fr; }
