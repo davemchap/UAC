@@ -186,12 +186,26 @@ function renderPersonaLegend(containerId, personas) {
 function renderPersonaScoreRow(containerId, personas) {
   const el = document.getElementById(containerId);
   el.innerHTML = personas.map((p) =>
-    `<div class="sc-metric-chip" style="border-color:${p.color}">
+    `<div class="sc-metric-chip" style="border-color:${p.color}"
+        role="button" aria-pressed="true" tabindex="0"
+        data-persona-id="${escAttr(p.personaId)}">
       <span class="sc-metric-dot" style="background:${p.color}"></span>
       <span class="sc-metric-name">${p.personaRole}</span>
       <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
     </div>`
   ).join("");
+  el.querySelectorAll(".sc-metric-chip").forEach((chip) => {
+    const toggle = () => {
+      const active = chip.getAttribute("aria-pressed") === "true";
+      chip.setAttribute("aria-pressed", active ? "false" : "true");
+      const id = chip.dataset.personaId;
+      document.querySelectorAll(`.sc-highlight[data-persona-id="${id}"]`).forEach((m) => {
+        m.classList.toggle("sc-highlight--hidden", active);
+      });
+    };
+    chip.addEventListener("click", toggle);
+    chip.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+  });
 }
 
 function renderPersonaSidebar(containerId, personas) {
@@ -546,8 +560,14 @@ function showError(msg) {
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
-  try { return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); }
-  catch { return dateStr; }
+  // UAC format: "Thursday, April 2, 2026 - 7:08am" — extract "Month D, YYYY"
+  const match = dateStr.match(/(\w+ \d{1,2}, \d{4})/);
+  const str = match ? match[1] : dateStr;
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch { return ""; }
 }
 
 function escHtml(str) {
