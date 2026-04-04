@@ -96,6 +96,156 @@ function estimateGradeLevel(text: string): number {
 }
 
 // ---------------------------------------------------------------------------
+// Dimension-aware scoring helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Terms unlocked by avalanche training level — persona no longer flags these.
+ * Each level builds on the previous.
+ */
+const TRAINING_UNLOCKED_TERMS: Record<number, string[]> = {
+	1: ["avalanche", "danger"],
+	2: [
+		"storm slab",
+		"wind slab",
+		"persistent slab",
+		"aspect",
+		"terrain trap",
+		"shooting cracks",
+		"whumpfing",
+		"crown",
+		"propagation",
+		"likelihood",
+		"natural avalanche",
+		"natural cycle",
+		"human triggered",
+	],
+	3: [
+		"facets",
+		"depth hoar",
+		"spatial distribution",
+		"isolated",
+		"specific",
+		"widespread",
+		"pwl",
+		"persistent weak layer",
+		"buried weak layer",
+		"cross-loaded",
+		"leeward",
+		"windward",
+		"convexity",
+	],
+	4: [
+		"swe",
+		"hs",
+		"hn24",
+		"hn72",
+		"utc",
+		"d1",
+		"d2",
+		"d3",
+		"d4",
+		"d5",
+		"loading rate",
+		"temperature gradient",
+		"settlement",
+	],
+};
+
+/** Terms unlocked by terrain assessment skill level */
+const TERRAIN_UNLOCKED_TERMS: Record<number, string[]> = {
+	3: ["cornice", "runout zone", "overhead hazard"],
+	4: ["convex roll", "trigger point", "debris"],
+	5: ["cross-loaded", "convexity"],
+};
+
+/**
+ * Returns the effective unknown-terms list for a persona after accounting for
+ * their avalanche training level and terrain assessment skill.
+ * Higher-trained personas know more jargon and are not penalized for it.
+ */
+function getEffectiveUnknownTerms(persona: Persona): readonly string[] {
+	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
+	const terrainSkill = persona.terrainAssessmentSkill ?? 1;
+
+	const knownTerms = new Set<string>();
+	for (let level = 1; level <= trainingLevel; level++) {
+		for (const t of TRAINING_UNLOCKED_TERMS[level] ?? []) knownTerms.add(t.toLowerCase());
+	}
+	for (let level = 3; level <= terrainSkill; level++) {
+		for (const t of TERRAIN_UNLOCKED_TERMS[level] ?? []) knownTerms.add(t.toLowerCase());
+	}
+
+	return persona.unknownTerms.filter((t) => !knownTerms.has(t.toLowerCase()));
+}
+
+/**
+ * Combined field-experience score (0–1) from years in mountains + days per season.
+ * Used to soften sentence-length and grade-level penalties for experienced personas.
+ */
+function computeExperienceScore(persona: Persona): number {
+	const years = Math.min(persona.yearsOfMountainExperience ?? 0, 20) / 20;
+	const days = Math.min(persona.backcountryDaysPerSeason ?? 0, 60) / 60;
+	return years * 0.4 + days * 0.6;
+}
+
+/** Raises max sentence length for field-experienced personas (up to +10 words). */
+function getAdjustedMaxSentenceLength(persona: Persona): number {
+	return persona.maxSentenceLength + Math.round(computeExperienceScore(persona) * 10);
+}
+
+/** Reduces per-flag sentence penalty for experienced personas (1.0 → 0.6). */
+function getSentencePenaltyMultiplier(persona: Persona): number {
+	return 1.0 - computeExperienceScore(persona) * 0.4;
+}
+
+/**
+ * Adjusts max grade level for conditions sections based on weather pattern recognition.
+ * Skill 1 = -3 grade levels; skill 3 = no change; skill 5 = +2 grade levels.
+ */
+function getAdjustedMaxGradeLevel(persona: Persona, isConditionsSection: boolean): number {
+	if (!isConditionsSection) return persona.maxGradeLevel;
+	const weatherSkill = persona.weatherPatternRecognition ?? 3;
+	const adjustment = weatherSkill <= 3 ? (weatherSkill - 3) * 1.5 : (weatherSkill - 3) * 1.0;
+	return persona.maxGradeLevel + adjustment;
+}
+
+/**
+ * Returns overall score weights adjusted for risk tolerance.
+ * Aggressive personas (high riskTolerance) need strong actionability signals most.
+ * Conservative personas need clarity and low jargon load most.
+ */
+function getOverallWeights(persona: Persona): { clarityW: number; jargonW: number; actionabilityW: number } {
+	const rt = persona.riskTolerance ?? 3;
+	if (rt <= 2) return { clarityW: 0.45, jargonW: 0.4, actionabilityW: 0.15 };
+	if (rt >= 4) return { clarityW: 0.35, jargonW: 0.25, actionabilityW: 0.4 };
+	return { clarityW: 0.4, jargonW: 0.35, actionabilityW: 0.25 };
+}
+
+const GROUP_PHRASES = [
+	"consult with partners",
+	"team decision",
+	"group assessment",
+	"discuss with your group",
+	"communicate with your party",
+	"partners",
+];
+
+/**
+ * Group-communication phrases bonus/penalty based on groupDecisionTendency.
+ * Consensus-oriented personas benefit from group language; solo-decision personas don't.
+ */
+function getGroupPhraseBonus(text: string, persona: Persona): number {
+	const tendency = persona.groupDecisionTendency ?? 3;
+	const lowerText = text.toLowerCase();
+	const found = GROUP_PHRASES.filter((p) => lowerText.includes(p)).length;
+	if (found === 0) return 0;
+	if (tendency >= 4) return found * 3;
+	if (tendency <= 2) return found * -1;
+	return found * 1;
+}
+
+// ---------------------------------------------------------------------------
 // Jargon detection
 // ---------------------------------------------------------------------------
 
@@ -466,19 +616,31 @@ function buildCoachingSuggestions(text: string, personaScore: PersonaScore): Coa
 
 /**
  * Score a single forecast section for a persona.
- * Returns sub-scores (clarity, jargonLoad, actionability) for that section.
+ * Uses dimension-aware thresholds: training level narrows jargon set,
+ * field experience softens sentence penalties, weather skill adjusts grade tolerance.
  */
 function scoreSectionForPersona(
 	sectionText: string,
 	persona: Persona,
+	isConditionsSection = false,
 ): { clarity: number; jargonLoad: number; actionability: number } {
 	const gradeLevel = estimateGradeLevel(sectionText);
-	const sentenceFlags = findLongSentenceFlags(sectionText, persona);
-	const jargonFlags = findJargonFlags(sectionText, persona);
-	const actionability = scoreActionability(sectionText);
+	const effectiveMaxGrade = getAdjustedMaxGradeLevel(persona, isConditionsSection);
+	const effectiveMaxSentence = getAdjustedMaxSentenceLength(persona);
+	const sentencePenaltyMult = getSentencePenaltyMultiplier(persona);
+	const effectiveTerms = getEffectiveUnknownTerms(persona);
 
-	const gradePenalty = Math.max(0, (gradeLevel - persona.maxGradeLevel) * 4);
-	const sentencePenalty = sentenceFlags.length * 5;
+	// Scoring proxy with dimension-adjusted thresholds
+	const adjustedPersona = { ...persona, unknownTerms: effectiveTerms, maxSentenceLength: effectiveMaxSentence };
+
+	const sentenceFlags = findLongSentenceFlags(sectionText, adjustedPersona);
+	const jargonFlags = findJargonFlags(sectionText, adjustedPersona);
+	const rawActionability = scoreActionability(sectionText);
+	const groupBonus = getGroupPhraseBonus(sectionText, persona);
+	const actionability = Math.max(10, Math.min(100, rawActionability + groupBonus));
+
+	const gradePenalty = Math.max(0, (gradeLevel - effectiveMaxGrade) * 4);
+	const sentencePenalty = sentenceFlags.length * 5 * sentencePenaltyMult;
 	const clarity = Math.max(10, Math.min(100, 90 - gradePenalty - sentencePenalty));
 	const jargonLoad = Math.max(10, Math.min(100, 100 - jargonFlags.length * 15));
 
@@ -511,51 +673,59 @@ function weightedSectionScore(
 // Main scoring function
 // ---------------------------------------------------------------------------
 
+/**
+ * Score a forecast against all personas.
+ * Pass `runtimePersonas` to use DB-loaded personas with full dimension values;
+ * falls back to static PERSONAS defaults when omitted.
+ */
 export function scoreForecast(
 	forecastText: string,
 	dangerRating: string,
 	problems: string[],
 	bottomLine: string,
+	runtimePersonas?: Persona[],
 ): PersonaScore[] {
-	// Score each logical section independently so section-level problems don't
-	// get diluted by unrelated well-written sections.
+	const activePersonas = runtimePersonas ?? PERSONA_IDS.map((id) => PERSONAS[id]);
+
 	const problemsText = problems.filter(Boolean).join("\n\n");
-	// forecastText is already bottomLine + currentConditions joined upstream;
-	// bottomLine is passed separately for the section-aware bottom-line weight.
 	const sections = [
-		{ label: "bottom_line", text: bottomLine },
-		{ label: "problems", text: problemsText },
-		{ label: "conditions", text: forecastText },
+		{ label: "bottom_line", text: bottomLine, isConditions: false },
+		{ label: "problems", text: problemsText, isConditions: false },
+		{ label: "conditions", text: forecastText, isConditions: true },
 	].filter((s) => s.text.trim().length > 0);
 
-	// Full concatenated text is still used for global flag positions (highlights)
+	// Full concatenated text for global flag positions (highlights)
 	// Note: forecastText already contains bottomLine — do not add it again or flags duplicate
 	const fullText = [forecastText, problemsText].filter(Boolean).join("\n\n");
 
-	return PERSONA_IDS.map((personaId): PersonaScore => {
-		const persona = PERSONAS[personaId];
-
-		// Section-level sub-scores
-		const sectionScores = sections.map((s) => scoreSectionForPersona(s.text, persona));
+	return activePersonas.map((persona): PersonaScore => {
+		// Section-level sub-scores with dimension-aware thresholds
+		const sectionScores = sections.map((s) => scoreSectionForPersona(s.text, persona, s.isConditions));
 
 		// Section weights by literacy level.
 		// Low-literacy readers depend on bottom line; technical readers weight problems heavily.
-		const weights: Record<typeof persona.literacyLevel, number[]> = {
+		const sectionWeightMap: Record<typeof persona.literacyLevel, number[]> = {
 			low: [0.5, 0.2, 0.3],
 			high: [0.25, 0.45, 0.3],
 			expert: [0.15, 0.5, 0.35],
 			forecaster: [0.1, 0.5, 0.4],
 		};
-		const sectionWeights = weights[persona.literacyLevel].slice(0, sections.length);
+		const sectionWeights = sectionWeightMap[persona.literacyLevel].slice(0, sections.length);
 		const { clarity, jargonLoad, actionability } = weightedSectionScore(sectionScores, sectionWeights);
 
-		// Flags: collect across full text for highlight positions
-		const jargonFlags = findJargonFlags(fullText, persona);
-		const sentenceFlags = findLongSentenceFlags(fullText, persona);
+		// Flags: use dimension-adjusted thresholds for highlight positions
+		const adjustedPersona = {
+			...persona,
+			unknownTerms: getEffectiveUnknownTerms(persona),
+			maxSentenceLength: getAdjustedMaxSentenceLength(persona),
+		};
+		const jargonFlags = findJargonFlags(fullText, adjustedPersona);
+		const sentenceFlags = findLongSentenceFlags(fullText, adjustedPersona);
 		const allFlags = [...jargonFlags, ...sentenceFlags];
 
-		// Overall weighted score — clarity and jargon load dominate for low-literacy personas
-		const overall = Math.round(clarity * 0.4 + jargonLoad * 0.35 + actionability * 0.25);
+		// Overall score weighted by risk tolerance dimension
+		const { clarityW, jargonW, actionabilityW } = getOverallWeights(persona);
+		const overall = Math.round(clarity * clarityW + jargonLoad * jargonW + actionability * actionabilityW);
 
 		// Decision outcome heuristic
 		const dangerNum = Number.parseInt(dangerRating) || 0;
@@ -569,7 +739,7 @@ export function scoreForecast(
 		}
 
 		return {
-			personaId,
+			personaId: persona.id,
 			personaName: persona.name,
 			personaRole: persona.role,
 			color: persona.color,

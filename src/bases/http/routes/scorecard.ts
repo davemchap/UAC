@@ -6,7 +6,44 @@ import {
 	normalizeText,
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
+	type Persona,
+	type PersonaId,
 } from "../../../components/scorecard";
+import { getAllPersonas, type PersonaRecord } from "../../../components/persona-trainer";
+
+/** Map a DB PersonaRecord to the Persona interface used by scoring. */
+function toScoringPersona(r: PersonaRecord): Persona {
+	return {
+		id: r.personaKey as PersonaId,
+		name: r.name,
+		role: r.role,
+		color: r.color,
+		literacyLevel: r.literacyLevel as Persona["literacyLevel"],
+		unknownTerms: r.unknownTerms,
+		maxSentenceLength: r.maxSentenceLength,
+		maxGradeLevel: r.maxGradeLevel,
+		successCriteria: r.successCriteria,
+		yearsOfMountainExperience: r.yearsOfMountainExperience,
+		avalancheTrainingLevel: r.avalancheTrainingLevel,
+		backcountryDaysPerSeason: r.backcountryDaysPerSeason,
+		weatherPatternRecognition: r.weatherPatternRecognition,
+		terrainAssessmentSkill: r.terrainAssessmentSkill,
+		riskTolerance: r.riskTolerance,
+		groupDecisionTendency: r.groupDecisionTendency,
+		localTerrainFamiliarity: r.localTerrainFamiliarity,
+	};
+}
+
+/** Load active built-in personas from DB; fall back to undefined (uses static defaults). */
+async function loadScoringPersonas(): Promise<Persona[] | undefined> {
+	try {
+		const records = await getAllPersonas();
+		const active = records.filter((r) => r.active && r.isBuiltIn);
+		return active.length > 0 ? active.map(toScoringPersona) : undefined;
+	} catch {
+		return undefined;
+	}
+}
 
 const scorecard = new Hono();
 
@@ -15,14 +52,14 @@ const scorecard = new Hono();
  * Returns scored forecasts for all zones (latest per zone).
  */
 scorecard.get("/", async (c) => {
-	const forecasts = await getLatestForecastsForScoring();
+	const [forecasts, personas] = await Promise.all([getLatestForecastsForScoring(), loadScoringPersonas()]);
 
 	const results = forecasts.map((f) => {
 		const bottomLine = normalizeText(f.bottomLine);
 		const currentConditions = normalizeText(f.currentConditions);
 		const problems = [f.avalancheProblem1, f.avalancheProblem2, f.avalancheProblem3].filter(Boolean) as string[];
 		const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
-		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, bottomLine);
+		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, bottomLine, personas);
 		const journeys = personaScores.map((ps) =>
 			simulateJourney(f.overallDangerRating, problems, bottomLine, currentConditions, ps),
 		);
@@ -54,7 +91,7 @@ scorecard.get("/", async (c) => {
  */
 scorecard.get("/:zoneSlug", async (c) => {
 	const zoneSlug = c.req.param("zoneSlug");
-	const forecast = await getForecastForScoringByZone(zoneSlug);
+	const [forecast, personas] = await Promise.all([getForecastForScoringByZone(zoneSlug), loadScoringPersonas()]);
 
 	if (!forecast) {
 		return c.json({ success: false, error: "No forecast found for zone" }, 404);
@@ -66,7 +103,7 @@ scorecard.get("/:zoneSlug", async (c) => {
 		Boolean,
 	) as string[];
 	const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
-	const personaScores = scoreForecast(forecastText, forecast.overallDangerRating, problems, bottomLine);
+	const personaScores = scoreForecast(forecastText, forecast.overallDangerRating, problems, bottomLine, personas);
 	const journeys = personaScores.map((ps) =>
 		simulateJourney(forecast.overallDangerRating, problems, bottomLine, currentConditions, ps),
 	);

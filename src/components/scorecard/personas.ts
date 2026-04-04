@@ -19,6 +19,23 @@ export interface Persona {
 	maxGradeLevel: number;
 	/** What a successful forecast interaction looks like */
 	successCriteria: string;
+	// Domain dimensions — populated from DB at runtime; scoring adjusts thresholds accordingly
+	/** Years spent in mountain terrain (0–30) */
+	yearsOfMountainExperience?: number;
+	/** Formal avalanche training: 0=None 1=Awareness 2=AIARE1 3=AIARE2 4=Pro1 5=Pro2+ */
+	avalancheTrainingLevel?: number;
+	/** Backcountry field days per season (0–120) */
+	backcountryDaysPerSeason?: number;
+	/** Ability to interpret weather patterns (1–5) */
+	weatherPatternRecognition?: number;
+	/** Terrain hazard evaluation skill (1–5) */
+	terrainAssessmentSkill?: number;
+	/** Decision conservatism: 1=very conservative 5=aggressive (3=calibrated) */
+	riskTolerance?: number;
+	/** 1=solo decisions 5=highly consensus-driven */
+	groupDecisionTendency?: number;
+	/** Familiarity with local terrain features (1–5) */
+	localTerrainFamiliarity?: number;
 }
 
 export const PERSONAS: Record<PersonaId, Persona> = {
