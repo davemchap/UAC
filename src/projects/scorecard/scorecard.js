@@ -351,6 +351,35 @@ function renderPersonaLegend(containerId, personas) {
   ).join("");
 }
 
+function updateLensHint(chipsEl) {
+  const hint = document.getElementById("readability-lens-hint");
+  const zeroState = document.getElementById("readability-lens-zero");
+  const allChips = [...chipsEl.querySelectorAll(".sc-metric-chip[role='button']")];
+  const activeCount = allChips.filter((c) => c.getAttribute("aria-pressed") === "true").length;
+  const total = allChips.length;
+
+  if (zeroState) zeroState.hidden = activeCount > 0;
+
+  if (!hint) return;
+  if (total === 0) {
+    hint.textContent = "";
+    hint.className = "sc-lens-hint";
+  } else if (activeCount === total) {
+    hint.textContent = "Colored underlines show phrases each reader may find unclear — click a chip to toggle visibility";
+    hint.className = "sc-lens-hint";
+  } else if (activeCount === 0) {
+    hint.textContent = "All flags hidden — click a chip to show readability highlights";
+    hint.className = "sc-lens-hint sc-lens-hint--warn";
+  } else {
+    const hiddenNames = allChips
+      .filter((c) => c.getAttribute("aria-pressed") === "false")
+      .map((c) => c.dataset.personaRole)
+      .join(", ");
+    hint.textContent = `Showing ${activeCount} of ${total} readers — ${hiddenNames} hidden`;
+    hint.className = "sc-lens-hint";
+  }
+}
+
 function renderPersonaScoreRow(containerId, personas) {
   const el = document.getElementById(containerId);
   el.innerHTML = personas.map((p) => {
@@ -388,7 +417,6 @@ function renderPersonaScoreRow(containerId, personas) {
   });
 
   el.querySelectorAll(".sc-metric-chip[role='button']").forEach((chip) => {
-    const role = chip.dataset.personaRole;
     const toggle = () => {
       const active = chip.getAttribute("aria-pressed") === "true";
       chip.setAttribute("aria-pressed", active ? "false" : "true");
@@ -396,10 +424,14 @@ function renderPersonaScoreRow(containerId, personas) {
       document.querySelectorAll(`.sc-highlight[data-persona-id="${id}"]`).forEach((m) => {
         m.classList.toggle("sc-highlight--hidden", active);
       });
+      updateLensHint(el);
     };
     chip.addEventListener("click", toggle);
     chip.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
   });
+
+  // Set initial hint text after chips are rendered
+  updateLensHint(el);
 }
 
 function renderPersonaSidebar(containerId, personas) {
@@ -506,7 +538,8 @@ function buildAnnotatedText(data, forecastText) {
   }
   result += escHtml(forecastText.slice(pos));
 
-  return `<div class="sc-forecast-annotated">${result.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>")}</div>`;
+  return `<div class="sc-forecast-annotated">${result.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>")}</div>
+    <p class="sc-lens-zero-state" id="readability-lens-zero" hidden>All readability flags are hidden — click a chip above to show highlights.</p>`;
 }
 
 function getForecastDisplayText(data) {

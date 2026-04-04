@@ -161,7 +161,20 @@ mark.sc-highlight {
   transition: background 0.15s;
 }
 mark.sc-highlight:hover, mark.sc-highlight:focus { background: rgba(30,45,61,0.06) !important; outline: none; }
-mark.sc-highlight--hidden { opacity: 0; border-bottom-color: transparent !important; }
+mark.sc-highlight--hidden { background: transparent !important; border-bottom-color: transparent !important; }
+
+/* Lens instruction hint below persona chips */
+.sc-lens-hint {
+  font-size: 0.75rem; color: var(--sc-text-muted); margin: 4px 0 0;
+  line-height: 1.4; transition: color 0.2s;
+}
+.sc-lens-hint--warn { color: var(--sc-accent); font-weight: 500; }
+
+/* Zero-state when all chips are toggled off */
+.sc-lens-zero-state {
+  font-size: 0.82rem; color: var(--sc-text-muted); text-align: center;
+  padding: 20px 16px; font-style: italic; margin-top: 8px;
+}
 
 /* ---- Sidebar ---- */
 .sc-sidebar { display: flex; flex-direction: column; gap: 12px; }
