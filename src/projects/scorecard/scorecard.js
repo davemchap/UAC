@@ -1016,7 +1016,48 @@ function wireTagInput() {
 // Identity tab
 // ---------------------------------------------------------------------------
 
+function buildBaselineProfile(persona) {
+  const LITERACY_LABELS = {
+    low: "Low literacy",
+    high: "High literacy",
+    expert: "Expert",
+    forecaster: "Forecaster-tier",
+  };
+  const literacyLabel = LITERACY_LABELS[persona.literacyLevel] ?? persona.literacyLevel;
+  const terms = persona.unknownTerms ?? [];
+  const preview = terms.slice(0, 6);
+  const remaining = terms.length - preview.length;
+
+  const termChips = preview
+    .map((t) => `<span class="trainer-baseline-term">${escHtml(t)}</span>`)
+    .join("");
+  const moreChip = remaining > 0
+    ? `<span class="trainer-baseline-term-more">+${remaining} more</span>`
+    : "";
+
+  const jargonLine = terms.length > 0
+    ? `Does not understand <strong>${terms.length} technical terms</strong>.`
+    : "No jargon restrictions — reads all technical language.";
+
+  return `
+    <div class="trainer-baseline-header">
+      <span class="trainer-baseline-label">Parameter Baseline</span>
+      <span class="trainer-baseline-literacy">${escHtml(literacyLabel)}</span>
+    </div>
+    <div class="trainer-baseline-prose">
+      ${escHtml(persona.name)} evaluates forecasts against a
+      <strong>grade ${persona.maxGradeLevel} reading ceiling</strong> and a
+      <strong>${persona.maxSentenceLength}-word sentence limit</strong>.
+      ${jargonLine}
+    </div>
+    ${terms.length > 0 ? `<div class="trainer-baseline-terms">${termChips}${moreChip}</div>` : ""}
+    <div class="trainer-baseline-success">
+      <strong>Success looks like:</strong> ${escHtml(persona.successCriteria)}
+    </div>`;
+}
+
 function populateIdentityTab(persona) {
+  document.getElementById("trainer-baseline-profile").innerHTML = buildBaselineProfile(persona);
   const ctx = persona.behavioralContext ?? "";
   document.getElementById("trainer-behavioral-context").value = ctx;
   updateCharCount();

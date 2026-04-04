@@ -548,6 +548,49 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 }
 .trainer-inject-row .trainer-textarea { flex: 1; }
 
+/* Baseline profile — synthesized read-only summary of scoring parameters */
+.trainer-baseline-profile {
+  background: var(--sc-surface2);
+  border: 1px solid var(--sc-border);
+  border-left: 3px solid var(--sc-accent);
+  border-radius: var(--sc-radius);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+.trainer-baseline-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.trainer-baseline-label {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--sc-accent);
+}
+.trainer-baseline-literacy {
+  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; padding: 2px 8px;
+  border-radius: 99px; border: 1px solid var(--sc-border);
+  color: var(--sc-text-muted); background: var(--sc-surface);
+}
+.trainer-baseline-prose {
+  font-size: 0.83rem; color: var(--sc-text); line-height: 1.6; margin-bottom: 8px;
+}
+.trainer-baseline-success {
+  font-size: 0.78rem; color: var(--sc-text-muted); line-height: 1.5;
+  padding-top: 8px; border-top: 1px solid var(--sc-border);
+}
+.trainer-baseline-success strong { color: var(--sc-text); font-weight: 600; }
+.trainer-baseline-terms {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+}
+.trainer-baseline-term {
+  font-size: 0.7rem; padding: 2px 7px;
+  border-radius: 3px; background: var(--sc-surface);
+  border: 1px solid var(--sc-border); color: var(--sc-text-muted);
+}
+.trainer-baseline-term-more {
+  font-size: 0.7rem; color: var(--sc-text-dim); padding: 2px 4px; align-self: center;
+}
+
 /* Instructions list */
 .trainer-instructions-list {
   display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;
