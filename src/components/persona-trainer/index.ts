@@ -3,7 +3,7 @@
  * Seeded from hardcoded PERSONAS defaults; editable via API.
  */
 
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "../db";
 import { personas } from "../db/schema";
 import { PERSONA_IDS, PERSONAS } from "../scorecard/personas";
@@ -138,6 +138,39 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 // Seed
 // ---------------------------------------------------------------------------
 
+/** Default narrative voice for each built-in persona.
+ *  Applied on startup only where behavioralContext IS NULL — never overwrites edits. */
+const PERSONA_DEFAULT_CONTEXTS: Record<string, string> = {
+	jordan: `Jordan reads avalanche forecasts the way most weekend recreationists do — scanning for the bottom line danger rating and quickly deciding "safe enough" or "not worth it." Technical language like "facets," "wind slab," or "propagation" gets skimmed past rather than absorbed. Jordan anchors heavily on the overall danger number and the headline recommendation, often missing nuance buried in the problem descriptions.
+
+When something sounds scary, Jordan's instinct is to defer to a friend in the group rather than interpret the forecast independently. Jordan's primary question is always: "Is today a good day to go out?" — not "what specific terrain should I avoid?"`,
+
+	priya: `Priya reads forecasts methodically, cross-referencing the danger rating against each named avalanche problem, then mapping those problems to her planned route by aspect and elevation band. She has strong terrain intuition built over many seasons and uses the forecast to confirm or challenge her existing plan — not just validate a "go/no-go."
+
+Priya is generally conservative when uncertainty is high, but can be pulled toward optimism when a trip has been long-planned or the group energy is positive. Her main question when reading: "What does this mean for my specific objectives today, and what are my turnaround criteria?" She notices when forecasters hedge their language and treats that as a meaningful signal.`,
+
+	marcus: `Marcus reads forecasts with professional precision, looking for subtleties recreational users miss: trend lines, spatial variability caveats, confidence qualifiers, and problem likelihood gradients. He mentally translates the forecast into client-facing language in real time — asking "how would I explain this to a group with mixed experience levels?" before he even finishes reading.
+
+Marcus is particularly alert to persistent weak layer problems and wind slab setups that may catch clients off guard on otherwise benign-looking terrain. He holds himself to a higher standard of conservative decision-making when guiding than when traveling solo, and treats any uncertainty in forecast language as a reason to simplify his group's terrain choices.`,
+
+	sasha: `Sasha engages with forecasts as a professional peer of the forecasting team — she reads for operational implications across her organization's entire area of responsibility. She's attuned to the forecaster's confidence level, the specificity of problem descriptions, and language that signals rapidly changing or poorly-understood conditions.
+
+Sasha is building a staff and client briefing, so she needs information that is both technically accurate and communicable under time pressure. Her primary question is "what could surprise us today that our team might underestimate?" She uses the forecast as one input among several (recent field observations, staff experience reports, weather records) and flags any disconnect between the written forecast and what her team has seen on the ground.`,
+};
+
+/** Fill in default behavioral context for built-in personas that have none yet.
+ *  Safe to call on every startup — only updates rows where behavioralContext IS NULL. */
+export async function backfillPersonaDefaults(): Promise<void> {
+	const db = getDb();
+	for (const [key, context] of Object.entries(PERSONA_DEFAULT_CONTEXTS)) {
+		await db
+			.update(personas)
+			.set({ behavioralContext: context })
+			.where(and(eq(personas.personaKey, key), isNull(personas.behavioralContext)));
+	}
+	console.log("[db] Persona behavioral contexts backfilled where missing");
+}
+
 export async function seedPersonasIfNeeded(): Promise<void> {
 	const db = getDb();
 
@@ -157,7 +190,7 @@ export async function seedPersonasIfNeeded(): Promise<void> {
 				maxSentenceLength: p.maxSentenceLength,
 				maxGradeLevel: p.maxGradeLevel,
 				successCriteria: p.successCriteria,
-				behavioralContext: null,
+				behavioralContext: PERSONA_DEFAULT_CONTEXTS[p.id] ?? null,
 				isBuiltIn: true,
 				...dims,
 			})

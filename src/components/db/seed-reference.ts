@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { count } from "drizzle-orm";
-import { seedPersonasIfNeeded } from "../persona-trainer";
+import { backfillPersonaDefaults, seedPersonasIfNeeded } from "../persona-trainer";
 import { getDb } from "./index";
 import {
 	alertThresholds,
@@ -147,6 +147,7 @@ export async function seedReferenceData(): Promise<void> {
 	);
 
 	await seedPersonasIfNeeded();
+	await backfillPersonaDefaults();
 }
 
 // ---------------------------------------------------------------------------
