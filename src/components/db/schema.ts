@@ -12,6 +12,22 @@ export const personas = pgTable("personas", {
 	maxGradeLevel: real("max_grade_level").notNull(),
 	successCriteria: text("success_criteria").notNull(),
 	behavioralContext: text("behavioral_context"),
+	// Domain dimensions (avalanche-specific)
+	yearsOfMountainExperience: integer("years_of_mountain_experience").notNull().default(0),
+	avalancheTrainingLevel: integer("avalanche_training_level").notNull().default(0), // 0=None,1=Awareness,2=AIARE1,3=AIARE2,4=Pro
+	backcountryDaysPerSeason: integer("backcountry_days_per_season").notNull().default(0),
+	weatherPatternRecognition: integer("weather_pattern_recognition").notNull().default(1), // 1-5
+	terrainAssessmentSkill: integer("terrain_assessment_skill").notNull().default(1), // 1-5
+	groupDecisionTendency: integer("group_decision_tendency").notNull().default(3), // 1-5
+	riskTolerance: integer("risk_tolerance").notNull().default(3), // 1-5
+	localTerrainFamiliarity: integer("local_terrain_familiarity").notNull().default(1), // 1-5
+	// Persona management
+	active: boolean("active").notNull().default(true),
+	tags: text("tags").array().notNull().default([]),
+	isBuiltIn: boolean("is_built_in").notNull().default(false),
+	// Avatar
+	avatarSeed: text("avatar_seed"),
+	avatarStyle: text("avatar_style").notNull().default("avataaars"),
 	updatedAt: timestamp("updated_at").defaultNow(),
 	createdAt: timestamp("created_at").defaultNow(),
 });
