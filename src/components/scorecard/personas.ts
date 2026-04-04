@@ -19,6 +19,8 @@ export interface Persona {
 	maxGradeLevel: number;
 	/** What a successful forecast interaction looks like */
 	successCriteria: string;
+	/** Audience classification tags — used to split recreational/professional grades */
+	tags?: readonly string[];
 	// Domain dimensions — populated from DB at runtime; scoring adjusts thresholds accordingly
 	/** Years spent in mountain terrain (0–30) */
 	yearsOfMountainExperience?: number;
@@ -45,6 +47,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		role: "Casual Recreationist",
 		color: "#F59E0B",
 		literacyLevel: "low",
+		tags: ["recreational"],
 		maxSentenceLength: 25,
 		maxGradeLevel: 8,
 		successCriteria: "Makes correct go/no-go decision for skill level",
@@ -113,6 +116,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		role: "Experienced Backcountry Traveler",
 		color: "#0D9488",
 		literacyLevel: "high",
+		tags: ["recreational", "experienced"],
 		maxSentenceLength: 40,
 		maxGradeLevel: 12,
 		successCriteria: "Accurate hazard-based route plan with correct terrain selection",
@@ -124,6 +128,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		role: "Guide / Avalanche Educator",
 		color: "#6366F1",
 		literacyLevel: "expert",
+		tags: ["professional", "educator"],
 		maxSentenceLength: 60,
 		maxGradeLevel: 16,
 		successCriteria: "Specific, defensible client briefing aligned with forecast",
@@ -135,6 +140,7 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		role: "Snow Safety Professional",
 		color: "#64748B",
 		literacyLevel: "forecaster",
+		tags: ["professional", "forecaster"],
 		maxSentenceLength: 80,
 		maxGradeLevel: 18,
 		successCriteria: "Forecast passes peer review without substantive revision",

@@ -107,6 +107,19 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
   box-shadow: 0 1px 3px rgba(30,45,61,0.08);
 }
 .sc-metric-chip:hover { box-shadow: 0 2px 6px rgba(30,45,61,0.14); opacity: 0.8; }
+
+/* Persona chip tooltip */
+.sc-chip-tooltip {
+  position: absolute; z-index: 9999;
+  background: var(--sc-text); color: #fff;
+  font-size: 0.72rem; line-height: 1.5;
+  padding: 6px 10px; border-radius: 6px;
+  white-space: pre-line; pointer-events: none;
+  transform: translateX(-50%) translateY(-100%);
+  opacity: 0; transition: opacity 0.12s;
+  max-width: 260px;
+}
+.sc-chip-tooltip.visible { opacity: 1; }
 .sc-persona-chip:disabled,
 .sc-metric-chip:disabled {
   opacity: 0.4;
@@ -164,6 +177,12 @@ mark.sc-highlight--hidden { opacity: 0; border-bottom-color: transparent !import
 .sc-gauge-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .sc-sub-scores { display: flex; gap: 8px; }
 .sc-sub-score { font-size: 0.72rem; color: var(--sc-text-muted); }
+.sc-persona-dim-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 6px; padding-top: 6px;
+  border-top: 1px solid var(--sc-border);
+  font-size: 0.68rem; color: var(--sc-text-dim);
+}
 .sc-sub-score b { color: var(--sc-text); }
 
 .sc-trend-section { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 12px; }
@@ -255,6 +274,12 @@ mark.sc-highlight--hidden { opacity: 0; border-bottom-color: transparent !import
 .sc-coach-zone { font-size: 1rem; font-weight: 700; }
 .sc-coach-date { font-size: 0.82rem; color: var(--sc-text-muted); margin-top: 2px; }
 .sc-coach-summary { font-size: 0.9rem; color: var(--sc-text-muted); margin-top: 8px; line-height: 1.5; }
+.sc-grade-split-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.sc-grade-split-item { display: flex; flex-direction: column; gap: 2px; }
+.sc-grade-split-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sc-text-dim); }
+.sc-grade-split-score { font-size: 1.1rem; font-weight: 800; }
+.sc-grade-split-num { font-size: 0.78rem; font-weight: 400; opacity: 0.7; }
+.sc-grade-split-divider { width: 1px; height: 32px; background: var(--sc-border); }
 
 .sc-coach-top3 { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 16px; }
 .sc-top3-title { font-size: 0.82rem; font-weight: 700; color: var(--sc-text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; }
@@ -290,11 +315,24 @@ mark.sc-highlight--hidden { opacity: 0; border-bottom-color: transparent !import
 
 .sc-coach-sidebar { display: flex; flex-direction: column; gap: 16px; }
 .sc-progress-section { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 14px; }
-.sc-progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.sc-progress-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
 .sc-progress-label { font-size: 0.72rem; width: 90px; flex-shrink: 0; }
 .sc-progress-track { flex: 1; height: 6px; background: var(--sc-border); border-radius: 3px; overflow: hidden; }
 .sc-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .sc-progress-val { font-size: 0.78rem; font-weight: 600; width: 28px; text-align: right; }
+.sc-progress-dim { width: 100%; font-size: 0.67rem; color: var(--sc-text-dim); padding-left: 98px; margin-bottom: 4px; }
+.sc-coach-tile-dim { font-size: 0.67rem; color: var(--sc-text-dim); margin-top: 2px; }
+
+/* Dimension badges on suggestion cards */
+.sc-dim-badge {
+  font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.sc-dim-badge--avalancheTrainingLevel { background: #fef3c7; color: #92400e; }
+.sc-dim-badge--generalVocabulary      { background: #ede9fe; color: #5b21b6; }
+.sc-dim-badge--fieldExperience        { background: #dbeafe; color: #1e40af; }
+.sc-dim-badge--riskTolerance          { background: #d1fae5; color: #065f46; }
 
 .sc-design-principles { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 14px; }
 .sc-principles-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sc-text-muted); margin-bottom: 8px; }

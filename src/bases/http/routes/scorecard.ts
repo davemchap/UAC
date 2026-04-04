@@ -23,6 +23,7 @@ function toScoringPersona(r: PersonaRecord): Persona {
 		maxSentenceLength: r.maxSentenceLength,
 		maxGradeLevel: r.maxGradeLevel,
 		successCriteria: r.successCriteria,
+		tags: r.tags,
 		yearsOfMountainExperience: r.yearsOfMountainExperience,
 		avalancheTrainingLevel: r.avalancheTrainingLevel,
 		backcountryDaysPerSeason: r.backcountryDaysPerSeason,
@@ -63,7 +64,13 @@ scorecard.get("/", async (c) => {
 		const journeys = personaScores.map((ps) =>
 			simulateJourney(f.overallDangerRating, problems, bottomLine, currentConditions, ps),
 		);
-		const coaching = personaScores.flatMap((ps) => buildCoachingSuggestions(forecastText, ps));
+		const coaching = personaScores.flatMap((ps) =>
+			buildCoachingSuggestions(
+				forecastText,
+				ps,
+				personas?.find((p) => p.id === ps.personaId),
+			),
+		);
 
 		return {
 			forecastId: f.id,
@@ -107,7 +114,13 @@ scorecard.get("/:zoneSlug", async (c) => {
 	const journeys = personaScores.map((ps) =>
 		simulateJourney(forecast.overallDangerRating, problems, bottomLine, currentConditions, ps),
 	);
-	const coaching = personaScores.flatMap((ps) => buildCoachingSuggestions(forecastText, ps));
+	const coaching = personaScores.flatMap((ps) =>
+		buildCoachingSuggestions(
+			forecastText,
+			ps,
+			personas?.find((p) => p.id === ps.personaId),
+		),
+	);
 
 	return c.json({
 		success: true,

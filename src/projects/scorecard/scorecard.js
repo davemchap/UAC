@@ -26,6 +26,23 @@ function addDismissed(zoneSlug, key) {
 function suggestionKey(s) { return `${s.personaId}:${s.section}`; }
 let activeTab = "readability";
 
+const TRAINING_LABELS = ['None', 'Awareness', 'AIARE 1', 'AIARE 2', 'Pro 1', 'Pro 2+'];
+
+function trainingLabel(level) {
+  return TRAINING_LABELS[Math.min(level ?? 0, 5)] ?? 'None';
+}
+
+function dimTooltipText(p) {
+  if (!p.dimensions) return p.personaRole;
+  const d = p.dimensions;
+  const tl = trainingLabel(d.avalancheTrainingLevel);
+  return [
+    `${p.personaName} — ${p.personaRole}`,
+    `${tl} training · ${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs`,
+    `Terrain ${d.terrainAssessmentSkill}/5 · Weather ${d.weatherPatternRecognition}/5`,
+  ].join('\n');
+}
+
 // ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
@@ -337,10 +354,11 @@ function renderPersonaScoreRow(containerId, personas) {
   const el = document.getElementById(containerId);
   el.innerHTML = personas.map((p) => {
     const hasFlags = (p.flags ?? []).length > 0;
+    const tooltip = escAttr(dimTooltipText(p));
     if (!hasFlags) {
       return `<div class="sc-metric-chip" style="border-color:${p.color}"
           aria-disabled="true" disabled
-          title="No flags for this persona"
+          data-dim-tooltip="${tooltip}"
           data-persona-id="${escAttr(p.personaId)}"
           data-persona-role="${escAttr(p.personaRole)}">
         <span class="sc-metric-dot" style="background:${p.color}"></span>
@@ -351,7 +369,7 @@ function renderPersonaScoreRow(containerId, personas) {
     }
     return `<div class="sc-metric-chip" style="border-color:${p.color}"
         role="button" aria-pressed="true" tabindex="0"
-        title="Click to hide ${escAttr(p.personaRole)} highlights"
+        data-dim-tooltip="${tooltip}"
         data-persona-id="${escAttr(p.personaId)}"
         data-persona-role="${escAttr(p.personaRole)}">
       <span class="sc-metric-dot" style="background:${p.color}"></span>
@@ -360,12 +378,19 @@ function renderPersonaScoreRow(containerId, personas) {
       <span class="sc-metric-eye" aria-hidden="true">●</span>
     </div>`;
   }).join("");
+
+  el.querySelectorAll(".sc-metric-chip").forEach((chip) => {
+    chip.addEventListener("mouseenter", () => showChipTooltip(chip, chip.dataset.dimTooltip ?? ''));
+    chip.addEventListener("mouseleave", hideChipTooltip);
+    chip.addEventListener("focus", () => showChipTooltip(chip, chip.dataset.dimTooltip ?? ''));
+    chip.addEventListener("blur", hideChipTooltip);
+  });
+
   el.querySelectorAll(".sc-metric-chip[role='button']").forEach((chip) => {
     const role = chip.dataset.personaRole;
     const toggle = () => {
       const active = chip.getAttribute("aria-pressed") === "true";
       chip.setAttribute("aria-pressed", active ? "false" : "true");
-      chip.title = active ? `Click to show ${role} highlights` : `Click to hide ${role} highlights`;
       const id = chip.dataset.personaId;
       document.querySelectorAll(`.sc-highlight[data-persona-id="${id}"]`).forEach((m) => {
         m.classList.toggle("sc-highlight--hidden", active);
@@ -378,8 +403,16 @@ function renderPersonaScoreRow(containerId, personas) {
 
 function renderPersonaSidebar(containerId, personas) {
   const el = document.getElementById(containerId);
-  el.innerHTML = personas.map((p) =>
-    `<div class="sc-persona-card">
+  el.innerHTML = personas.map((p) => {
+    const d = p.dimensions;
+    const dimRow = d
+      ? `<div class="sc-persona-dim-row">
+          <span>${trainingLabel(d.avalancheTrainingLevel)}</span>
+          <span>${d.backcountryDaysPerSeason} days/season</span>
+          <span>Terrain ${d.terrainAssessmentSkill}/5</span>
+        </div>`
+      : '';
+    return `<div class="sc-persona-card">
       <div class="sc-persona-card-header">
         <span class="sc-persona-avatar" style="background:${p.color}20;color:${p.color}">
           ${p.personaName[0]}
@@ -398,8 +431,9 @@ function renderPersonaSidebar(containerId, personas) {
         <span class="sc-sub-score">Action <b>${p.actionability}</b></span>
         <span class="sc-sub-score">Jargon <b>${p.jargonLoad}</b></span>
       </div>
-    </div>`
-  ).join("");
+      ${dimRow}
+    </div>`;
+  }).join("");
 }
 
 function renderScoreDistribution(data) {
@@ -615,19 +649,41 @@ function renderCoach(data) {
 
 function renderCoachHero(data) {
   const hero = document.getElementById("coach-hero");
-  const avgScore = Math.round(data.personas.reduce((s, p) => s + p.overall, 0) / data.personas.length);
-  const grade = scoreToGrade(avgScore);
-  const gradeColor = gradeColor_(grade);
+  const recPersonas = data.personas.filter((p) => (p.tags ?? []).includes("recreational"));
+  const proPersonas = data.personas.filter((p) => !(p.tags ?? []).includes("recreational"));
+
+  const avgOf = (arr) => arr.length ? Math.round(arr.reduce((s, p) => s + p.overall, 0) / arr.length) : null;
+  const recScore = avgOf(recPersonas);
+  const proScore = avgOf(proPersonas);
+
+  // Primary grade is recreational — the audience with most to lose from a bad forecast
+  const primaryScore = recScore ?? avgOf(data.personas);
+  const primaryGrade = scoreToGrade(primaryScore);
+  const primaryColor = gradeColor_(primaryGrade);
   const weakest = [...data.personas].sort((a, b) => a.overall - b.overall)[0];
+
+  const splitRow = recScore !== null && proScore !== null ? `
+    <div class="sc-grade-split-row">
+      <div class="sc-grade-split-item">
+        <span class="sc-grade-split-label">Recreational</span>
+        <span class="sc-grade-split-score" style="color:${gradeColor_(scoreToGrade(recScore))}">${scoreToGrade(recScore)} <span class="sc-grade-split-num">${recScore}</span></span>
+      </div>
+      <div class="sc-grade-split-divider"></div>
+      <div class="sc-grade-split-item">
+        <span class="sc-grade-split-label">Professional</span>
+        <span class="sc-grade-split-score" style="color:${gradeColor_(scoreToGrade(proScore))}">${scoreToGrade(proScore)} <span class="sc-grade-split-num">${proScore}</span></span>
+      </div>
+    </div>` : '';
 
   hero.innerHTML = `
     <div class="sc-coach-grade-card">
-      <div class="sc-coach-grade" style="color:${gradeColor};border-color:${gradeColor}">${grade}</div>
+      <div class="sc-coach-grade" style="color:${primaryColor};border-color:${primaryColor}">${primaryGrade}</div>
       <div class="sc-coach-grade-detail">
         <div class="sc-coach-zone">${data.zoneName}</div>
         <div class="sc-coach-date">${formatDate(data.dateIssued)}</div>
+        ${splitRow}
         <div class="sc-coach-summary">
-          ${grade === "A" || grade === "B"
+          ${primaryGrade === "A" || primaryGrade === "B"
             ? `Strong forecast — scores well across most personas.`
             : `Today's forecast loses <strong>${weakest?.personaRole}</strong> most (score: ${weakest?.overall}).`}
         </div>
@@ -646,15 +702,27 @@ function renderCoachHero(data) {
   `;
 }
 
+function limitingDimension(p) {
+  if (!p.dimensions) return null;
+  const d = p.dimensions;
+  const scores = { clarity: p.clarity, actionability: p.actionability, jargon: p.jargonLoad };
+  const worst = Object.entries(scores).sort((a, b) => a[1] - b[1])[0][0];
+  if (worst === "jargon") return d.avalancheTrainingLevel < 2 ? "No avalanche training" : "Vocabulary gap";
+  if (worst === "clarity") return `${d.yearsOfMountainExperience} yr${d.yearsOfMountainExperience !== 1 ? "s" : ""} experience`;
+  return "Needs clearer action";
+}
+
 function renderCoachPersonaGrades(data) {
   const el = document.getElementById("coach-persona-grades");
   el.innerHTML = data.personas.map((p) => {
     const grade = scoreToGrade(p.overall);
     const color = gradeColor_(grade);
+    const limDim = limitingDimension(p);
     return `<div class="sc-coach-persona-tile" style="border-top:3px solid ${p.color}">
       <div class="sc-coach-tile-grade" style="background:${color}15;color:${color}">${grade}</div>
       <div class="sc-coach-tile-name">${p.personaRole}</div>
       <div class="sc-coach-tile-issue">${worstIssue(p)}</div>
+      ${limDim ? `<div class="sc-coach-tile-dim">▸ ${escHtml(limDim)}</div>` : ''}
     </div>`;
   }).join("");
 }
@@ -687,9 +755,13 @@ function renderCoachSuggestions(data) {
   list.innerHTML = visible.map((s) => {
     const persona = data.personas.find((p) => p.personaId === s.personaId);
     const key = escAttr(suggestionKey(s));
+    const dimBadge = s.drivingDimensionLabel
+      ? `<span class="sc-dim-badge sc-dim-badge--${escAttr(s.drivingDimension)}">${escHtml(s.drivingDimensionLabel)}</span>`
+      : '';
     return `<div class="sc-suggestion-card" data-key="${key}">
       <div class="sc-suggestion-header">
         <span class="sc-suggestion-persona" style="color:${persona?.color ?? '#666'}">${s.personaName}</span>
+        ${dimBadge}
         <span class="sc-suggestion-section">${escHtml(sectionLabel(s.section))}</span>
         <span class="sc-suggestion-impact">+${s.scoreImpact} pts</span>
       </div>
@@ -721,15 +793,17 @@ function renderCoachSuggestions(data) {
 
 function renderCoachProgressBars(data) {
   const el = document.getElementById("coach-progress-bars");
-  el.innerHTML = data.personas.map((p) =>
-    `<div class="sc-progress-row">
+  el.innerHTML = data.personas.map((p) => {
+    const limDim = limitingDimension(p);
+    return `<div class="sc-progress-row">
       <span class="sc-progress-label" style="color:${p.color}">${p.personaRole}</span>
       <div class="sc-progress-track">
         <div class="sc-progress-fill" style="width:${p.overall}%;background:${p.color}"></div>
       </div>
       <span class="sc-progress-val">${p.overall}</span>
-    </div>`
-  ).join("");
+      ${limDim ? `<div class="sc-progress-dim">▸ ${escHtml(limDim)}</div>` : ''}
+    </div>`;
+  }).join("");
 }
 
 function worstIssue(persona) {
@@ -753,6 +827,34 @@ function gradeColor_(grade) {
 // ---------------------------------------------------------------------------
 // Drawer close
 // ---------------------------------------------------------------------------
+
+function getOrCreateTooltip() {
+  let tip = document.getElementById('sc-chip-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'sc-chip-tooltip';
+    tip.className = 'sc-chip-tooltip';
+    tip.setAttribute('role', 'tooltip');
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tip);
+  }
+  return tip;
+}
+
+function showChipTooltip(chip, text) {
+  const tip = getOrCreateTooltip();
+  tip.textContent = text;
+  tip.setAttribute('aria-hidden', 'false');
+  tip.classList.add('visible');
+  const rect = chip.getBoundingClientRect();
+  tip.style.left = `${rect.left + rect.width / 2 + window.scrollX}px`;
+  tip.style.top = `${rect.top + window.scrollY - tip.offsetHeight - 8}px`;
+}
+
+function hideChipTooltip() {
+  const tip = document.getElementById('sc-chip-tooltip');
+  if (tip) { tip.classList.remove('visible'); tip.setAttribute('aria-hidden', 'true'); }
+}
 
 function wireDrawerClose() {
   document.getElementById("drawer-close").addEventListener("click", () =>

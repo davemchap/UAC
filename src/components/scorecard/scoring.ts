@@ -5,6 +5,8 @@
 
 import { PERSONAS, PERSONA_IDS, type PersonaId, type Persona } from "./personas";
 
+export const TRAINING_LABELS = ["None", "Awareness", "AIARE 1", "AIARE 2", "Pro 1", "Pro 2+"] as const;
+
 export interface FlaggedPhrase {
 	text: string;
 	startIndex: number;
@@ -12,6 +14,18 @@ export interface FlaggedPhrase {
 	personaId: PersonaId;
 	reason: string;
 	suggestion: string;
+}
+
+export interface PersonaDimensions {
+	yearsOfMountainExperience: number;
+	avalancheTrainingLevel: number;
+	avalancheTrainingLabel: string;
+	backcountryDaysPerSeason: number;
+	weatherPatternRecognition: number;
+	terrainAssessmentSkill: number;
+	riskTolerance: number;
+	groupDecisionTendency: number;
+	localTerrainFamiliarity: number;
 }
 
 export interface PersonaScore {
@@ -25,6 +39,8 @@ export interface PersonaScore {
 	jargonLoad: number;
 	decisionOutcome: "correct" | "uncertain" | "wrong" | "abandoned";
 	flags: FlaggedPhrase[];
+	dimensions?: PersonaDimensions;
+	tags?: string[];
 }
 
 export interface ScorecardResult {
@@ -249,6 +265,17 @@ function getGroupPhraseBonus(text: string, persona: Persona): number {
 // Jargon detection
 // ---------------------------------------------------------------------------
 
+function buildJargonReason(phrase: string, persona: Persona): string {
+	const level = persona.avalancheTrainingLevel ?? 0;
+	if (level === 0) {
+		return `"${phrase}" requires avalanche training ${persona.name} doesn't have (${TRAINING_LABELS[0]})`;
+	}
+	if (level <= 2) {
+		return `"${phrase}" is technical jargon beyond ${persona.name}'s ${TRAINING_LABELS[level]} training (Level ${level})`;
+	}
+	return `"${phrase}" is not in ${persona.name}'s vocabulary`;
+}
+
 function findJargonFlags(text: string, persona: Persona): FlaggedPhrase[] {
 	const flags: FlaggedPhrase[] = [];
 	const lowerText = text.toLowerCase();
@@ -271,7 +298,7 @@ function findJargonFlags(text: string, persona: Persona): FlaggedPhrase[] {
 					startIndex: idx,
 					endIndex: idx + term.length,
 					personaId: persona.id,
-					reason: `"${phrase}" is not in ${persona.name}'s vocabulary`,
+					reason: buildJargonReason(phrase, persona),
 					suggestion: getJargonSuggestion(term),
 				});
 			}
@@ -556,16 +583,24 @@ export interface CoachingSuggestion {
 	problem: string;
 	suggestion: string;
 	scoreImpact: number; // estimated points gained
+	drivingDimension: string; // e.g. "avalancheTrainingLevel"
+	drivingDimensionLabel: string; // e.g. "Training Gap"
 }
 
-function buildCoachingSuggestions(text: string, personaScore: PersonaScore): CoachingSuggestion[] {
+function buildCoachingSuggestions(
+	text: string,
+	personaScore: PersonaScore,
+	runtimePersona?: Persona,
+): CoachingSuggestion[] {
 	const suggestions: CoachingSuggestion[] = [];
+	const persona = runtimePersona ?? PERSONAS[personaScore.personaId];
+	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
 
 	// Suggest breaking long sentences
 	const sentences = getSentences(text);
-	const persona = PERSONAS[personaScore.personaId];
+	const effectiveMaxSentence = getAdjustedMaxSentenceLength(persona);
 	for (const sentence of sentences.slice(0, 3)) {
-		if (countWords(sentence) > persona.maxSentenceLength) {
+		if (countWords(sentence) > effectiveMaxSentence) {
 			suggestions.push({
 				section: "Forecast text",
 				personaId: personaScore.personaId,
@@ -574,14 +609,17 @@ function buildCoachingSuggestions(text: string, personaScore: PersonaScore): Coa
 				problem: `This sentence is too long for ${persona.name} (${countWords(sentence)} words)`,
 				suggestion: "Consider: break into two sentences. Lead with the hazard or action, then add context.",
 				scoreImpact: 8,
+				drivingDimension: "fieldExperience",
+				drivingDimensionLabel: "Complexity",
 			});
-			break; // one sentence suggestion max
+			break;
 		}
 	}
 
 	// Suggest replacing jargon (top 2)
-	const jargonFlags = personaScore.flags.filter((f) => f.reason.includes("vocabulary")).slice(0, 2);
+	const jargonFlags = personaScore.flags.filter((f) => !f.reason.includes("words")).slice(0, 2);
 	for (const flag of jargonFlags) {
+		const isTrainingGap = trainingLevel < 2;
 		suggestions.push({
 			section: "Avalanche Problems",
 			personaId: personaScore.personaId,
@@ -590,6 +628,8 @@ function buildCoachingSuggestions(text: string, personaScore: PersonaScore): Coa
 			problem: flag.reason,
 			suggestion: `Consider: "${getJargonSuggestion(flag.text)}"`,
 			scoreImpact: 12,
+			drivingDimension: isTrainingGap ? "avalancheTrainingLevel" : "generalVocabulary",
+			drivingDimensionLabel: isTrainingGap ? "Training Gap" : "Experience Gap",
 		});
 	}
 
@@ -604,6 +644,8 @@ function buildCoachingSuggestions(text: string, personaScore: PersonaScore): Coa
 			suggestion:
 				"Consider: start Travel Advice with a direct action sentence: 'Avoid slopes steeper than 35° on [specific aspects] today.'",
 			scoreImpact: 15,
+			drivingDimension: "riskTolerance",
+			drivingDimensionLabel: "Actionability",
 		});
 	}
 
@@ -738,6 +780,18 @@ export function scoreForecast(
 			decisionOutcome = "uncertain";
 		}
 
+		const dimensions: PersonaDimensions = {
+			yearsOfMountainExperience: persona.yearsOfMountainExperience ?? 0,
+			avalancheTrainingLevel: persona.avalancheTrainingLevel ?? 0,
+			avalancheTrainingLabel: TRAINING_LABELS[Math.min(persona.avalancheTrainingLevel ?? 0, 5)],
+			backcountryDaysPerSeason: persona.backcountryDaysPerSeason ?? 0,
+			weatherPatternRecognition: persona.weatherPatternRecognition ?? 3,
+			terrainAssessmentSkill: persona.terrainAssessmentSkill ?? 1,
+			riskTolerance: persona.riskTolerance ?? 3,
+			groupDecisionTendency: persona.groupDecisionTendency ?? 3,
+			localTerrainFamiliarity: persona.localTerrainFamiliarity ?? 1,
+		};
+
 		return {
 			personaId: persona.id,
 			personaName: persona.name,
@@ -749,6 +803,8 @@ export function scoreForecast(
 			jargonLoad,
 			decisionOutcome,
 			flags: allFlags,
+			dimensions,
+			tags: persona.tags ? [...persona.tags] : [],
 		};
 	});
 }
