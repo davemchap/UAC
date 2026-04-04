@@ -856,6 +856,12 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 }
 .trainer-persona-avatar-wrap { margin-bottom: 6px; }
 
+/* ---- Profile tab section divider (between params and dimension sliders) ---- */
+.trainer-section-divider {
+  border: none; border-top: 1px solid var(--sc-border);
+  margin: 20px 0 8px;
+}
+
 /* ---- Profile tab / domain dimension sliders ---- */
 .dim-section-title {
   font-size: 0.68rem; font-weight: 700; text-transform: uppercase;

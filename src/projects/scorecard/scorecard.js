@@ -929,7 +929,7 @@ function copyToClipboard(btn, text) {
 
 let trainerPersonas = [];
 let trainerActiveKey = null;
-let trainerUnsaved = {}; // { [key]: { parameters?: true, identity?: true } }
+let trainerUnsaved = {}; // { [key]: { profile?: true, behavior?: true } }
 let trainerOriginals = {}; // { [key]: PersonaRecord } — snapshots for Reset
 let trainerSearchQuery = "";
 let trainerTagFilter = "all"; // "all" | tag string
@@ -1092,7 +1092,7 @@ function renderRoster() {
 
 function hasUnsaved(key) {
   const u = trainerUnsaved[key];
-  return u && (u.parameters || u.identity);
+  return u && (u.profile || u.behavior);
 }
 
 // ---------------------------------------------------------------------------
@@ -1117,12 +1117,12 @@ function selectPersona(key) {
   renderDetailHeader(persona);
 
   // Switch to first trainer tab
-  switchTrainerTab("parameters");
+  switchTrainerTab("profile");
 
   // Populate fields
   populateParametersTab(persona);
   renderProfileTab(persona);
-  populateIdentityTab(persona);
+  populateBehaviorTab(persona);
   clearInterrogateTab();
 
   wireDetailActions(key);
@@ -1187,7 +1187,7 @@ function removeTag(term) {
   if (!persona) return;
   persona.unknownTerms = (persona.unknownTerms ?? []).filter((t) => t !== term);
   renderTags(persona.unknownTerms);
-  markUnsaved(trainerActiveKey, "parameters");
+  markUnsaved(trainerActiveKey, "profile");
 }
 
 function wireTagInput() {
@@ -1202,7 +1202,7 @@ function wireTagInput() {
       if (!(persona.unknownTerms ?? []).includes(val)) {
         persona.unknownTerms = [...(persona.unknownTerms ?? []), val];
         renderTags(persona.unknownTerms);
-        markUnsaved(trainerActiveKey, "parameters");
+        markUnsaved(trainerActiveKey, "profile");
       }
       input.value = "";
     }
@@ -1210,51 +1210,10 @@ function wireTagInput() {
 }
 
 // ---------------------------------------------------------------------------
-// Identity tab
+// Behavior tab
 // ---------------------------------------------------------------------------
 
-function buildBaselineProfile(persona) {
-  const LITERACY_LABELS = {
-    low: "Low literacy",
-    high: "High literacy",
-    expert: "Expert",
-    forecaster: "Forecaster-tier",
-  };
-  const literacyLabel = LITERACY_LABELS[persona.literacyLevel] ?? persona.literacyLevel;
-  const terms = persona.unknownTerms ?? [];
-  const preview = terms.slice(0, 6);
-  const remaining = terms.length - preview.length;
-
-  const termChips = preview
-    .map((t) => `<span class="trainer-baseline-term">${escHtml(t)}</span>`)
-    .join("");
-  const moreChip = remaining > 0
-    ? `<span class="trainer-baseline-term-more">+${remaining} more</span>`
-    : "";
-
-  const jargonLine = terms.length > 0
-    ? `Does not understand <strong>${terms.length} technical terms</strong>.`
-    : "No jargon restrictions — reads all technical language.";
-
-  return `
-    <div class="trainer-baseline-header">
-      <span class="trainer-baseline-label">Parameter Baseline</span>
-      <span class="trainer-baseline-literacy">${escHtml(literacyLabel)}</span>
-    </div>
-    <div class="trainer-baseline-prose">
-      ${escHtml(persona.name)} evaluates forecasts against a
-      <strong>grade ${persona.maxGradeLevel} reading ceiling</strong> and a
-      <strong>${persona.maxSentenceLength}-word sentence limit</strong>.
-      ${jargonLine}
-    </div>
-    ${terms.length > 0 ? `<div class="trainer-baseline-terms">${termChips}${moreChip}</div>` : ""}
-    <div class="trainer-baseline-success">
-      <strong>Success looks like:</strong> ${escHtml(persona.successCriteria)}
-    </div>`;
-}
-
-function populateIdentityTab(persona) {
-  document.getElementById("trainer-baseline-profile").innerHTML = buildBaselineProfile(persona);
+function populateBehaviorTab(persona) {
   const ctx = persona.behavioralContext ?? "";
   document.getElementById("trainer-behavioral-context").value = ctx;
   updateCharCount();
@@ -1301,7 +1260,7 @@ function removeInstruction(seg) {
   document.getElementById("trainer-behavioral-context").value = persona.behavioralContext ?? "";
   updateCharCount();
   renderInstructions(persona.behavioralContext ?? "");
-  markUnsaved(trainerActiveKey, "identity");
+  markUnsaved(trainerActiveKey, "behavior");
 }
 
 // ---------------------------------------------------------------------------
@@ -1327,12 +1286,12 @@ function wireDetailActions(key) {
     updateCharCount();
     const persona = trainerPersonas.find((p) => p.personaKey === key);
     if (persona) persona.behavioralContext = document.getElementById("trainer-behavioral-context").value || null;
-    markUnsaved(key, "identity");
+    markUnsaved(key, "behavior");
   });
 
   // Parameters inputs → mark unsaved
   ["trainer-max-sentence", "trainer-max-grade", "trainer-success-criteria"].forEach((id) => {
-    document.getElementById(id).addEventListener("input", () => markUnsaved(key, "parameters"));
+    document.getElementById(id).addEventListener("input", () => markUnsaved(key, "profile"));
   });
 
   // Save parameters
@@ -1406,7 +1365,7 @@ async function saveParameters(key) {
     const updated = await res.json();
     Object.assign(persona, updated);
     trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
-    clearUnsaved(key, "parameters");
+    clearUnsaved(key, "profile");
     showTrainerToast("Parameters saved.");
   } catch (err) {
     showTrainerToast(`Save failed: ${err.message}`, true);
@@ -1429,9 +1388,9 @@ async function saveIdentity(key) {
     const updated = await res.json();
     Object.assign(persona, updated);
     trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
-    clearUnsaved(key, "identity");
+    clearUnsaved(key, "behavior");
     renderInstructions(updated.behavioralContext ?? "");
-    showTrainerToast("Identity saved.");
+    showTrainerToast("Behavior saved.");
   } catch (err) {
     showTrainerToast(`Save failed: ${err.message}`, true);
   }
@@ -1776,7 +1735,7 @@ function getSliderValueLabel(dim, value) {
 }
 
 function renderProfileTab(persona) {
-  const panel = document.getElementById("trainer-panel-profile");
+  const panel = document.getElementById("trainer-profile-dims");
   let html = "";
 
   for (const group of DOMAIN_DIMENSIONS) {
@@ -1843,7 +1802,7 @@ async function saveProfile(key) {
   const persona = trainerPersonas.find((p) => p.personaKey === key);
   if (!persona) return;
 
-  const panel = document.getElementById("trainer-panel-profile");
+  const panel = document.getElementById("trainer-profile-dims");
   const allDims = DOMAIN_DIMENSIONS.flatMap((g) => g.fields);
   const updates = {};
   for (const dim of allDims) {

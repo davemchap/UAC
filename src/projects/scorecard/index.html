@@ -208,13 +208,12 @@
             <div id="trainer-detail-header" class="trainer-detail-header"></div>
             <!-- Tab nav -->
             <nav class="trainer-tabs" role="tablist">
-              <button class="trainer-tab active" data-trainer-tab="parameters" role="tab" aria-selected="true">Parameters</button>
-              <button class="trainer-tab" data-trainer-tab="profile" role="tab" aria-selected="false">Profile</button>
-              <button class="trainer-tab" data-trainer-tab="identity" role="tab" aria-selected="false">Identity</button>
-              <button class="trainer-tab" data-trainer-tab="interrogate" role="tab" aria-selected="false">Interrogate</button>
+              <button class="trainer-tab active" data-trainer-tab="profile" role="tab" aria-selected="true">Profile</button>
+              <button class="trainer-tab" data-trainer-tab="behavior" role="tab" aria-selected="false">Behavior</button>
+              <button class="trainer-tab" data-trainer-tab="test" role="tab" aria-selected="false">Test</button>
             </nav>
-            <!-- Parameters tab -->
-            <div class="trainer-tab-panel active" id="trainer-panel-parameters">
+            <!-- Profile tab — scoring parameters + domain dimension sliders -->
+            <div class="trainer-tab-panel active" id="trainer-panel-profile">
               <div class="trainer-field">
                 <label class="trainer-label">Unknown Terms <span class="trainer-hint">(press Enter to add)</span></label>
                 <div class="trainer-tags-wrap" id="trainer-tags-wrap">
@@ -240,15 +239,12 @@
                 <button class="trainer-btn trainer-btn-primary" id="trainer-save-params">Save Parameters</button>
                 <button class="trainer-btn trainer-btn-ghost" id="trainer-reset-params">Reset to Default</button>
               </div>
+              <hr class="trainer-section-divider" />
+              <!-- Domain dimension sliders rendered by JS -->
+              <div id="trainer-profile-dims"></div>
             </div>
-            <!-- Profile tab -->
-            <div class="trainer-tab-panel hidden" id="trainer-panel-profile">
-              <!-- rendered by JS -->
-            </div>
-            <!-- Identity tab -->
-            <div class="trainer-tab-panel hidden" id="trainer-panel-identity">
-              <!-- Synthesized read-only baseline derived from Parameters tab -->
-              <div class="trainer-baseline-profile" id="trainer-baseline-profile"></div>
+            <!-- Behavior tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-behavior">
               <div class="trainer-field">
                 <label class="trainer-label" for="trainer-behavioral-context">Behavioral Context <span class="trainer-hint">(add richer narrative below)</span></label>
                 <textarea class="trainer-textarea trainer-textarea-lg" id="trainer-behavioral-context" rows="6" placeholder="Describe how this persona thinks, reacts, and makes decisions…"></textarea>
@@ -271,8 +267,8 @@
                 <button class="trainer-btn trainer-btn-primary" id="trainer-save-identity">Save Context</button>
               </div>
             </div>
-            <!-- Interrogate tab -->
-            <div class="trainer-tab-panel hidden" id="trainer-panel-interrogate">
+            <!-- Test tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-test">
               <div class="trainer-field">
                 <label class="trainer-label" for="trainer-question">Ask this persona a question</label>
                 <textarea class="trainer-textarea" id="trainer-question" rows="3" placeholder="How would you use today's forecast to plan your backcountry route?"></textarea>
