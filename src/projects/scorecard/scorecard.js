@@ -335,8 +335,21 @@ function renderPersonaLegend(containerId, personas) {
 
 function renderPersonaScoreRow(containerId, personas) {
   const el = document.getElementById(containerId);
-  el.innerHTML = personas.map((p) =>
-    `<div class="sc-metric-chip" style="border-color:${p.color}"
+  el.innerHTML = personas.map((p) => {
+    const hasFlags = (p.flags ?? []).length > 0;
+    if (!hasFlags) {
+      return `<div class="sc-metric-chip" style="border-color:${p.color}"
+          aria-disabled="true" disabled
+          title="No flags for this persona"
+          data-persona-id="${escAttr(p.personaId)}"
+          data-persona-role="${escAttr(p.personaRole)}">
+        <span class="sc-metric-dot" style="background:${p.color}"></span>
+        <span class="sc-metric-name">${p.personaRole}</span>
+        <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
+        <span class="sc-metric-eye" aria-hidden="true">○</span>
+      </div>`;
+    }
+    return `<div class="sc-metric-chip" style="border-color:${p.color}"
         role="button" aria-pressed="true" tabindex="0"
         title="Click to hide ${escAttr(p.personaRole)} highlights"
         data-persona-id="${escAttr(p.personaId)}"
@@ -345,9 +358,9 @@ function renderPersonaScoreRow(containerId, personas) {
       <span class="sc-metric-name">${p.personaRole}</span>
       <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
       <span class="sc-metric-eye" aria-hidden="true">●</span>
-    </div>`
-  ).join("");
-  el.querySelectorAll(".sc-metric-chip").forEach((chip) => {
+    </div>`;
+  }).join("");
+  el.querySelectorAll(".sc-metric-chip[role='button']").forEach((chip) => {
     const role = chip.dataset.personaRole;
     const toggle = () => {
       const active = chip.getAttribute("aria-pressed") === "true";

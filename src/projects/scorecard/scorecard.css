@@ -107,6 +107,12 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
   box-shadow: 0 1px 3px rgba(30,45,61,0.08);
 }
 .sc-metric-chip:hover { box-shadow: 0 2px 6px rgba(30,45,61,0.14); opacity: 0.8; }
+.sc-persona-chip:disabled,
+.sc-metric-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .sc-metric-chip[aria-pressed="false"] {
   opacity: 0.45; background: var(--sc-surface2);
   border-color: var(--sc-border) !important;
@@ -142,7 +148,7 @@ mark.sc-highlight {
   transition: background 0.15s;
 }
 mark.sc-highlight:hover, mark.sc-highlight:focus { background: rgba(30,45,61,0.06) !important; outline: none; }
-mark.sc-highlight--hidden { opacity: 0.15; border-bottom-color: transparent !important; }
+mark.sc-highlight--hidden { opacity: 0; border-bottom-color: transparent !important; }
 
 /* ---- Sidebar ---- */
 .sc-sidebar { display: flex; flex-direction: column; gap: 12px; }
