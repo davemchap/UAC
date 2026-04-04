@@ -204,9 +204,12 @@
             <p>Select a persona to configure</p>
           </div>
           <div class="trainer-detail-panel hidden" id="trainer-detail-panel">
+            <!-- Detail header: avatar + name + active toggle -->
+            <div id="trainer-detail-header" class="trainer-detail-header"></div>
             <!-- Tab nav -->
             <nav class="trainer-tabs" role="tablist">
               <button class="trainer-tab active" data-trainer-tab="parameters" role="tab" aria-selected="true">Parameters</button>
+              <button class="trainer-tab" data-trainer-tab="profile" role="tab" aria-selected="false">Profile</button>
               <button class="trainer-tab" data-trainer-tab="identity" role="tab" aria-selected="false">Identity</button>
               <button class="trainer-tab" data-trainer-tab="interrogate" role="tab" aria-selected="false">Interrogate</button>
             </nav>
@@ -237,6 +240,10 @@
                 <button class="trainer-btn trainer-btn-primary" id="trainer-save-params">Save Parameters</button>
                 <button class="trainer-btn trainer-btn-ghost" id="trainer-reset-params">Reset to Default</button>
               </div>
+            </div>
+            <!-- Profile tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-profile">
+              <!-- rendered by JS -->
             </div>
             <!-- Identity tab -->
             <div class="trainer-tab-panel hidden" id="trainer-panel-identity">
@@ -277,6 +284,35 @@
                 <!-- Response card rendered by JS -->
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Clone sub-modal -->
+    <div id="trainer-clone-modal" class="trainer-sub-modal" hidden>
+      <div class="trainer-sub-modal-inner">
+        <div class="trainer-sub-modal-header">
+          <h3>Clone Persona</h3>
+          <button id="trainer-clone-close" class="trainer-close-btn">&times;</button>
+        </div>
+        <div class="trainer-sub-modal-body">
+          <p class="trainer-clone-source" id="trainer-clone-source"></p>
+          <div class="trainer-field">
+            <label class="trainer-label" for="trainer-clone-name">New Name *</label>
+            <input type="text" class="trainer-input" id="trainer-clone-name" placeholder="e.g. Jordan — Expert Level" />
+          </div>
+          <div class="trainer-field">
+            <label class="trainer-label" for="trainer-clone-role">Role</label>
+            <input type="text" class="trainer-input" id="trainer-clone-role" placeholder="e.g. Recreational Skier (advanced)" />
+          </div>
+          <div class="trainer-field">
+            <label class="trainer-label" for="trainer-clone-key">Key <span class="trainer-hint">(auto-generated, must be unique)</span></label>
+            <input type="text" class="trainer-input" id="trainer-clone-key" placeholder="jordan_expert" />
+            <div class="trainer-clone-key-error hidden" id="trainer-clone-key-error"></div>
+          </div>
+          <div class="trainer-actions">
+            <button class="trainer-btn trainer-btn-primary" id="trainer-clone-submit">Clone Persona</button>
+            <button class="trainer-btn trainer-btn-ghost" id="trainer-clone-cancel">Cancel</button>
           </div>
         </div>
       </div>

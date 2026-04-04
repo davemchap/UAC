@@ -815,6 +815,8 @@ let trainerPersonas = [];
 let trainerActiveKey = null;
 let trainerUnsaved = {}; // { [key]: { parameters?: true, identity?: true } }
 let trainerOriginals = {}; // { [key]: PersonaRecord } — snapshots for Reset
+let trainerSearchQuery = "";
+let trainerTagFilter = "all"; // "all" | tag string
 
 // ---------------------------------------------------------------------------
 // Wiring
@@ -827,8 +829,26 @@ function wireTrainerModal() {
     if (e.target === e.currentTarget) closeTrainerModal();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !document.getElementById("trainer-modal").hidden) closeTrainerModal();
+    if (e.key === "Escape" && !document.getElementById("trainer-modal").hidden) {
+      const cloneModal = document.getElementById("trainer-clone-modal");
+      if (!cloneModal.hidden) { closeCloneModal(); return; }
+      closeTrainerModal();
+    }
   });
+  document.getElementById("trainer-clone-close").addEventListener("click", closeCloneModal);
+  document.getElementById("trainer-clone-cancel").addEventListener("click", closeCloneModal);
+  document.getElementById("trainer-clone-submit").addEventListener("click", submitClone);
+
+  // Auto-generate key from name (only when key hasn't been manually edited)
+  let cloneKeyManuallyEdited = false;
+  const cloneNameInput = document.getElementById("trainer-clone-name");
+  const cloneKeyInput = document.getElementById("trainer-clone-key");
+  cloneNameInput.addEventListener("input", () => {
+    if (!cloneKeyManuallyEdited) cloneKeyInput.value = slugify(cloneNameInput.value);
+  });
+  cloneKeyInput.addEventListener("input", () => { cloneKeyManuallyEdited = true; });
+  // Reset flag when clone modal opens (handled in openCloneModal)
+  document.getElementById("trainer-clone-modal")._resetKeyFlag = () => { cloneKeyManuallyEdited = false; };
 }
 
 // ---------------------------------------------------------------------------
@@ -879,17 +899,74 @@ async function loadPersonas() {
 function renderRoster() {
   const roster = document.getElementById("trainer-roster");
   roster.innerHTML = "";
-  for (const p of trainerPersonas) {
+
+  // Search + filter controls (shown when more than 4 personas)
+  if (trainerPersonas.length > 4) {
+    const searchEl = document.createElement("input");
+    searchEl.type = "text";
+    searchEl.className = "trainer-roster-search";
+    searchEl.placeholder = "Search personas…";
+    searchEl.value = trainerSearchQuery;
+    searchEl.addEventListener("input", (e) => {
+      trainerSearchQuery = e.target.value.toLowerCase();
+      renderRoster();
+    });
+    roster.appendChild(searchEl);
+
+    // Collect all unique tags
+    const allTags = [...new Set(trainerPersonas.flatMap((p) => p.tags ?? []))].sort();
+    if (allTags.length > 0) {
+      const chipsEl = document.createElement("div");
+      chipsEl.className = "trainer-filter-chips";
+      const allChip = document.createElement("button");
+      allChip.className = "trainer-filter-chip" + (trainerTagFilter === "all" ? " active" : "");
+      allChip.textContent = "All";
+      allChip.addEventListener("click", () => { trainerTagFilter = "all"; renderRoster(); });
+      chipsEl.appendChild(allChip);
+      for (const tag of allTags) {
+        const chip = document.createElement("button");
+        chip.className = "trainer-filter-chip" + (trainerTagFilter === tag ? " active" : "");
+        chip.textContent = tag;
+        chip.addEventListener("click", () => { trainerTagFilter = tag; renderRoster(); });
+        chipsEl.appendChild(chip);
+      }
+      roster.appendChild(chipsEl);
+    }
+  }
+
+  // Apply search + tag filter
+  let visible = trainerPersonas;
+  if (trainerSearchQuery) {
+    visible = visible.filter((p) =>
+      p.name.toLowerCase().includes(trainerSearchQuery) ||
+      p.role.toLowerCase().includes(trainerSearchQuery)
+    );
+  }
+  if (trainerTagFilter !== "all") {
+    visible = visible.filter((p) => (p.tags ?? []).includes(trainerTagFilter));
+  }
+
+  for (const p of visible) {
     const card = document.createElement("div");
     card.className = "trainer-persona-card" +
       (p.personaKey === trainerActiveKey ? " active" : "") +
-      (hasUnsaved(p.personaKey) ? " has-unsaved" : "");
+      (hasUnsaved(p.personaKey) ? " has-unsaved" : "") +
+      (p.active === false ? " inactive" : "");
     card.style.borderLeftColor = p.color;
     card.dataset.key = p.personaKey;
+
+    const tagsHtml = (p.tags ?? []).length > 0
+      ? `<div class="trainer-persona-card-tags">${(p.tags).map((t) => `<span class="trainer-persona-tag">${escHtml(t)}</span>`).join("")}</div>`
+      : "";
+    const inactiveBadge = p.active === false ? `<span class="trainer-persona-inactive-badge">⊘</span>` : "";
+
     card.innerHTML = `
+      ${inactiveBadge}
+      <div class="trainer-persona-avatar-wrap">${renderAvatar(p, 36)}</div>
       <div class="trainer-persona-card-name">${escHtml(p.name)}</div>
       <div class="trainer-persona-card-role">${escHtml(p.role)}</div>
       <div class="trainer-persona-card-literacy">${escHtml(p.literacyLevel)}</div>
+      ${tagsHtml}
       <div class="trainer-persona-unsaved"></div>
     `;
     card.addEventListener("click", () => selectPersona(p.personaKey));
@@ -920,11 +997,15 @@ function selectPersona(key) {
   document.getElementById("trainer-detail-empty").classList.add("hidden");
   document.getElementById("trainer-detail-panel").classList.remove("hidden");
 
+  // Render detail header (avatar, name, active toggle, clone/delete)
+  renderDetailHeader(persona);
+
   // Switch to first trainer tab
   switchTrainerTab("parameters");
 
   // Populate fields
   populateParametersTab(persona);
+  renderProfileTab(persona);
   populateIdentityTab(persona);
   clearInterrogateTab();
 
@@ -1340,4 +1421,333 @@ function showTrainerToast(message, isError = false) {
   toast.classList.remove("hidden");
   if (_toastTimer) clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => toast.classList.add("hidden"), 3000);
+}
+
+// ===========================================================================
+// Avatar helpers
+// ===========================================================================
+
+function getAvatarUrl(persona, size) {
+  const seed = persona.avatarSeed || persona.personaKey;
+  const style = persona.avatarStyle || "avataaars";
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&size=${size}`;
+}
+
+function renderAvatar(persona, size) {
+  const url = getAvatarUrl(persona, size);
+  const initials = persona.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  return `<span class="persona-avatar persona-avatar-${size}" style="--avatar-accent:${escAttr(persona.color || "#3a7f9c")}">
+    <img src="${url}" alt="${escHtml(persona.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+    <span class="persona-avatar-fallback" style="display:none">${escHtml(initials)}</span>
+  </span>`;
+}
+
+// ===========================================================================
+// Detail header
+// ===========================================================================
+
+function renderDetailHeader(persona) {
+  const activePill = persona.active !== false
+    ? `<button class="trainer-active-toggle active" data-key="${escAttr(persona.personaKey)}" title="Click to deactivate">&#8857; Active</button>`
+    : `<button class="trainer-active-toggle inactive" data-key="${escAttr(persona.personaKey)}" title="Click to activate">&#8856; Inactive</button>`;
+
+  const deleteBtn = !persona.isBuiltIn
+    ? `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`
+    : "";
+
+  document.getElementById("trainer-detail-header").innerHTML = `
+    <div class="trainer-detail-header-inner">
+      ${renderAvatar(persona, 64)}
+      <div class="trainer-detail-header-info">
+        <div class="trainer-detail-name">${escHtml(persona.name)}</div>
+        <div class="trainer-detail-role">${escHtml(persona.role)}</div>
+        <div class="trainer-detail-meta">
+          ${(persona.tags ?? []).map((t) => `<span class="trainer-tag-chip">${escHtml(t)}</span>`).join("")}
+        </div>
+      </div>
+      <div class="trainer-detail-header-actions">
+        ${activePill}
+        <button class="trainer-clone-btn" data-key="${escAttr(persona.personaKey)}">&#8853; Clone</button>
+        ${deleteBtn}
+      </div>
+    </div>`;
+
+  document.querySelector(".trainer-active-toggle")?.addEventListener("click", () =>
+    togglePersonaActive(persona.personaKey)
+  );
+  document.querySelector(".trainer-clone-btn")?.addEventListener("click", () =>
+    openCloneModal(persona.personaKey)
+  );
+  document.querySelector(".trainer-delete-btn")?.addEventListener("click", () =>
+    confirmDeletePersona(persona.personaKey)
+  );
+}
+
+// ===========================================================================
+// Active toggle
+// ===========================================================================
+
+async function togglePersonaActive(key) {
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+  const newActive = persona.active === false ? true : false;
+  try {
+    const res = await fetch(`/api/personas/${key}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: newActive }),
+    });
+    if (!res.ok) throw new Error("Save failed");
+    persona.active = newActive;
+    renderRoster();
+    renderDetailHeader(persona);
+    showTrainerToast(newActive ? `${persona.name} is now active` : `${persona.name} deactivated`);
+  } catch (err) {
+    showTrainerToast(`Failed to update: ${err.message}`, true);
+  }
+}
+
+// ===========================================================================
+// Clone flow
+// ===========================================================================
+
+function slugify(str) {
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+function openCloneModal(sourceKey) {
+  const source = trainerPersonas.find((p) => p.personaKey === sourceKey);
+  if (!source) return;
+
+  // Reset manual-edit flag via stored function
+  const modal = document.getElementById("trainer-clone-modal");
+  if (typeof modal._resetKeyFlag === "function") modal._resetKeyFlag();
+
+  document.getElementById("trainer-clone-source").textContent =
+    `Cloning: ${source.name} (${source.role})`;
+  document.getElementById("trainer-clone-name").value = `${source.name} — Copy`;
+  document.getElementById("trainer-clone-role").value = source.role;
+  document.getElementById("trainer-clone-key").value = slugify(`${source.name} copy`);
+  document.getElementById("trainer-clone-key-error").textContent = "";
+  document.getElementById("trainer-clone-key-error").classList.add("hidden");
+
+  modal.dataset.sourceKey = sourceKey;
+  modal.hidden = false;
+  document.getElementById("trainer-clone-name").focus();
+}
+
+async function submitClone() {
+  const modal = document.getElementById("trainer-clone-modal");
+  const sourceKey = modal.dataset.sourceKey;
+  const name = document.getElementById("trainer-clone-name").value.trim();
+  const role = document.getElementById("trainer-clone-role").value.trim();
+  const personaKey = document.getElementById("trainer-clone-key").value.trim();
+  const errorEl = document.getElementById("trainer-clone-key-error");
+
+  errorEl.classList.add("hidden");
+  errorEl.textContent = "";
+
+  if (!name) { showTrainerToast("Name is required.", true); return; }
+  if (!personaKey) { showTrainerToast("Key is required.", true); return; }
+
+  try {
+    const res = await fetch(`/api/personas/${sourceKey}/clone`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, role: role || undefined, personaKey }),
+    });
+    if (res.status === 409) {
+      const data = await res.json().catch(() => ({}));
+      errorEl.textContent = data.error ?? "A persona with that key already exists.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    if (res.status === 400) {
+      const data = await res.json().catch(() => ({}));
+      errorEl.textContent = data.error ?? "Invalid input.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const newPersona = await res.json();
+    trainerPersonas.push(newPersona);
+    trainerOriginals[newPersona.personaKey] = { ...newPersona, unknownTerms: [...(newPersona.unknownTerms ?? [])] };
+    closeCloneModal();
+    renderRoster();
+    selectPersona(newPersona.personaKey);
+    showTrainerToast(`Cloned as "${newPersona.name}"`);
+  } catch (err) {
+    showTrainerToast(`Clone failed: ${err.message}`, true);
+  }
+}
+
+function closeCloneModal() {
+  document.getElementById("trainer-clone-modal").hidden = true;
+}
+
+// ===========================================================================
+// Delete
+// ===========================================================================
+
+function confirmDeletePersona(key) {
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona || persona.isBuiltIn) return;
+  if (!confirm(`Delete "${persona.name}"? This cannot be undone.`)) return;
+  deletePersona(key);
+}
+
+async function deletePersona(key) {
+  try {
+    const res = await fetch(`/api/personas/${key}`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Delete failed");
+    trainerPersonas = trainerPersonas.filter((p) => p.personaKey !== key);
+    trainerActiveKey = trainerPersonas[0]?.personaKey ?? null;
+    renderRoster();
+    if (trainerActiveKey) {
+      selectPersona(trainerActiveKey);
+    } else {
+      document.getElementById("trainer-detail-empty").classList.remove("hidden");
+      document.getElementById("trainer-detail-panel").classList.add("hidden");
+    }
+    showTrainerToast("Persona deleted");
+  } catch (err) {
+    showTrainerToast(`Failed to delete: ${err.message}`, true);
+  }
+}
+
+// ===========================================================================
+// Profile tab — domain dimension sliders
+// ===========================================================================
+
+const DOMAIN_DIMENSIONS = [
+  {
+    section: "Experience & Training",
+    fields: [
+      { key: "yearsOfMountainExperience", label: "Years of Mountain Experience", min: 0, max: 30, unit: "yrs", labels: null },
+      { key: "avalancheTrainingLevel", label: "Avalanche Training", min: 0, max: 4, unit: null,
+        labels: ["None", "Awareness", "AIARE 1", "AIARE 2", "Pro / Guide"] },
+      { key: "backcountryDaysPerSeason", label: "Backcountry Days per Season", min: 0, max: 120, unit: "days", labels: null },
+    ],
+  },
+  {
+    section: "Technical Skills",
+    fields: [
+      { key: "weatherPatternRecognition", label: "Weather Reading Ability", min: 1, max: 5, unit: null,
+        labels: ["None", "Minimal", "Developing", "Capable", "Expert"] },
+      { key: "terrainAssessmentSkill", label: "Terrain Assessment Skill", min: 1, max: 5, unit: null,
+        labels: ["None", "Minimal", "Developing", "Capable", "Expert"] },
+    ],
+  },
+  {
+    section: "Behavioral Tendencies",
+    fields: [
+      { key: "riskTolerance", label: "Risk Tolerance", min: 1, max: 5, unit: null,
+        labels: ["Very Conservative", "Conservative", "Moderate", "Elevated", "Aggressive"] },
+      { key: "groupDecisionTendency", label: "Group Influence", min: 1, max: 5, unit: null,
+        labels: ["Independent", "Low", "Moderate", "Strong", "Group-Led"] },
+      { key: "localTerrainFamiliarity", label: "Local Terrain Familiarity", min: 1, max: 5, unit: null,
+        labels: ["Visitor", "New", "Occasional", "Familiar", "Native Expert"] },
+    ],
+  },
+];
+
+function getSliderValueLabel(dim, value) {
+  if (dim.labels) {
+    const idx = value - dim.min;
+    return dim.labels[idx] ?? String(value);
+  }
+  return `${value}${dim.unit ? " " + dim.unit : ""}`;
+}
+
+function renderProfileTab(persona) {
+  const panel = document.getElementById("trainer-panel-profile");
+  let html = "";
+
+  for (const group of DOMAIN_DIMENSIONS) {
+    html += `<div class="dim-section-title">${escHtml(group.section)}</div>`;
+    for (const dim of group.fields) {
+      const rawVal = persona[dim.key];
+      const value = rawVal != null ? rawVal : dim.min;
+      const displayVal = getSliderValueLabel(dim, value);
+
+      let scaleHtml = "";
+      if (dim.labels) {
+        scaleHtml = `<div class="dim-scale">${dim.labels.map((lbl, i) => {
+          const isActive = (i + dim.min) === value;
+          return `<span class="dim-scale-label${isActive ? " active" : ""}">${escHtml(lbl)}</span>`;
+        }).join("")}</div>`;
+      }
+
+      html += `<div class="dim-field" data-dim-key="${escAttr(dim.key)}">
+        <div class="dim-label-row">
+          <span class="dim-label">${escHtml(dim.label)}</span>
+          <span class="dim-value" data-dim-value="${escAttr(dim.key)}">${escHtml(displayVal)}</span>
+        </div>
+        <input type="range" class="dim-slider" min="${dim.min}" max="${dim.max}" step="1" value="${value}"
+          data-dim-key="${escAttr(dim.key)}" />
+        ${scaleHtml}
+      </div>`;
+    }
+  }
+
+  html += `<div class="trainer-actions dim-save-row">
+    <button class="trainer-btn trainer-btn-primary" id="trainer-save-profile">Save Profile</button>
+  </div>`;
+
+  panel.innerHTML = html;
+
+  // Wire slider input events
+  panel.querySelectorAll(".dim-slider").forEach((slider) => {
+    slider.addEventListener("input", () => {
+      const dimKey = slider.dataset.dimKey;
+      const dim = DOMAIN_DIMENSIONS.flatMap((g) => g.fields).find((f) => f.key === dimKey);
+      if (!dim) return;
+      const val = parseInt(slider.value, 10);
+      // Update value callout
+      const valueEl = panel.querySelector(`[data-dim-value="${dimKey}"]`);
+      if (valueEl) valueEl.textContent = getSliderValueLabel(dim, val);
+      // Update active scale label
+      const fieldEl = panel.querySelector(`.dim-field[data-dim-key="${dimKey}"]`);
+      if (fieldEl && dim.labels) {
+        fieldEl.querySelectorAll(".dim-scale-label").forEach((lbl, i) => {
+          lbl.classList.toggle("active", (i + dim.min) === val);
+        });
+      }
+      markUnsaved(persona.personaKey, "profile");
+    });
+  });
+
+  // Wire save
+  document.getElementById("trainer-save-profile").addEventListener("click", () =>
+    saveProfile(persona.personaKey)
+  );
+}
+
+async function saveProfile(key) {
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+
+  const panel = document.getElementById("trainer-panel-profile");
+  const allDims = DOMAIN_DIMENSIONS.flatMap((g) => g.fields);
+  const updates = {};
+  for (const dim of allDims) {
+    const slider = panel.querySelector(`.dim-slider[data-dim-key="${dim.key}"]`);
+    if (slider) updates[dim.key] = parseInt(slider.value, 10);
+  }
+
+  try {
+    const res = await fetch(`/api/personas/${key}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const updated = await res.json();
+    Object.assign(persona, updated);
+    trainerOriginals[key] = { ...updated, unknownTerms: [...(updated.unknownTerms ?? [])] };
+    clearUnsaved(key, "profile");
+    showTrainerToast("Profile saved.");
+  } catch (err) {
+    showTrainerToast(`Save failed: ${err.message}`, true);
+  }
 }
