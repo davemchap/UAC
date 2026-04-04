@@ -208,12 +208,16 @@
             <div id="trainer-detail-header" class="trainer-detail-header"></div>
             <!-- Tab nav -->
             <nav class="trainer-tabs" role="tablist">
-              <button class="trainer-tab active" data-trainer-tab="profile" role="tab" aria-selected="true">Profile</button>
-              <button class="trainer-tab" data-trainer-tab="behavior" role="tab" aria-selected="false">Behavior</button>
-              <button class="trainer-tab" data-trainer-tab="test" role="tab" aria-selected="false">Test</button>
+              <button class="trainer-tab active" data-trainer-tab="background" role="tab" aria-selected="true">Background</button>
+              <button class="trainer-tab" data-trainer-tab="voice" role="tab" aria-selected="false">Voice &amp; Rules</button>
+              <button class="trainer-tab" data-trainer-tab="test" role="tab" aria-selected="false">Test Drive</button>
             </nav>
-            <!-- Profile tab — scoring parameters + domain dimension sliders -->
-            <div class="trainer-tab-panel active" id="trainer-panel-profile">
+            <!-- Background tab — persona snapshot + reading limits + dimension sliders -->
+            <div class="trainer-tab-panel active" id="trainer-panel-background">
+              <!-- Persona Snapshot: read-only summary, updates after save -->
+              <div class="trainer-baseline-profile" id="trainer-persona-snapshot"></div>
+              <p class="trainer-snapshot-hint">Updates when you save changes below</p>
+              <div class="dim-section-title">Reading Limits</div>
               <div class="trainer-field">
                 <label class="trainer-label">Unknown Terms <span class="trainer-hint">(press Enter to add)</span></label>
                 <div class="trainer-tags-wrap" id="trainer-tags-wrap">
@@ -235,42 +239,44 @@
                 <label class="trainer-label" for="trainer-success-criteria">Success Criteria</label>
                 <textarea class="trainer-textarea" id="trainer-success-criteria" rows="3"></textarea>
               </div>
-              <div class="trainer-actions">
-                <button class="trainer-btn trainer-btn-primary" id="trainer-save-params">Save Parameters</button>
-                <button class="trainer-btn trainer-btn-ghost" id="trainer-reset-params">Reset to Default</button>
-              </div>
               <hr class="trainer-section-divider" />
               <!-- Domain dimension sliders rendered by JS -->
               <div id="trainer-profile-dims"></div>
+              <!-- Unified save for reading limits + sliders -->
+              <div class="trainer-actions">
+                <button class="trainer-btn trainer-btn-primary" id="trainer-save-background">Save Background</button>
+                <button class="trainer-btn trainer-btn-ghost" id="trainer-reset-params">Reset to Default</button>
+              </div>
             </div>
-            <!-- Behavior tab -->
-            <div class="trainer-tab-panel hidden" id="trainer-panel-behavior">
+            <!-- Voice & Rules tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-voice">
+              <div class="dim-section-title">Narrative Voice</div>
               <div class="trainer-field">
-                <label class="trainer-label" for="trainer-behavioral-context">Behavioral Context <span class="trainer-hint">(add richer narrative below)</span></label>
                 <textarea class="trainer-textarea trainer-textarea-lg" id="trainer-behavioral-context" rows="6" placeholder="Describe how this persona thinks, reacts, and makes decisions…"></textarea>
                 <div class="trainer-char-count" id="trainer-char-count">0 characters</div>
               </div>
-              <div class="trainer-field">
-                <label class="trainer-label" for="trainer-inject-input">Inject Instruction</label>
-                <div class="trainer-inject-row">
-                  <textarea class="trainer-textarea" id="trainer-inject-input" rows="2" placeholder="Add a specific behavioral instruction…"></textarea>
-                  <button class="trainer-btn trainer-btn-primary" id="trainer-inject-btn">Inject</button>
-                </div>
-              </div>
-              <div class="trainer-field">
-                <label class="trainer-label">Active Instructions</label>
-                <div class="trainer-instructions-list" id="trainer-instructions-list">
-                  <p class="trainer-instructions-empty">No instructions injected yet.</p>
-                </div>
-              </div>
               <div class="trainer-actions">
-                <button class="trainer-btn trainer-btn-primary" id="trainer-save-identity">Save Context</button>
+                <button class="trainer-btn trainer-btn-primary" id="trainer-save-identity">Save Voice</button>
+              </div>
+              <div class="trainer-section-divider-sm"></div>
+              <div class="dim-section-title">Behavioral Rules</div>
+              <div class="trainer-field">
+                <div class="trainer-inject-row">
+                  <textarea class="trainer-textarea" id="trainer-inject-input" rows="2" placeholder="Add a specific rule that overrides or refines the narrative above…"></textarea>
+                  <button class="trainer-btn trainer-btn-primary" id="trainer-inject-btn">Add Rule</button>
+                </div>
+              </div>
+              <div class="trainer-field">
+                <label class="trainer-label" id="trainer-rules-label">Active rules</label>
+                <div class="trainer-instructions-list" id="trainer-instructions-list">
+                  <p class="trainer-instructions-empty">No rules yet. Add one above to refine how this persona scores forecasts.</p>
+                </div>
               </div>
             </div>
-            <!-- Test tab -->
+            <!-- Test Drive tab -->
             <div class="trainer-tab-panel hidden" id="trainer-panel-test">
+              <p class="trainer-tab-intro">Ask a question to verify this persona responds the way you'd expect before trusting its scores.</p>
               <div class="trainer-field">
-                <label class="trainer-label" for="trainer-question">Ask this persona a question</label>
                 <textarea class="trainer-textarea" id="trainer-question" rows="3" placeholder="How would you use today's forecast to plan your backcountry route?"></textarea>
               </div>
               <div class="trainer-actions">

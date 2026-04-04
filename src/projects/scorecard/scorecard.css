@@ -856,10 +856,22 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 }
 .trainer-persona-avatar-wrap { margin-bottom: 6px; }
 
-/* ---- Profile tab section divider (between params and dimension sliders) ---- */
+/* ---- Background tab: snapshot hint + section dividers ---- */
+.trainer-snapshot-hint {
+  font-size: 0.72rem; color: var(--sc-text-dim); margin: -8px 0 16px;
+  font-style: italic;
+}
 .trainer-section-divider {
   border: none; border-top: 1px solid var(--sc-border);
   margin: 20px 0 8px;
+}
+.trainer-section-divider-sm {
+  border-top: 1px solid var(--sc-border);
+  margin: 20px 0 4px;
+}
+/* Tab intro text (Test Drive framing sentence) */
+.trainer-tab-intro {
+  font-size: 0.82rem; color: var(--sc-text-muted); margin: 0 0 14px; line-height: 1.5;
 }
 
 /* ---- Profile tab / domain dimension sliders ---- */

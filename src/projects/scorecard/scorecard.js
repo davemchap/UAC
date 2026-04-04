@@ -929,7 +929,7 @@ function copyToClipboard(btn, text) {
 
 let trainerPersonas = [];
 let trainerActiveKey = null;
-let trainerUnsaved = {}; // { [key]: { profile?: true, behavior?: true } }
+let trainerUnsaved = {}; // { [key]: { background?: true, voice?: true } }
 let trainerOriginals = {}; // { [key]: PersonaRecord } — snapshots for Reset
 let trainerSearchQuery = "";
 let trainerTagFilter = "all"; // "all" | tag string
@@ -1092,7 +1092,7 @@ function renderRoster() {
 
 function hasUnsaved(key) {
   const u = trainerUnsaved[key];
-  return u && (u.profile || u.behavior);
+  return u && (u.background || u.voice);
 }
 
 // ---------------------------------------------------------------------------
@@ -1117,12 +1117,12 @@ function selectPersona(key) {
   renderDetailHeader(persona);
 
   // Switch to first trainer tab
-  switchTrainerTab("profile");
+  switchTrainerTab("background");
 
   // Populate fields
   populateParametersTab(persona);
   renderProfileTab(persona);
-  populateBehaviorTab(persona);
+  populateVoiceTab(persona);
   clearInterrogateTab();
 
   wireDetailActions(key);
@@ -1155,7 +1155,38 @@ function wireTrainerTabButtons() {
 // Parameters tab
 // ---------------------------------------------------------------------------
 
+function renderPersonaSnapshot(persona) {
+  const LITERACY_LABELS = {
+    low: "Low literacy", high: "High literacy", expert: "Expert", forecaster: "Forecaster-tier",
+  };
+  const literacyLabel = LITERACY_LABELS[persona.literacyLevel] ?? persona.literacyLevel;
+  const terms = persona.unknownTerms ?? [];
+  const preview = terms.slice(0, 6);
+  const remaining = terms.length - preview.length;
+  const termChips = preview.map((t) => `<span class="trainer-baseline-term">${escHtml(t)}</span>`).join("");
+  const moreChip = remaining > 0 ? `<span class="trainer-baseline-term-more">+${remaining} more</span>` : "";
+  const jargonLine = terms.length > 0
+    ? `Does not understand <strong>${terms.length} technical terms</strong>.`
+    : "No jargon restrictions — reads all technical language.";
+  document.getElementById("trainer-persona-snapshot").innerHTML = `
+    <div class="trainer-baseline-header">
+      <span class="trainer-baseline-label">Persona Snapshot</span>
+      <span class="trainer-baseline-literacy">${escHtml(literacyLabel)}</span>
+    </div>
+    <div class="trainer-baseline-prose">
+      ${escHtml(persona.name)} evaluates forecasts against a
+      <strong>grade ${persona.maxGradeLevel} reading ceiling</strong> and a
+      <strong>${persona.maxSentenceLength}-word sentence limit</strong>.
+      ${jargonLine}
+    </div>
+    ${terms.length > 0 ? `<div class="trainer-baseline-terms">${termChips}${moreChip}</div>` : ""}
+    <div class="trainer-baseline-success">
+      <strong>Success looks like:</strong> ${escHtml(persona.successCriteria)}
+    </div>`;
+}
+
 function populateParametersTab(persona) {
+  renderPersonaSnapshot(persona);
   renderTags(persona.unknownTerms ?? []);
   document.getElementById("trainer-max-sentence").value = persona.maxSentenceLength;
   document.getElementById("trainer-max-grade").value = persona.maxGradeLevel;
@@ -1187,7 +1218,7 @@ function removeTag(term) {
   if (!persona) return;
   persona.unknownTerms = (persona.unknownTerms ?? []).filter((t) => t !== term);
   renderTags(persona.unknownTerms);
-  markUnsaved(trainerActiveKey, "profile");
+  markUnsaved(trainerActiveKey, "background");
 }
 
 function wireTagInput() {
@@ -1202,7 +1233,7 @@ function wireTagInput() {
       if (!(persona.unknownTerms ?? []).includes(val)) {
         persona.unknownTerms = [...(persona.unknownTerms ?? []), val];
         renderTags(persona.unknownTerms);
-        markUnsaved(trainerActiveKey, "profile");
+        markUnsaved(trainerActiveKey, "background");
       }
       input.value = "";
     }
@@ -1210,10 +1241,10 @@ function wireTagInput() {
 }
 
 // ---------------------------------------------------------------------------
-// Behavior tab
+// Voice & Rules tab
 // ---------------------------------------------------------------------------
 
-function populateBehaviorTab(persona) {
+function populateVoiceTab(persona) {
   const ctx = persona.behavioralContext ?? "";
   document.getElementById("trainer-behavioral-context").value = ctx;
   updateCharCount();
@@ -1227,23 +1258,29 @@ function updateCharCount() {
 
 function renderInstructions(behavioralContext) {
   const list = document.getElementById("trainer-instructions-list");
+  const labelEl = document.getElementById("trainer-rules-label");
+  const emptyHtml = '<p class="trainer-instructions-empty">No rules yet. Add one above to refine how this persona scores forecasts.</p>';
+
   if (!behavioralContext) {
-    list.innerHTML = '<p class="trainer-instructions-empty">No instructions injected yet.</p>';
+    if (labelEl) labelEl.textContent = "Active rules";
+    list.innerHTML = emptyHtml;
     return;
   }
   // Parse injected entries — separated by \n\n---\n\n
   const segments = behavioralContext.split("\n\n---\n\n").filter(Boolean);
   if (segments.length === 0) {
-    list.innerHTML = '<p class="trainer-instructions-empty">No instructions injected yet.</p>';
+    if (labelEl) labelEl.textContent = "Active rules";
+    list.innerHTML = emptyHtml;
     return;
   }
+  if (labelEl) labelEl.textContent = `Active rules (${segments.length})`;
   list.innerHTML = "";
   // Newest first
   for (const seg of [...segments].reverse()) {
     const item = document.createElement("div");
     item.className = "trainer-instruction-item";
     item.innerHTML = `<span class="trainer-instruction-text">${escHtml(seg.trim())}</span>
-      <button class="trainer-instruction-remove" aria-label="Remove instruction">&times;</button>`;
+      <button class="trainer-instruction-remove" aria-label="Remove rule">&times;</button>`;
     item.querySelector("button").addEventListener("click", () => {
       removeInstruction(seg);
     });
@@ -1260,7 +1297,7 @@ function removeInstruction(seg) {
   document.getElementById("trainer-behavioral-context").value = persona.behavioralContext ?? "";
   updateCharCount();
   renderInstructions(persona.behavioralContext ?? "");
-  markUnsaved(trainerActiveKey, "behavior");
+  markUnsaved(trainerActiveKey, "voice");
 }
 
 // ---------------------------------------------------------------------------
@@ -1286,18 +1323,18 @@ function wireDetailActions(key) {
     updateCharCount();
     const persona = trainerPersonas.find((p) => p.personaKey === key);
     if (persona) persona.behavioralContext = document.getElementById("trainer-behavioral-context").value || null;
-    markUnsaved(key, "behavior");
+    markUnsaved(key, "voice");
   });
 
   // Parameters inputs → mark unsaved
   ["trainer-max-sentence", "trainer-max-grade", "trainer-success-criteria"].forEach((id) => {
-    document.getElementById(id).addEventListener("input", () => markUnsaved(key, "profile"));
+    document.getElementById(id).addEventListener("input", () => markUnsaved(key, "background"));
   });
 
-  // Save parameters
-  document.getElementById("trainer-save-params").onclick = () => saveParameters(key);
+  // Save background (reading limits + dimension sliders combined)
+  document.getElementById("trainer-save-background").onclick = () => saveBackground(key);
 
-  // Reset parameters
+  // Reset reading limits
   document.getElementById("trainer-reset-params").onclick = () => resetParameters(key);
 
   // Save identity
@@ -1344,33 +1381,6 @@ function clearUnsaved(key, section) {
 // Save / reset
 // ---------------------------------------------------------------------------
 
-async function saveParameters(key) {
-  const persona = trainerPersonas.find((p) => p.personaKey === key);
-  if (!persona) return;
-
-  const tags = getCurrentTags();
-  const maxSentence = parseInt(document.getElementById("trainer-max-sentence").value, 10);
-  const maxGrade = parseFloat(document.getElementById("trainer-max-grade").value);
-  const successCriteria = document.getElementById("trainer-success-criteria").value.trim();
-
-  if (!successCriteria) { showTrainerToast("Success criteria cannot be empty.", true); return; }
-
-  try {
-    const res = await fetch(`/api/personas/${key}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ unknownTerms: tags, maxSentenceLength: maxSentence, maxGradeLevel: maxGrade, successCriteria }),
-    });
-    if (!res.ok) throw new Error(`API error ${res.status}`);
-    const updated = await res.json();
-    Object.assign(persona, updated);
-    trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
-    clearUnsaved(key, "profile");
-    showTrainerToast("Parameters saved.");
-  } catch (err) {
-    showTrainerToast(`Save failed: ${err.message}`, true);
-  }
-}
 
 async function saveIdentity(key) {
   const persona = trainerPersonas.find((p) => p.personaKey === key);
@@ -1388,7 +1398,7 @@ async function saveIdentity(key) {
     const updated = await res.json();
     Object.assign(persona, updated);
     trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
-    clearUnsaved(key, "behavior");
+    clearUnsaved(key, "voice");
     renderInstructions(updated.behavioralContext ?? "");
     showTrainerToast("Behavior saved.");
   } catch (err) {
@@ -1428,9 +1438,9 @@ async function injectInstruction(key, instruction) {
     document.getElementById("trainer-behavioral-context").value = updated.behavioralContext ?? "";
     updateCharCount();
     renderInstructions(updated.behavioralContext ?? "");
-    showTrainerToast("Instruction injected.");
+    showTrainerToast("Rule added.");
   } catch (err) {
-    showTrainerToast(`Inject failed: ${err.message}`, true);
+    showTrainerToast(`Failed to add rule: ${err.message}`, true);
   }
 }
 
@@ -1765,10 +1775,6 @@ function renderProfileTab(persona) {
     }
   }
 
-  html += `<div class="trainer-actions dim-save-row">
-    <button class="trainer-btn trainer-btn-primary" id="trainer-save-profile">Save Profile</button>
-  </div>`;
-
   panel.innerHTML = html;
 
   // Wire slider input events
@@ -1788,40 +1794,41 @@ function renderProfileTab(persona) {
           lbl.classList.toggle("active", (i + dim.min) === val);
         });
       }
-      markUnsaved(persona.personaKey, "profile");
+      markUnsaved(persona.personaKey, "background");
     });
   });
-
-  // Wire save
-  document.getElementById("trainer-save-profile").addEventListener("click", () =>
-    saveProfile(persona.personaKey)
-  );
 }
 
-async function saveProfile(key) {
+async function saveBackground(key) {
   const persona = trainerPersonas.find((p) => p.personaKey === key);
   if (!persona) return;
 
-  const panel = document.getElementById("trainer-profile-dims");
-  const allDims = DOMAIN_DIMENSIONS.flatMap((g) => g.fields);
-  const updates = {};
-  for (const dim of allDims) {
-    const slider = panel.querySelector(`.dim-slider[data-dim-key="${dim.key}"]`);
-    if (slider) updates[dim.key] = parseInt(slider.value, 10);
+  const tags = getCurrentTags();
+  const maxSentence = parseInt(document.getElementById("trainer-max-sentence").value, 10);
+  const maxGrade = parseFloat(document.getElementById("trainer-max-grade").value);
+  const successCriteria = document.getElementById("trainer-success-criteria").value.trim();
+  if (!successCriteria) { showTrainerToast("Success criteria cannot be empty.", true); return; }
+
+  const dimsPanel = document.getElementById("trainer-profile-dims");
+  const dimUpdates = {};
+  for (const dim of DOMAIN_DIMENSIONS.flatMap((g) => g.fields)) {
+    const slider = dimsPanel.querySelector(`.dim-slider[data-dim-key="${dim.key}"]`);
+    if (slider) dimUpdates[dim.key] = parseInt(slider.value, 10);
   }
 
   try {
     const res = await fetch(`/api/personas/${key}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ unknownTerms: tags, maxSentenceLength: maxSentence, maxGradeLevel: maxGrade, successCriteria, ...dimUpdates }),
     });
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const updated = await res.json();
     Object.assign(persona, updated);
     trainerOriginals[key] = { ...updated, unknownTerms: [...(updated.unknownTerms ?? [])] };
-    clearUnsaved(key, "profile");
-    showTrainerToast("Profile saved.");
+    renderPersonaSnapshot(persona);
+    clearUnsaved(key, "background");
+    showTrainerToast("Background saved.");
   } catch (err) {
     showTrainerToast(`Save failed: ${err.message}`, true);
   }
