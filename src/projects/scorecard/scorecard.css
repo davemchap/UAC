@@ -106,7 +106,7 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
   transition: opacity 0.15s, background 0.15s, box-shadow 0.15s;
   box-shadow: 0 1px 3px rgba(30,45,61,0.08);
 }
-.sc-metric-chip:hover { box-shadow: 0 2px 6px rgba(30,45,61,0.14); }
+.sc-metric-chip:hover { box-shadow: 0 2px 6px rgba(30,45,61,0.14); opacity: 0.8; }
 .sc-metric-chip[aria-pressed="false"] {
   opacity: 0.45; background: var(--sc-surface2);
   border-color: var(--sc-border) !important;
@@ -114,9 +114,11 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
 }
 .sc-metric-chip[aria-pressed="false"] .sc-metric-dot { background: var(--sc-border) !important; }
 .sc-metric-chip[aria-pressed="false"] .sc-metric-score { color: var(--sc-text-dim) !important; }
+.sc-metric-chip[aria-pressed="false"] .sc-metric-eye { opacity: 0.3; }
 .sc-metric-dot { width: 8px; height: 8px; border-radius: 50%; }
 .sc-metric-name { color: var(--sc-text-muted); }
 .sc-metric-score { font-weight: 700; font-size: 1rem; }
+.sc-metric-eye { font-size: 0.55rem; color: var(--sc-text-dim); margin-left: 2px; transition: opacity 0.15s; }
 
 /* ---- Readability layout ---- */
 .sc-readability-layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }

@@ -338,16 +338,21 @@ function renderPersonaScoreRow(containerId, personas) {
   el.innerHTML = personas.map((p) =>
     `<div class="sc-metric-chip" style="border-color:${p.color}"
         role="button" aria-pressed="true" tabindex="0"
-        data-persona-id="${escAttr(p.personaId)}">
+        title="Click to hide ${escAttr(p.personaRole)} highlights"
+        data-persona-id="${escAttr(p.personaId)}"
+        data-persona-role="${escAttr(p.personaRole)}">
       <span class="sc-metric-dot" style="background:${p.color}"></span>
       <span class="sc-metric-name">${p.personaRole}</span>
       <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
+      <span class="sc-metric-eye" aria-hidden="true">●</span>
     </div>`
   ).join("");
   el.querySelectorAll(".sc-metric-chip").forEach((chip) => {
+    const role = chip.dataset.personaRole;
     const toggle = () => {
       const active = chip.getAttribute("aria-pressed") === "true";
       chip.setAttribute("aria-pressed", active ? "false" : "true");
+      chip.title = active ? `Click to show ${role} highlights` : `Click to hide ${role} highlights`;
       const id = chip.dataset.personaId;
       document.querySelectorAll(`.sc-highlight[data-persona-id="${id}"]`).forEach((m) => {
         m.classList.toggle("sc-highlight--hidden", active);
