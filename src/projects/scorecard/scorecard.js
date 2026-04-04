@@ -36,9 +36,10 @@ function dimTooltipText(p) {
   if (!p.dimensions) return p.personaRole;
   const d = p.dimensions;
   const tl = trainingLabel(d.avalancheTrainingLevel);
+  const tlLine = d.avalancheTrainingLevel === 0 ? 'No formal training' : `${tl} training`;
   return [
     `${p.personaName} — ${p.personaRole}`,
-    `${tl} training · ${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs`,
+    `${tlLine} · ${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs`,
     `Terrain ${d.terrainAssessmentSkill}/5 · Weather ${d.weatherPatternRecognition}/5`,
   ].join('\n');
 }
@@ -407,7 +408,7 @@ function renderPersonaSidebar(containerId, personas) {
     const d = p.dimensions;
     const dimRow = d
       ? `<div class="sc-persona-dim-row">
-          <span>${trainingLabel(d.avalancheTrainingLevel)}</span>
+          <span>${d.avalancheTrainingLevel === 0 ? 'No training' : trainingLabel(d.avalancheTrainingLevel)}</span>
           <span>${d.backcountryDaysPerSeason} days/season</span>
           <span>Terrain ${d.terrainAssessmentSkill}/5</span>
         </div>`
