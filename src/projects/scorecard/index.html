@@ -24,6 +24,9 @@
       <select id="zone-select" class="sc-select">
         <option value="">All Zones</option>
       </select>
+      <button id="train-personas-btn" class="sc-train-btn" aria-label="Train Persona Evaluators">
+        &#9881; Train Personas
+      </button>
       <a href="/dashboard" class="sc-back-link">← Dashboard</a>
     </div>
   </header>
@@ -180,6 +183,105 @@
       </div>
     </section>
   </main>
+
+  <!-- -------------------------------------------------------------------- -->
+  <!-- Persona Trainer Modal                                                -->
+  <!-- -------------------------------------------------------------------- -->
+  <div id="trainer-modal" class="trainer-modal" role="dialog" aria-modal="true" aria-label="Train Persona Evaluators" hidden>
+    <div class="trainer-modal-inner">
+      <header class="trainer-modal-header">
+        <h2 class="trainer-modal-title">&#9881; Train Persona Evaluators</h2>
+        <button class="trainer-close-btn" id="trainer-close-btn" aria-label="Close trainer">&times;</button>
+      </header>
+      <div class="trainer-modal-body">
+        <!-- Left: Persona roster -->
+        <aside class="trainer-roster" id="trainer-roster">
+          <!-- Rendered by JS -->
+        </aside>
+        <!-- Right: Detail panel -->
+        <div class="trainer-detail" id="trainer-detail">
+          <div class="trainer-detail-empty" id="trainer-detail-empty">
+            <p>Select a persona to configure</p>
+          </div>
+          <div class="trainer-detail-panel hidden" id="trainer-detail-panel">
+            <!-- Tab nav -->
+            <nav class="trainer-tabs" role="tablist">
+              <button class="trainer-tab active" data-trainer-tab="parameters" role="tab" aria-selected="true">Parameters</button>
+              <button class="trainer-tab" data-trainer-tab="identity" role="tab" aria-selected="false">Identity</button>
+              <button class="trainer-tab" data-trainer-tab="interrogate" role="tab" aria-selected="false">Interrogate</button>
+            </nav>
+            <!-- Parameters tab -->
+            <div class="trainer-tab-panel active" id="trainer-panel-parameters">
+              <div class="trainer-field">
+                <label class="trainer-label">Unknown Terms <span class="trainer-hint">(press Enter to add)</span></label>
+                <div class="trainer-tags-wrap" id="trainer-tags-wrap">
+                  <div class="trainer-tags" id="trainer-tags"></div>
+                  <input type="text" class="trainer-tag-input" id="trainer-tag-input" placeholder="Add term…" />
+                </div>
+              </div>
+              <div class="trainer-field-row">
+                <div class="trainer-field">
+                  <label class="trainer-label" for="trainer-max-sentence">Max Sentence Length (words)</label>
+                  <input type="number" class="trainer-input" id="trainer-max-sentence" min="5" max="120" />
+                </div>
+                <div class="trainer-field">
+                  <label class="trainer-label" for="trainer-max-grade">Max Grade Level</label>
+                  <input type="number" class="trainer-input" id="trainer-max-grade" min="1" max="20" step="0.5" />
+                </div>
+              </div>
+              <div class="trainer-field">
+                <label class="trainer-label" for="trainer-success-criteria">Success Criteria</label>
+                <textarea class="trainer-textarea" id="trainer-success-criteria" rows="3"></textarea>
+              </div>
+              <div class="trainer-actions">
+                <button class="trainer-btn trainer-btn-primary" id="trainer-save-params">Save Parameters</button>
+                <button class="trainer-btn trainer-btn-ghost" id="trainer-reset-params">Reset to Default</button>
+              </div>
+            </div>
+            <!-- Identity tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-identity">
+              <div class="trainer-field">
+                <label class="trainer-label" for="trainer-behavioral-context">Behavioral Context</label>
+                <textarea class="trainer-textarea trainer-textarea-lg" id="trainer-behavioral-context" rows="6" placeholder="Describe how this persona thinks, reacts, and makes decisions…"></textarea>
+                <div class="trainer-char-count" id="trainer-char-count">0 characters</div>
+              </div>
+              <div class="trainer-field">
+                <label class="trainer-label" for="trainer-inject-input">Inject Instruction</label>
+                <div class="trainer-inject-row">
+                  <textarea class="trainer-textarea" id="trainer-inject-input" rows="2" placeholder="Add a specific behavioral instruction…"></textarea>
+                  <button class="trainer-btn trainer-btn-primary" id="trainer-inject-btn">Inject</button>
+                </div>
+              </div>
+              <div class="trainer-field">
+                <label class="trainer-label">Active Instructions</label>
+                <div class="trainer-instructions-list" id="trainer-instructions-list">
+                  <p class="trainer-instructions-empty">No instructions injected yet.</p>
+                </div>
+              </div>
+              <div class="trainer-actions">
+                <button class="trainer-btn trainer-btn-primary" id="trainer-save-identity">Save Context</button>
+              </div>
+            </div>
+            <!-- Interrogate tab -->
+            <div class="trainer-tab-panel hidden" id="trainer-panel-interrogate">
+              <div class="trainer-field">
+                <label class="trainer-label" for="trainer-question">Ask this persona a question</label>
+                <textarea class="trainer-textarea" id="trainer-question" rows="3" placeholder="How would you use today's forecast to plan your backcountry route?"></textarea>
+              </div>
+              <div class="trainer-actions">
+                <button class="trainer-btn trainer-btn-primary" id="trainer-ask-btn">Ask Persona</button>
+              </div>
+              <div class="trainer-response-area" id="trainer-response-area" hidden>
+                <!-- Response card rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Toast -->
+    <div class="trainer-toast hidden" id="trainer-toast" role="status" aria-live="polite"></div>
+  </div>
 
   <script src="/scorecard/scorecard.js"></script>
 </body>

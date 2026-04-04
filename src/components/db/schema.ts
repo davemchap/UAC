@@ -1,5 +1,21 @@
 import { boolean, integer, pgTable, real, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
 
+export const personas = pgTable("personas", {
+	id: serial("id").primaryKey(),
+	personaKey: text("persona_key").unique().notNull(),
+	name: text("name").notNull(),
+	role: text("role").notNull(),
+	color: text("color").notNull(),
+	literacyLevel: text("literacy_level").notNull(),
+	unknownTerms: text("unknown_terms").array().notNull().default([]),
+	maxSentenceLength: integer("max_sentence_length").notNull(),
+	maxGradeLevel: real("max_grade_level").notNull(),
+	successCriteria: text("success_criteria").notNull(),
+	behavioralContext: text("behavioral_context"),
+	updatedAt: timestamp("updated_at").defaultNow(),
+	createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const forecastZones = pgTable("forecast_zones", {
 	id: serial("id").primaryKey(),
 	zoneId: integer("zone_id").unique().notNull(),

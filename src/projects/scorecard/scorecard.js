@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireForecasterSelect();
   wireZoneSelect();
   wireDrawerClose();
+  wireTrainerModal();
 });
 
 // ---------------------------------------------------------------------------
@@ -795,4 +796,502 @@ function copyToClipboard(btn, text) {
     btn.style.background = "#dc2626";
     setTimeout(() => { btn.textContent = orig; btn.style.background = ""; btn.disabled = false; }, 2000);
   });
+}
+
+// ===========================================================================
+// Trainer Modal
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+let trainerPersonas = [];
+let trainerActiveKey = null;
+let trainerUnsaved = {}; // { [key]: { parameters?: true, identity?: true } }
+let trainerOriginals = {}; // { [key]: PersonaRecord } — snapshots for Reset
+
+// ---------------------------------------------------------------------------
+// Wiring
+// ---------------------------------------------------------------------------
+
+function wireTrainerModal() {
+  document.getElementById("train-personas-btn").addEventListener("click", openTrainerModal);
+  document.getElementById("trainer-close-btn").addEventListener("click", closeTrainerModal);
+  document.getElementById("trainer-modal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeTrainerModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !document.getElementById("trainer-modal").hidden) closeTrainerModal();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Open / close
+// ---------------------------------------------------------------------------
+
+function openTrainerModal() {
+  document.getElementById("trainer-modal").hidden = false;
+  document.body.style.overflow = "hidden";
+  loadPersonas();
+}
+
+function closeTrainerModal() {
+  document.getElementById("trainer-modal").hidden = true;
+  document.body.style.overflow = "";
+  trainerActiveKey = null;
+  trainerUnsaved = {};
+}
+
+// ---------------------------------------------------------------------------
+// Load personas from API
+// ---------------------------------------------------------------------------
+
+async function loadPersonas() {
+  try {
+    const res = await fetch("/api/personas");
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    trainerPersonas = await res.json();
+    // Snapshot originals for reset
+    trainerOriginals = {};
+    for (const p of trainerPersonas) {
+      trainerOriginals[p.personaKey] = { ...p, unknownTerms: [...p.unknownTerms] };
+    }
+    renderRoster();
+    // Auto-select first persona
+    if (trainerPersonas.length > 0 && !trainerActiveKey) {
+      selectPersona(trainerPersonas[0].personaKey);
+    }
+  } catch (err) {
+    showTrainerToast(`Failed to load personas: ${err.message}`, true);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Roster
+// ---------------------------------------------------------------------------
+
+function renderRoster() {
+  const roster = document.getElementById("trainer-roster");
+  roster.innerHTML = "";
+  for (const p of trainerPersonas) {
+    const card = document.createElement("div");
+    card.className = "trainer-persona-card" +
+      (p.personaKey === trainerActiveKey ? " active" : "") +
+      (hasUnsaved(p.personaKey) ? " has-unsaved" : "");
+    card.style.borderLeftColor = p.color;
+    card.dataset.key = p.personaKey;
+    card.innerHTML = `
+      <div class="trainer-persona-card-name">${escHtml(p.name)}</div>
+      <div class="trainer-persona-card-role">${escHtml(p.role)}</div>
+      <div class="trainer-persona-card-literacy">${escHtml(p.literacyLevel)}</div>
+      <div class="trainer-persona-unsaved"></div>
+    `;
+    card.addEventListener("click", () => selectPersona(p.personaKey));
+    roster.appendChild(card);
+  }
+}
+
+function hasUnsaved(key) {
+  const u = trainerUnsaved[key];
+  return u && (u.parameters || u.identity);
+}
+
+// ---------------------------------------------------------------------------
+// Select persona
+// ---------------------------------------------------------------------------
+
+function selectPersona(key) {
+  trainerActiveKey = key;
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+
+  // Update roster selection
+  document.querySelectorAll(".trainer-persona-card").forEach((c) => {
+    c.classList.toggle("active", c.dataset.key === key);
+  });
+
+  // Show detail panel
+  document.getElementById("trainer-detail-empty").classList.add("hidden");
+  document.getElementById("trainer-detail-panel").classList.remove("hidden");
+
+  // Switch to first trainer tab
+  switchTrainerTab("parameters");
+
+  // Populate fields
+  populateParametersTab(persona);
+  populateIdentityTab(persona);
+  clearInterrogateTab();
+
+  wireDetailActions(key);
+}
+
+// ---------------------------------------------------------------------------
+// Trainer tab switching
+// ---------------------------------------------------------------------------
+
+function switchTrainerTab(tabName) {
+  document.querySelectorAll(".trainer-tab").forEach((btn) => {
+    const active = btn.dataset.trainerTab === tabName;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  document.querySelectorAll(".trainer-tab-panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === `trainer-panel-${tabName}`);
+    panel.classList.toggle("hidden", panel.id !== `trainer-panel-${tabName}`);
+  });
+}
+
+// Wire trainer tab buttons (called once after detail panel is shown)
+function wireTrainerTabButtons() {
+  document.querySelectorAll(".trainer-tab").forEach((btn) => {
+    btn.addEventListener("click", () => switchTrainerTab(btn.dataset.trainerTab));
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Parameters tab
+// ---------------------------------------------------------------------------
+
+function populateParametersTab(persona) {
+  renderTags(persona.unknownTerms ?? []);
+  document.getElementById("trainer-max-sentence").value = persona.maxSentenceLength;
+  document.getElementById("trainer-max-grade").value = persona.maxGradeLevel;
+  document.getElementById("trainer-success-criteria").value = persona.successCriteria;
+}
+
+function renderTags(terms) {
+  const container = document.getElementById("trainer-tags");
+  container.innerHTML = "";
+  for (const term of terms) {
+    const chip = document.createElement("span");
+    chip.className = "trainer-tag";
+    chip.innerHTML = `${escHtml(term)} <button class="trainer-tag-remove" aria-label="Remove ${escAttr(term)}">&times;</button>`;
+    chip.querySelector("button").addEventListener("click", () => {
+      removeTag(term);
+    });
+    container.appendChild(chip);
+  }
+}
+
+function getCurrentTags() {
+  return [...document.querySelectorAll("#trainer-tags .trainer-tag")].map((c) =>
+    c.textContent.trim().replace(/×$/, "").trim()
+  );
+}
+
+function removeTag(term) {
+  const persona = trainerPersonas.find((p) => p.personaKey === trainerActiveKey);
+  if (!persona) return;
+  persona.unknownTerms = (persona.unknownTerms ?? []).filter((t) => t !== term);
+  renderTags(persona.unknownTerms);
+  markUnsaved(trainerActiveKey, "parameters");
+}
+
+function wireTagInput() {
+  const input = document.getElementById("trainer-tag-input");
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const val = input.value.trim().toLowerCase();
+      if (!val) return;
+      const persona = trainerPersonas.find((p) => p.personaKey === trainerActiveKey);
+      if (!persona) return;
+      if (!(persona.unknownTerms ?? []).includes(val)) {
+        persona.unknownTerms = [...(persona.unknownTerms ?? []), val];
+        renderTags(persona.unknownTerms);
+        markUnsaved(trainerActiveKey, "parameters");
+      }
+      input.value = "";
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Identity tab
+// ---------------------------------------------------------------------------
+
+function populateIdentityTab(persona) {
+  const ctx = persona.behavioralContext ?? "";
+  document.getElementById("trainer-behavioral-context").value = ctx;
+  updateCharCount();
+  renderInstructions(ctx);
+}
+
+function updateCharCount() {
+  const val = document.getElementById("trainer-behavioral-context").value;
+  document.getElementById("trainer-char-count").textContent = `${val.length} characters`;
+}
+
+function renderInstructions(behavioralContext) {
+  const list = document.getElementById("trainer-instructions-list");
+  if (!behavioralContext) {
+    list.innerHTML = '<p class="trainer-instructions-empty">No instructions injected yet.</p>';
+    return;
+  }
+  // Parse injected entries — separated by \n\n---\n\n
+  const segments = behavioralContext.split("\n\n---\n\n").filter(Boolean);
+  if (segments.length === 0) {
+    list.innerHTML = '<p class="trainer-instructions-empty">No instructions injected yet.</p>';
+    return;
+  }
+  list.innerHTML = "";
+  // Newest first
+  for (const seg of [...segments].reverse()) {
+    const item = document.createElement("div");
+    item.className = "trainer-instruction-item";
+    item.innerHTML = `<span class="trainer-instruction-text">${escHtml(seg.trim())}</span>
+      <button class="trainer-instruction-remove" aria-label="Remove instruction">&times;</button>`;
+    item.querySelector("button").addEventListener("click", () => {
+      removeInstruction(seg);
+    });
+    list.appendChild(item);
+  }
+}
+
+function removeInstruction(seg) {
+  const persona = trainerPersonas.find((p) => p.personaKey === trainerActiveKey);
+  if (!persona) return;
+  const segments = (persona.behavioralContext ?? "").split("\n\n---\n\n").filter(Boolean);
+  const filtered = segments.filter((s) => s !== seg);
+  persona.behavioralContext = filtered.join("\n\n---\n\n") || null;
+  document.getElementById("trainer-behavioral-context").value = persona.behavioralContext ?? "";
+  updateCharCount();
+  renderInstructions(persona.behavioralContext ?? "");
+  markUnsaved(trainerActiveKey, "identity");
+}
+
+// ---------------------------------------------------------------------------
+// Interrogate tab
+// ---------------------------------------------------------------------------
+
+function clearInterrogateTab() {
+  document.getElementById("trainer-question").value = "";
+  document.getElementById("trainer-response-area").hidden = true;
+  document.getElementById("trainer-response-area").innerHTML = "";
+}
+
+// ---------------------------------------------------------------------------
+// Wire detail actions
+// ---------------------------------------------------------------------------
+
+function wireDetailActions(key) {
+  wireTrainerTabButtons();
+  wireTagInput();
+
+  // Char count
+  document.getElementById("trainer-behavioral-context").addEventListener("input", () => {
+    updateCharCount();
+    const persona = trainerPersonas.find((p) => p.personaKey === key);
+    if (persona) persona.behavioralContext = document.getElementById("trainer-behavioral-context").value || null;
+    markUnsaved(key, "identity");
+  });
+
+  // Parameters inputs → mark unsaved
+  ["trainer-max-sentence", "trainer-max-grade", "trainer-success-criteria"].forEach((id) => {
+    document.getElementById(id).addEventListener("input", () => markUnsaved(key, "parameters"));
+  });
+
+  // Save parameters
+  document.getElementById("trainer-save-params").onclick = () => saveParameters(key);
+
+  // Reset parameters
+  document.getElementById("trainer-reset-params").onclick = () => resetParameters(key);
+
+  // Save identity
+  document.getElementById("trainer-save-identity").onclick = () => saveIdentity(key);
+
+  // Inject
+  document.getElementById("trainer-inject-btn").onclick = () => {
+    const instruction = document.getElementById("trainer-inject-input").value.trim();
+    if (!instruction) return;
+    injectInstruction(key, instruction);
+  };
+
+  // Ask
+  document.getElementById("trainer-ask-btn").onclick = () => {
+    const question = document.getElementById("trainer-question").value.trim();
+    if (!question) return;
+    askPersona(key, question);
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Unsaved tracking
+// ---------------------------------------------------------------------------
+
+function markUnsaved(key, section) {
+  if (!trainerUnsaved[key]) trainerUnsaved[key] = {};
+  trainerUnsaved[key][section] = true;
+  renderRoster();
+  // Mark tab
+  document.querySelectorAll(".trainer-tab").forEach((btn) => {
+    if (btn.dataset.trainerTab === section) btn.classList.add("has-unsaved");
+  });
+}
+
+function clearUnsaved(key, section) {
+  if (trainerUnsaved[key]) delete trainerUnsaved[key][section];
+  renderRoster();
+  document.querySelectorAll(".trainer-tab").forEach((btn) => {
+    if (btn.dataset.trainerTab === section) btn.classList.remove("has-unsaved");
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Save / reset
+// ---------------------------------------------------------------------------
+
+async function saveParameters(key) {
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+
+  const tags = getCurrentTags();
+  const maxSentence = parseInt(document.getElementById("trainer-max-sentence").value, 10);
+  const maxGrade = parseFloat(document.getElementById("trainer-max-grade").value);
+  const successCriteria = document.getElementById("trainer-success-criteria").value.trim();
+
+  if (!successCriteria) { showTrainerToast("Success criteria cannot be empty.", true); return; }
+
+  try {
+    const res = await fetch(`/api/personas/${key}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unknownTerms: tags, maxSentenceLength: maxSentence, maxGradeLevel: maxGrade, successCriteria }),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const updated = await res.json();
+    Object.assign(persona, updated);
+    trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
+    clearUnsaved(key, "parameters");
+    showTrainerToast("Parameters saved.");
+  } catch (err) {
+    showTrainerToast(`Save failed: ${err.message}`, true);
+  }
+}
+
+async function saveIdentity(key) {
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+
+  const behavioralContext = document.getElementById("trainer-behavioral-context").value.trim() || null;
+
+  try {
+    const res = await fetch(`/api/personas/${key}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ behavioralContext }),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const updated = await res.json();
+    Object.assign(persona, updated);
+    trainerOriginals[key] = { ...updated, unknownTerms: [...updated.unknownTerms] };
+    clearUnsaved(key, "identity");
+    renderInstructions(updated.behavioralContext ?? "");
+    showTrainerToast("Identity saved.");
+  } catch (err) {
+    showTrainerToast(`Save failed: ${err.message}`, true);
+  }
+}
+
+function resetParameters(key) {
+  const original = trainerOriginals[key];
+  if (!original) return;
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  if (!persona) return;
+  persona.unknownTerms = [...original.unknownTerms];
+  persona.maxSentenceLength = original.maxSentenceLength;
+  persona.maxGradeLevel = original.maxGradeLevel;
+  persona.successCriteria = original.successCriteria;
+  populateParametersTab(persona);
+  clearUnsaved(key, "parameters");
+}
+
+// ---------------------------------------------------------------------------
+// Inject instruction
+// ---------------------------------------------------------------------------
+
+async function injectInstruction(key, instruction) {
+  try {
+    const res = await fetch(`/api/personas/${key}/inject`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ instruction }),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const updated = await res.json();
+    const persona = trainerPersonas.find((p) => p.personaKey === key);
+    if (persona) Object.assign(persona, updated);
+    document.getElementById("trainer-inject-input").value = "";
+    document.getElementById("trainer-behavioral-context").value = updated.behavioralContext ?? "";
+    updateCharCount();
+    renderInstructions(updated.behavioralContext ?? "");
+    showTrainerToast("Instruction injected.");
+  } catch (err) {
+    showTrainerToast(`Inject failed: ${err.message}`, true);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Ask persona (AI interrogation)
+// ---------------------------------------------------------------------------
+
+async function askPersona(key, question) {
+  const area = document.getElementById("trainer-response-area");
+  const persona = trainerPersonas.find((p) => p.personaKey === key);
+  const btn = document.getElementById("trainer-ask-btn");
+
+  area.hidden = false;
+  area.innerHTML = `
+    <div class="trainer-response-card">
+      <div class="trainer-skeleton trainer-skeleton-line" style="width:40%"></div>
+      <div class="trainer-skeleton trainer-skeleton-line"></div>
+      <div class="trainer-skeleton trainer-skeleton-line"></div>
+      <div class="trainer-skeleton trainer-skeleton-line"></div>
+    </div>`;
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`/api/personas/${key}/interrogate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    const instructionCount = countInstructions(persona?.behavioralContext ?? "");
+    area.innerHTML = `
+      <div class="trainer-response-card" style="border-left-color:${escAttr(persona?.color ?? "#3a7f9c")}">
+        <div class="trainer-response-persona">
+          <span class="trainer-response-dot" style="background:${escAttr(persona?.color ?? "#3a7f9c")}"></span>
+          <span class="trainer-response-name">${escHtml(data.personaName)}</span>
+        </div>
+        <p class="trainer-response-text">${escHtml(data.response)}</p>
+        <div class="trainer-response-footer">${instructionCount} active instruction${instructionCount !== 1 ? "s" : ""}</div>
+      </div>`;
+  } catch (err) {
+    area.innerHTML = `<p style="color:#ef4444;font-size:0.85rem">Error: ${escHtml(err.message)}</p>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function countInstructions(behavioralContext) {
+  if (!behavioralContext) return 0;
+  return behavioralContext.split("\n\n---\n\n").filter(Boolean).length;
+}
+
+// ---------------------------------------------------------------------------
+// Toast
+// ---------------------------------------------------------------------------
+
+let _toastTimer = null;
+
+function showTrainerToast(message, isError = false) {
+  const toast = document.getElementById("trainer-toast");
+  toast.textContent = message;
+  toast.classList.toggle("error", isError);
+  toast.classList.remove("hidden");
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => toast.classList.add("hidden"), 3000);
 }

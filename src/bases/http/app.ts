@@ -9,6 +9,7 @@ import aiAlerts from "./routes/ai-alerts";
 import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
 import observations from "./routes/observations";
+import personasRoute from "./routes/personas";
 import proxy from "./routes/proxy";
 import reports from "./routes/reports";
 import reviews from "./routes/reviews";
@@ -77,6 +78,7 @@ app.get("/api", (c) =>
 );
 
 app.route("/api/zones", zones);
+app.route("/api/personas", personasRoute);
 app.route("/api/scorecard", scorecard);
 app.route("/api/ai-alerts", aiAlerts);
 app.route("/api/notifications", notifications);

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { count } from "drizzle-orm";
+import { seedPersonasIfNeeded } from "../persona-trainer";
 import { getDb } from "./index";
 import {
 	alertThresholds,
@@ -144,6 +145,8 @@ export async function seedReferenceData(): Promise<void> {
 	console.log(
 		`[db] Reference data seeded: ${zoneConfigs.length} zones, ${thresholds.alert_thresholds.length} thresholds`,
 	);
+
+	await seedPersonasIfNeeded();
 }
 
 // ---------------------------------------------------------------------------
