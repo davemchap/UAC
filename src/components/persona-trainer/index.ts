@@ -374,7 +374,7 @@ export async function clonePersona(
 
 export async function deletePersona(key: string): Promise<boolean> {
 	const existing = await getPersonaByKey(key);
-	if (!existing || existing.isBuiltIn) return false;
+	if (!existing) return false;
 
 	const db = getDb();
 	await db.delete(scorecardRuns).where(eq(scorecardRuns.personaId, key));

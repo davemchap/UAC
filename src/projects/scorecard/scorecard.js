@@ -312,6 +312,10 @@ async function loadZoneByDate(slug, date) {
   showLoading(true);
   try {
     const res = await fetch(`/api/scorecard/${encodeURIComponent(slug)}/${encodeURIComponent(date)}`);
+    if (res.status === 404) {
+      showNoDataForDate(date);
+      return;
+    }
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
       throw new Error(json.error ?? `API error ${res.status}`);
@@ -323,6 +327,20 @@ async function loadZoneByDate(slug, date) {
   } finally {
     showLoading(false);
   }
+}
+
+function showNoDataForDate(date) {
+  // Hide all tab panels and show a friendly empty state in the active one
+  const activePanel = document.querySelector(`.sc-tab-panel[data-tab="${activeTab}"]`);
+  if (!activePanel) return;
+  const existing = activePanel.querySelector(".sc-date-empty");
+  if (existing) existing.remove();
+  const el = document.createElement("div");
+  el.className = "sc-date-empty sc-empty-state";
+  el.innerHTML = `
+    <p class="sc-empty-title">No forecast data for ${escHtml(date)}</p>
+    <p class="sc-empty-hint">UAC had not published a forecast for this zone on that date, or data was not ingested. Try an adjacent date.</p>`;
+  activePanel.prepend(el);
 }
 
 // ---------------------------------------------------------------------------
@@ -1258,6 +1276,7 @@ function wireDrawerClose() {
 
 function showLoading(show) {
   document.getElementById("sc-loading").classList.toggle("hidden", !show);
+  if (show) document.querySelectorAll(".sc-date-empty").forEach((el) => el.remove());
 }
 
 function showError(msg) {
@@ -1883,7 +1902,7 @@ function renderRoster() {
       ? `<div class="trainer-persona-card-tags">${(p.tags).map((t) => `<span class="trainer-persona-tag">${escHtml(t)}</span>`).join("")}</div>`
       : "";
     const inactiveBadge = p.active === false ? `<span class="trainer-persona-inactive-badge">⊘</span>` : "";
-    const deleteHintHtml = p.isBuiltIn ? "" : `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`;
+    const deleteHintHtml = `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`;
 
     card.innerHTML = `
       ${inactiveBadge}
@@ -2390,7 +2409,7 @@ function renderDetailHeader(persona) {
     ? `<button class="trainer-active-toggle active" data-key="${escAttr(persona.personaKey)}" title="Click to deactivate">&#8857; Active</button>`
     : `<button class="trainer-active-toggle inactive" data-key="${escAttr(persona.personaKey)}" title="Click to activate">&#8856; Inactive</button>`;
 
-  const deleteBtn = persona.isBuiltIn ? "" : `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`;
+  const deleteBtn = `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`;
 
   document.getElementById("trainer-detail-header").innerHTML = `
     <div class="trainer-detail-header-inner">
