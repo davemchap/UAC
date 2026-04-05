@@ -398,6 +398,9 @@ function renderAll(data) {
   });
   renderReadability(data);
   renderCoach(data);
+  renderAssumptionAudit(data);
+  renderPersonaLens(data);
+  renderDecisionMirror(data);
 }
 
 // ---------------------------------------------------------------------------
@@ -1129,6 +1132,434 @@ function copyToClipboard(btn, text) {
     btn.style.background = "#dc2626";
     setTimeout(() => { btn.textContent = orig; btn.style.background = ""; btn.disabled = false; }, 2000);
   });
+}
+
+// ===========================================================================
+// Tab 3: Assumption Audit
+// ===========================================================================
+
+const DOMAIN_CLASS = {
+  snowpack: 'sc-domain-snowpack',
+  terrain: 'sc-domain-terrain',
+  danger_scale: 'sc-domain-danger_scale',
+  decision_framework: 'sc-domain-decision_framework',
+  avalanche_problem: 'sc-domain-avalanche_problem',
+  local_knowledge: 'sc-domain-local_knowledge',
+};
+
+const DOMAIN_LABEL = {
+  snowpack: 'Snowpack',
+  terrain: 'Terrain',
+  danger_scale: 'Danger Scale',
+  decision_framework: 'Decision',
+  avalanche_problem: 'Avy Problem',
+  local_knowledge: 'Local',
+};
+
+function renderAssumptionAudit(data) {
+  const audit = data.assumptionAudit;
+  const emptyEl = document.getElementById('audit-empty');
+  const bannerEl = document.getElementById('audit-critical-gap');
+  const conceptListEl = document.getElementById('audit-concept-list');
+  const matrixEl = document.getElementById('audit-matrix');
+  const densityEl = document.getElementById('audit-density');
+
+  if (!audit || !audit.conceptInventory) {
+    emptyEl.classList.remove('hidden');
+    bannerEl.hidden = true;
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  const { conceptInventory, personaGaps, assumptionDensityScore, mostCriticalGap } = audit;
+
+  // --- Critical gap banner ---
+  bannerEl.hidden = false;
+  if (conceptInventory.length === 0 || !mostCriticalGap) {
+    bannerEl.className = 'sc-audit-gap-banner sc-audit-gap-banner--clear';
+    bannerEl.innerHTML = `
+      <span class="sc-audit-gap-icon">&#10003;</span>
+      <div class="sc-audit-gap-body">
+        <div class="sc-audit-gap-label">All Clear</div>
+        <div class="sc-audit-gap-text">No technical concepts detected — this forecast uses accessible, plain-language content.</div>
+      </div>`;
+  } else {
+    const criticalCount = personaGaps.filter(
+      (pg) => pg.conceptsUnknown.includes(mostCriticalGap)
+    ).length;
+    bannerEl.className = 'sc-audit-gap-banner';
+    bannerEl.innerHTML = `
+      <span class="sc-audit-gap-icon">&#9888;</span>
+      <div class="sc-audit-gap-body">
+        <div class="sc-audit-gap-label">Most Critical Gap</div>
+        <div class="sc-audit-gap-text"><strong>${escHtml(mostCriticalGap)}</strong> — ${criticalCount} persona${criticalCount !== 1 ? 's' : ''} may misread this concept.</div>
+      </div>`;
+  }
+
+  // --- Concept cards ---
+  // Sort: most unknowns first, then by criticalityWeight descending
+  const sortedConcepts = [...conceptInventory].sort((a, b) => {
+    const aUnknown = personaGaps.filter((pg) => pg.conceptsUnknown.includes(a.concept)).length;
+    const bUnknown = personaGaps.filter((pg) => pg.conceptsUnknown.includes(b.concept)).length;
+    if (bUnknown !== aUnknown) return bUnknown - aUnknown;
+    return b.criticalityWeight - a.criticalityWeight;
+  });
+
+  let activeConceptCard = null;
+
+  conceptListEl.innerHTML = '';
+  for (const concept of sortedConcepts) {
+    const domainCls = DOMAIN_CLASS[concept.domain] ?? '';
+    const domainLabel = DOMAIN_LABEL[concept.domain] ?? concept.domain;
+    const isCritical = concept.criticalityWeight >= 2.0;
+
+    const card = document.createElement('div');
+    card.className = 'sc-audit-concept-card';
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-pressed', 'false');
+    card.dataset.concept = concept.concept;
+    card.innerHTML = `
+      <div class="sc-audit-concept-header">
+        <span class="sc-audit-domain-badge ${escAttr(domainCls)}">${escHtml(domainLabel)}</span>
+        <span class="sc-audit-concept-name">${escHtml(concept.concept)}</span>
+        ${isCritical ? '<span class="sc-audit-critical-icon" title="Safety-critical concept" aria-label="Safety-critical">&#9888;</span>' : ''}
+      </div>
+      <div class="sc-audit-triggers">Triggers: ${escHtml(concept.triggerPhrases.join(', '))}</div>`;
+
+    const toggleActive = () => {
+      if (activeConceptCard && activeConceptCard !== card) {
+        activeConceptCard.classList.remove('active');
+        activeConceptCard.setAttribute('aria-pressed', 'false');
+      }
+      const isActive = card.classList.toggle('active');
+      card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      activeConceptCard = isActive ? card : null;
+      highlightMatrixConcept(isActive ? concept.concept : null);
+    };
+    card.addEventListener('click', toggleActive);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleActive(); }
+    });
+    conceptListEl.appendChild(card);
+  }
+
+  // --- Gap matrix ---
+  if (conceptInventory.length === 0 || personaGaps.length === 0) {
+    matrixEl.innerHTML = '<p class="sc-no-data">No concepts detected in this forecast.</p>';
+  } else {
+    matrixEl.innerHTML = buildGapMatrixHtml(sortedConcepts, personaGaps);
+  }
+
+  // --- Density bar ---
+  const score = Math.round(assumptionDensityScore);
+  const densityColor = score < 30 ? '#16a34a' : score < 60 ? '#d97706' : '#dc2626';
+  const densityHint = score < 30
+    ? 'This forecast uses accessible language.'
+    : score < 60
+      ? 'This forecast requires moderate background knowledge.'
+      : 'This forecast assumes significant technical expertise.';
+  densityEl.innerHTML = `
+    <div class="sc-audit-density-label">
+      <span>Assumption Density</span>
+      <span class="sc-audit-density-val" style="color:${densityColor}">${score}/100</span>
+    </div>
+    <div class="sc-audit-density-track">
+      <div class="sc-audit-density-fill" style="width:${score}%;background:${densityColor}"></div>
+    </div>
+    <div class="sc-audit-density-hint">${escHtml(densityHint)}</div>`;
+}
+
+function buildGapMatrixHtml(concepts, personaGaps) {
+  const headerCells = personaGaps.map((pg) =>
+    `<th scope="col">
+      <div class="sc-matrix-persona-th">
+        <span class="sc-matrix-persona-dot" style="background:${escAttr(pg.color)}"></span>
+        <span class="sc-matrix-persona-name" style="color:${escAttr(pg.color)}">${escHtml(pg.personaName.split(' ')[0])}</span>
+      </div>
+    </th>`
+  ).join('');
+
+  const rows = concepts.map((concept) => {
+    const cells = personaGaps.map((pg) => {
+      const isKnown = pg.conceptsKnown.includes(concept.concept);
+      const isPartial = pg.conceptsPartial.includes(concept.concept);
+      if (isKnown) {
+        return `<td><span class="sc-gap-known" title="${escAttr(pg.personaName)}: Known" aria-label="Known">&#9679;</span></td>`;
+      } else if (isPartial) {
+        return `<td><span class="sc-gap-partial" title="${escAttr(pg.personaName)}: Partial" aria-label="Partial">&#9680;</span></td>`;
+      }
+      return `<td><span class="sc-gap-unknown" title="${escAttr(pg.personaName)}: Unknown" aria-label="Unknown">&#10005;</span></td>`;
+    }).join('');
+    return `<tr data-concept="${escAttr(concept.concept)}">
+      <td class="sc-matrix-concept-cell">${escHtml(concept.concept.length > 24 ? concept.concept.slice(0, 22) + '…' : concept.concept)}</td>
+      ${cells}
+    </tr>`;
+  }).join('');
+
+  const riskCells = personaGaps.map((pg) => {
+    const risk = pg.misreadRisk;
+    const riskColor = risk < 30 ? '#16a34a' : risk < 60 ? '#d97706' : '#dc2626';
+    return `<td>
+      <div class="sc-audit-risk-bar-wrap">
+        <div class="sc-audit-risk-bar-track">
+          <div class="sc-audit-risk-bar-fill" style="width:${risk}%;background:${riskColor}"></div>
+        </div>
+        <div class="sc-audit-risk-val" style="color:${riskColor}">${risk}</div>
+      </div>
+    </td>`;
+  }).join('');
+
+  return `<table class="sc-audit-matrix-table" role="table">
+    <thead>
+      <tr>
+        <th class="sc-matrix-concept-col" scope="col">Concept</th>
+        ${headerCells}
+      </tr>
+    </thead>
+    <tbody>
+      ${rows}
+      <tr class="sc-audit-risk-row">
+        <td class="sc-matrix-concept-cell" style="font-weight:700;font-size:0.72rem;color:var(--sc-text-muted)">Misread Risk</td>
+        ${riskCells}
+      </tr>
+    </tbody>
+  </table>`;
+}
+
+function highlightMatrixConcept(conceptName) {
+  document.querySelectorAll('#audit-matrix tr[data-concept]').forEach((row) => {
+    row.style.background = conceptName && row.dataset.concept === conceptName
+      ? 'rgba(58,127,156,0.08)'
+      : '';
+  });
+}
+
+// ===========================================================================
+// Tab 4: What They Heard (Persona Lens)
+// ===========================================================================
+
+let activeLensPersonaId = null;
+
+function renderPersonaLens(data) {
+  const personaLens = data.personaLens;
+  const stripEl = document.getElementById('lens-persona-strip');
+  const contentEl = document.getElementById('lens-content');
+  const emptyEl = document.getElementById('lens-empty');
+
+  if (!personaLens || !personaLens.length) {
+    stripEl.innerHTML = '';
+    contentEl.innerHTML = '';
+    contentEl.appendChild(emptyEl);
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  // Build pill strip
+  stripEl.innerHTML = personaLens.map((pl) =>
+    `<button class="sc-lens-persona-pill" role="tab"
+        aria-selected="false"
+        data-persona-id="${escAttr(pl.personaId)}"
+        style="border-color:${escAttr(pl.color)};color:${escAttr(pl.color)}"
+        aria-controls="lens-content">
+      <span class="sc-lens-pill-dot" style="background:${escAttr(pl.color)}"></span>
+      ${escHtml(pl.personaName.split(' ')[0])}
+    </button>`
+  ).join('');
+
+  // Activate first persona (or keep previously active if still present)
+  const targetId = personaLens.some((pl) => pl.personaId === activeLensPersonaId)
+    ? activeLensPersonaId
+    : personaLens[0].personaId;
+
+  stripEl.querySelectorAll('.sc-lens-persona-pill').forEach((pill) => {
+    pill.addEventListener('click', () => {
+      activeLensPersonaId = pill.dataset.personaId;
+      renderLensContent(personaLens, activeLensPersonaId, stripEl, contentEl);
+    });
+    pill.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        pill.click();
+      }
+      // Arrow key roving tabindex
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const pills = [...stripEl.querySelectorAll('.sc-lens-persona-pill')];
+        const idx = pills.indexOf(pill);
+        const next = e.key === 'ArrowRight'
+          ? pills[(idx + 1) % pills.length]
+          : pills[(idx - 1 + pills.length) % pills.length];
+        next.focus();
+        next.click();
+      }
+    });
+  });
+
+  activeLensPersonaId = targetId;
+  renderLensContent(personaLens, targetId, stripEl, contentEl);
+}
+
+function comprehensionColor(level) {
+  return { HIGH: '#16a34a', MEDIUM: '#ca8a04', LOW: '#ea580c', MISREAD: '#dc2626' }[level] ?? '#8a9bac';
+}
+
+function divergenceBracket(score) {
+  if (score <= 20) return 'Aligned with forecast intent';
+  if (score <= 50) return 'Partial alignment';
+  if (score <= 75) return 'Significant gap';
+  return 'Critical divergence';
+}
+
+function renderLensContent(personaLens, personaId, stripEl, contentEl) {
+  // Update pill states
+  stripEl.querySelectorAll('.sc-lens-persona-pill').forEach((pill) => {
+    const active = pill.dataset.personaId === personaId;
+    pill.classList.toggle('active', active);
+    pill.setAttribute('aria-selected', active ? 'true' : 'false');
+    if (active) {
+      pill.style.background = pill.style.borderColor.replace(')', ', 0.1)').replace('rgb', 'rgba');
+    } else {
+      pill.style.background = '';
+    }
+  });
+
+  const pl = personaLens.find((p) => p.personaId === personaId);
+  if (!pl) return;
+
+  const compColor = comprehensionColor(pl.overallComprehension);
+  const compLabel = pl.overallComprehension === 'MISREAD'
+    ? '&#9888; MISREAD — Safety Risk'
+    : escHtml(pl.overallComprehension) + ' comprehension';
+  const divScore = pl.divergenceScore;
+  const divColor = divScore <= 20 ? '#16a34a' : divScore <= 50 ? '#ca8a04' : divScore <= 75 ? '#ea580c' : '#dc2626';
+
+  const sectionCards = pl.sectionHearings.map((sh) => {
+    const sc = comprehensionColor(sh.comprehensionLevel);
+    const missedHtml = sh.missed && sh.missed.length
+      ? `<div class="sc-lens-missed-terms">${sh.missed.map((t) => `<span class="sc-lens-missed-chip">${escHtml(t)}</span>`).join('')}</div>`
+      : '';
+    return `<div class="sc-lens-section-card" style="border-top-color:${sc}">
+      <div class="sc-lens-section-header">
+        <span class="sc-lens-section-name">${escHtml(sh.sectionLabel)}</span>
+        <span class="sc-comprehension-badge sc-comprehension-${escAttr(sh.comprehensionLevel)}">${escHtml(sh.comprehensionLevel)}</span>
+      </div>
+      <div class="sc-lens-heard-as">${escHtml(sh.heardAs)}</div>
+      ${missedHtml}
+    </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="sc-lens-hero" style="border-color:${compColor};background:${compColor}08">
+      <div class="sc-lens-hero-top">
+        <span class="sc-lens-persona-name" style="color:${pl.color}">${escHtml(pl.personaName)}</span>
+        <span class="sc-comprehension-badge sc-comprehension-${escAttr(pl.overallComprehension)}">${compLabel}</span>
+      </div>
+      <div class="sc-lens-action-label">What they will do</div>
+      <div class="sc-lens-action-text">${escHtml(pl.whatTheyWillDo)}</div>
+      <div class="sc-lens-divergence">
+        <div class="sc-lens-divergence-label">
+          <span>Message divergence from forecaster intent</span>
+          <span class="sc-lens-divergence-score" style="color:${divColor}">${divScore}/100</span>
+        </div>
+        <div class="sc-lens-divergence-track">
+          <div class="sc-lens-divergence-fill" style="width:${divScore}%;background:${divColor}"></div>
+        </div>
+        <div class="sc-lens-divergence-bracket">${escHtml(divergenceBracket(divScore))}</div>
+      </div>
+    </div>
+    <div>
+      <div class="sc-lens-sections-title">Section Breakdown</div>
+      <div class="sc-lens-sections-grid">${sectionCards}</div>
+    </div>`;
+}
+
+// ===========================================================================
+// Tab 5: Decision Mirror
+// ===========================================================================
+
+function renderDecisionMirror(data) {
+  const mirror = data.decisionMirror;
+  const gridEl = document.getElementById('mirror-grid');
+  const emptyEl = document.getElementById('mirror-empty');
+  const allClearEl = document.getElementById('mirror-all-clear');
+
+  if (!mirror || !mirror.length) {
+    gridEl.innerHTML = '';
+    emptyEl.classList.remove('hidden');
+    allClearEl.hidden = true;
+    return;
+  }
+  emptyEl.classList.add('hidden');
+
+  // Sort: INVERTED first, then UNCERTAIN, then HIGH; within group by accuracyScore asc
+  const CONFIDENCE_ORDER = { INVERTED: 0, UNCERTAIN: 1, HIGH: 2 };
+  const sorted = [...mirror].sort((a, b) => {
+    const orderDiff = (CONFIDENCE_ORDER[a.confidence] ?? 3) - (CONFIDENCE_ORDER[b.confidence] ?? 3);
+    return orderDiff !== 0 ? orderDiff : a.accuracyScore - b.accuracyScore;
+  });
+
+  const hasInverted = sorted.some((r) => r.confidence === 'INVERTED');
+
+  // All-clear banner
+  if (!hasInverted) {
+    allClearEl.hidden = false;
+    allClearEl.innerHTML = `<span style="font-size:1.1rem">&#10003;</span>
+      <div>
+        <strong>All personas formed the correct decision</strong> from this forecast.
+        No INVERTED signals detected.
+      </div>`;
+  } else {
+    allClearEl.hidden = true;
+  }
+
+  gridEl.innerHTML = sorted.map((r) => {
+    const cardCls = {
+      INVERTED: 'sc-mirror-card--inverted',
+      UNCERTAIN: 'sc-mirror-card--uncertain',
+      HIGH: 'sc-mirror-card--high',
+    }[r.confidence] ?? '';
+
+    const badgeCls = `sc-confidence-${r.confidence}`;
+    const badgeLabel = r.confidence === 'INVERTED'
+      ? '&#9888; INVERTED'
+      : r.confidence === 'UNCERTAIN'
+        ? '&#126; UNCERTAIN'
+        : '&#10003; HIGH';
+
+    const accuracyColor = r.accuracyScore >= 75 ? '#16a34a' : r.accuracyScore >= 50 ? '#d97706' : '#dc2626';
+
+    const signalRows = r.signals.map((sig) => {
+      const parsedHtml = sig.parsed
+        ? '<span class="sc-mirror-signal-parsed">&#10003; Parsed</span>'
+        : '<span class="sc-mirror-signal-unparsed">&#10005; NOT PARSED</span>';
+      const detailTitle = escAttr(sig.personaConclusion);
+      return `<div class="sc-mirror-signal-row">
+        <span class="sc-mirror-signal-label">${escHtml(sig.signalLabel)}</span>
+        <span title="${detailTitle}">${parsedHtml}</span>
+      </div>
+      ${!sig.parsed ? `<div class="sc-mirror-signal-detail">${escHtml(sig.personaConclusion)}</div>` : ''}`;
+    }).join('');
+
+    return `<article class="sc-mirror-card ${escAttr(cardCls)}" aria-label="${escAttr(r.personaName)} decision accuracy">
+      <div class="sc-mirror-card-header">
+        <div>
+          <div class="sc-mirror-persona-name" style="color:${escAttr(r.color)}">${escHtml(r.personaName)}</div>
+          <div class="sc-mirror-persona-role" style="color:${escAttr(r.color)}">${escHtml(r.personaName)}</div>
+        </div>
+        <span class="sc-confidence-badge ${escAttr(badgeCls)}">${badgeLabel}</span>
+        <div class="sc-mirror-accuracy">
+          <div class="sc-mirror-accuracy-bar">
+            <div class="sc-mirror-accuracy-fill" style="width:${r.accuracyScore}%;background:${accuracyColor}"></div>
+          </div>
+          <div class="sc-mirror-accuracy-val">Accuracy: ${r.accuracyScore}/100</div>
+        </div>
+      </div>
+      <div class="sc-mirror-conclusion">${escHtml(r.behavioralConclusion)}</div>
+      <div class="sc-mirror-signals">${signalRows}</div>
+    </article>`;
+  }).join('');
 }
 
 // ===========================================================================

@@ -57,9 +57,21 @@
       <span class="sc-tab-icon">&#9685;</span>
       Readability Lens
     </button>
-<button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-coach" id="btn-coach" data-tab="coach">
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-coach" id="btn-coach" data-tab="coach">
       <span class="sc-tab-icon">&#9733;</span>
       Forecaster Coach
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-audit" id="btn-audit" data-tab="audit">
+      <span class="sc-tab-icon">&#128269;</span>
+      Assumption Audit
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-lens" id="btn-lens" data-tab="lens">
+      <span class="sc-tab-icon">&#128100;</span>
+      What They Heard
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-mirror" id="btn-mirror" data-tab="mirror">
+      <span class="sc-tab-icon">&#127919;</span>
+      Decision Mirror
     </button>
   </nav>
 
@@ -163,6 +175,54 @@
       </div>
     </section>
   </main>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 3: Assumption Audit                                           -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-audit" role="tabpanel" aria-labelledby="btn-audit">
+      <div id="audit-critical-gap" class="sc-audit-gap-banner" hidden></div>
+      <div class="sc-audit-layout">
+        <div class="sc-audit-concepts" id="audit-concepts">
+          <h3 class="sc-audit-panel-title">Concept Inventory</h3>
+          <p class="sc-audit-panel-hint">Technical concepts assumed by this forecast. Click a concept to highlight its trigger phrases.</p>
+          <div id="audit-concept-list"></div>
+        </div>
+        <div class="sc-audit-matrix-wrap">
+          <h3 class="sc-audit-panel-title">Knowledge Gap Matrix</h3>
+          <p class="sc-audit-panel-hint">How well each persona understands each concept.</p>
+          <div id="audit-matrix" class="sc-audit-matrix" role="table" aria-label="Knowledge gap matrix"></div>
+          <div class="sc-audit-density" id="audit-density"></div>
+        </div>
+      </div>
+      <div class="sc-audit-empty hidden" id="audit-empty">
+        <p class="sc-empty-title">Select a zone to run the assumption audit.</p>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 4: What They Heard (Persona Lens)                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-lens" role="tabpanel" aria-labelledby="btn-lens">
+      <div class="sc-lens-header" id="lens-header">
+        <div id="lens-persona-strip" class="sc-lens-persona-strip" role="tablist" aria-label="Select persona"></div>
+      </div>
+      <div id="lens-content" class="sc-lens-content" aria-live="polite">
+        <div class="sc-audit-empty" id="lens-empty">
+          <p class="sc-empty-title">Select a zone to see what each persona heard.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 5: Decision Mirror                                             -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-mirror" role="tabpanel" aria-labelledby="btn-mirror">
+      <div id="mirror-all-clear" class="sc-mirror-all-clear" hidden></div>
+      <div id="mirror-grid" class="sc-mirror-grid" aria-label="Decision accuracy per persona"></div>
+      <div class="sc-audit-empty hidden" id="mirror-empty">
+        <p class="sc-empty-title">Select a zone to see the decision mirror.</p>
+      </div>
+    </section>
 
   <!-- -------------------------------------------------------------------- -->
   <!-- Persona Trainer Modal                                                -->
