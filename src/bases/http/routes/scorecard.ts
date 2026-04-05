@@ -95,6 +95,53 @@ scorecard.get("/", async (c) => {
 });
 
 /**
+ * GET /api/scorecard/golden
+ * Returns all 18 golden dataset scenarios scored against current personas.
+ */
+scorecard.get("/golden", async (c) => {
+	const [scenarios, personas] = await Promise.all([Promise.resolve(loadGoldenScenarios()), loadScoringPersonas()]);
+
+	const results = scenarios.map((f) => {
+		const bottomLine = normalizeText(f.bottomLine);
+		const currentConditions = normalizeText(f.currentConditions);
+		const problems = [f.avalancheProblem1, f.avalancheProblem2, f.avalancheProblem3].filter(Boolean) as string[];
+		const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
+		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, bottomLine, personas);
+		const coaching = personaScores.flatMap((ps) =>
+			buildCoachingSuggestions(
+				forecastText,
+				ps,
+				personas?.find((p) => p.id === ps.personaId),
+			),
+		);
+
+		return {
+			forecastId: f.id,
+			zoneId: f.zoneId,
+			zoneName: f.zoneName,
+			zoneSlug: f.zoneSlug,
+			forecasterName: f.forecasterName,
+			dateIssued: f.dateIssued,
+			overallDangerRating: f.overallDangerRating,
+			bottomLine: bottomLine || null,
+			currentConditions: currentConditions || null,
+			personas: personaScores,
+			coaching,
+			scoredAt: new Date().toISOString(),
+			// Golden-specific metadata
+			isGolden: true,
+			scenarioId: f.scenarioId,
+			scenarioName: f.scenarioName,
+			center: f.center,
+			dangerLevel: f.dangerLevel,
+			alertAction: f.alertAction,
+		};
+	});
+
+	return c.json({ success: true, data: results });
+});
+
+/**
  * GET /api/scorecard/:zoneSlug
  * Returns scored forecast for a single zone.
  */
@@ -142,53 +189,6 @@ scorecard.get("/:zoneSlug", async (c) => {
 			scoredAt: new Date().toISOString(),
 		},
 	});
-});
-
-/**
- * GET /api/scorecard/golden
- * Returns all 18 golden dataset scenarios scored against current personas.
- */
-scorecard.get("/golden", async (c) => {
-	const [scenarios, personas] = await Promise.all([Promise.resolve(loadGoldenScenarios()), loadScoringPersonas()]);
-
-	const results = scenarios.map((f) => {
-		const bottomLine = normalizeText(f.bottomLine);
-		const currentConditions = normalizeText(f.currentConditions);
-		const problems = [f.avalancheProblem1, f.avalancheProblem2, f.avalancheProblem3].filter(Boolean) as string[];
-		const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
-		const personaScores = scoreForecast(forecastText, f.overallDangerRating, problems, bottomLine, personas);
-		const coaching = personaScores.flatMap((ps) =>
-			buildCoachingSuggestions(
-				forecastText,
-				ps,
-				personas?.find((p) => p.id === ps.personaId),
-			),
-		);
-
-		return {
-			forecastId: f.id,
-			zoneId: f.zoneId,
-			zoneName: f.zoneName,
-			zoneSlug: f.zoneSlug,
-			forecasterName: f.forecasterName,
-			dateIssued: f.dateIssued,
-			overallDangerRating: f.overallDangerRating,
-			bottomLine: bottomLine || null,
-			currentConditions: currentConditions || null,
-			personas: personaScores,
-			coaching,
-			scoredAt: new Date().toISOString(),
-			// Golden-specific metadata
-			isGolden: true,
-			scenarioId: f.scenarioId,
-			scenarioName: f.scenarioName,
-			center: f.center,
-			dangerLevel: f.dangerLevel,
-			alertAction: f.alertAction,
-		};
-	});
-
-	return c.json({ success: true, data: results });
 });
 
 export default scorecard;
