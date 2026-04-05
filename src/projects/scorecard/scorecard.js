@@ -1257,7 +1257,24 @@ function renderRoster() {
     card.addEventListener("click", () => selectPersona(p.personaKey));
     card.querySelector(".trainer-card-delete-btn")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      confirmDeletePersona(p.personaKey);
+      // Inline confirmation — replaces card content to avoid window.confirm() which is blocked in iframes
+      const saved = card.innerHTML;
+      card.innerHTML = `
+        <div class="trainer-card-delete-confirm">
+          <p class="trainer-card-delete-msg">Delete <strong>${escHtml(p.name)}</strong>?</p>
+          <div class="trainer-card-delete-actions">
+            <button class="trainer-card-delete-yes">Delete</button>
+            <button class="trainer-card-delete-cancel">Cancel</button>
+          </div>
+        </div>`;
+      card.querySelector(".trainer-card-delete-yes").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        deletePersona(p.personaKey);
+      });
+      card.querySelector(".trainer-card-delete-cancel").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        card.innerHTML = saved;
+      });
     });
     roster.appendChild(card);
   }
@@ -1872,7 +1889,6 @@ function closeCloneModal() {
 function confirmDeletePersona(key) {
   const persona = trainerPersonas.find((p) => p.personaKey === key);
   if (!persona || persona.isBuiltIn) return;
-  if (!confirm(`Delete "${persona.name}"? This cannot be undone.`)) return;
   deletePersona(key);
 }
 

@@ -528,6 +528,13 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 }
 .trainer-persona-card:hover .trainer-card-delete-btn { opacity: 1; }
 .trainer-card-delete-btn:hover { background: #fee2e2; color: #dc2626; opacity: 1; }
+.trainer-card-delete-confirm { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.trainer-card-delete-msg { font-size: 0.82rem; color: var(--sc-text); line-height: 1.4; }
+.trainer-card-delete-actions { display: flex; gap: 8px; }
+.trainer-card-delete-yes { padding: 5px 12px; border-radius: 6px; border: 1px solid #dc2626; background: #dc2626; color: #fff; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+.trainer-card-delete-yes:hover { background: #b91c1c; }
+.trainer-card-delete-cancel { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--sc-border); background: var(--sc-surface); color: var(--sc-text-muted); font-size: 0.78rem; cursor: pointer; }
+.trainer-card-delete-cancel:hover { border-color: var(--sc-accent); color: var(--sc-text); }
 .trainer-persona-card.active { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 .trainer-persona-card-name {
   font-size: 0.88rem; font-weight: 600; color: var(--sc-text);
