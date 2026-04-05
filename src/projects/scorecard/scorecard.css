@@ -45,6 +45,39 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
 .sc-back-link { font-size: 0.82rem; color: rgba(232,237,242,0.6); text-decoration: none; }
 .sc-back-link:hover { color: var(--sc-header-text); }
 
+/* ---- Demo mode button in header ---- */
+.sc-demo-btn {
+  background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.4);
+  color: #fbbf24; padding: 6px 12px; border-radius: var(--sc-radius);
+  font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.sc-demo-btn:hover { background: rgba(251,191,36,0.28); }
+.sc-demo-btn.active { background: #fbbf24; color: #1e2d3d; }
+
+/* ---- Demo mode banner bar ---- */
+.sc-demo-bar {
+  display: none; align-items: center; gap: 16px; padding: 10px 24px;
+  background: #1c1a0e; border-bottom: 2px solid #fbbf24;
+}
+.sc-demo-bar.active { display: flex; }
+.sc-demo-label { font-size: 0.9rem; font-weight: 700; color: #fbbf24; white-space: nowrap; }
+.sc-demo-subtitle { font-size: 0.75rem; color: rgba(251,191,36,0.6); }
+.sc-demo-bar-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sc-demo-nav { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center; }
+.sc-demo-prev, .sc-demo-next {
+  background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3);
+  color: #fbbf24; width: 28px; height: 28px; border-radius: 50%; font-size: 1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.sc-demo-prev:disabled, .sc-demo-next:disabled { opacity: 0.3; cursor: not-allowed; }
+.sc-demo-prev:not(:disabled):hover, .sc-demo-next:not(:disabled):hover { background: rgba(251,191,36,0.3); }
+.sc-demo-scenario { font-size: 0.82rem; color: #fde68a; text-align: center; flex: 1; }
+.sc-demo-exit {
+  background: transparent; border: 1px solid rgba(251,191,36,0.3); color: rgba(251,191,36,0.6);
+  padding: 4px 10px; border-radius: var(--sc-radius); font-size: 0.78rem; cursor: pointer; white-space: nowrap;
+}
+.sc-demo-exit:hover { border-color: #fbbf24; color: #fbbf24; }
+
 /* ---- Problem banner ---- */
 .sc-problem-banner {
   background: var(--sc-surface2); border-bottom: 1px solid var(--sc-border);

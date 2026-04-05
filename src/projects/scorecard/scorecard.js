@@ -10,6 +10,8 @@
 let allData = [];
 let activeZoneSlug = null;
 let activeForecaster = null;
+let isDemoMode = false;
+let demoActiveIndex = 0;
 
 // Dismissed suggestions: { [zoneSlug]: Set<string> } — persisted in sessionStorage
 function getDismissed(zoneSlug) {
@@ -62,6 +64,10 @@ function dimTooltipText(p) {
 document.addEventListener("DOMContentLoaded", () => {
   switchTab(location.hash.replace("#", "") || "readability");
   loadData();
+  document.getElementById("demo-mode-btn").addEventListener("click", enterDemoMode);
+  document.getElementById("sc-demo-exit").addEventListener("click", exitDemoMode);
+  document.getElementById("sc-demo-prev").addEventListener("click", () => { demoActiveIndex = Math.max(0, demoActiveIndex - 1); renderDemoActiveScenario(); });
+  document.getElementById("sc-demo-next").addEventListener("click", () => { demoActiveIndex = Math.min(allData.length - 1, demoActiveIndex + 1); renderDemoActiveScenario(); });
   wireTabButtons();
   wireForecasterSelect();
   wireZoneSelect();
@@ -76,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadData() {
   showLoading(true);
   try {
-    const res = await fetch("/api/scorecard");
+    const url = isDemoMode ? "/api/scorecard/golden" : "/api/scorecard";
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const json = await res.json();
     allData = json.data ?? [];
@@ -88,6 +95,46 @@ async function loadData() {
   } finally {
     showLoading(false);
   }
+}
+
+async function enterDemoMode() {
+  isDemoMode = true;
+  demoActiveIndex = 0;
+  activeZoneSlug = null;
+  activeForecaster = null;
+  document.getElementById("sc-demo-bar").classList.add("active");
+  document.getElementById("demo-mode-btn").classList.add("active");
+  await loadData();
+  renderDemoActiveScenario();
+}
+
+function exitDemoMode() {
+  isDemoMode = false;
+  activeZoneSlug = null;
+  activeForecaster = null;
+  document.getElementById("sc-demo-bar").classList.remove("active");
+  document.getElementById("demo-mode-btn").classList.remove("active");
+  loadData();
+}
+
+function renderDemoActiveScenario() {
+  if (!isDemoMode || !allData.length) return;
+  const scenario = allData[demoActiveIndex];
+  if (!scenario) return;
+
+  // Update nav label
+  const DANGER_ICONS = { Low: '🟢', Moderate: '🟡', Considerable: '🟠', High: '🔴', Extreme: '⚫' };
+  const icon = DANGER_ICONS[scenario.overallDangerRating] ?? '❓';
+  const label = document.getElementById("sc-demo-scenario-label");
+  label.textContent = `${demoActiveIndex + 1} / ${allData.length} — ${scenario.zoneName} · ${icon} ${scenario.overallDangerRating} · ${formatDate(scenario.dateIssued)}`;
+
+  // Update prev/next disabled state
+  document.getElementById("sc-demo-prev").disabled = demoActiveIndex === 0;
+  document.getElementById("sc-demo-next").disabled = demoActiveIndex === allData.length - 1;
+
+  // Select this scenario as the active zone
+  activeZoneSlug = scenario.zoneSlug;
+  renderAll(scenario);
 }
 
 async function loadZone(slug) {
@@ -815,7 +862,7 @@ function renderCoachSuggestions(data) {
   const groups = [];
   const groupMap = new Map();
   for (const s of visible) {
-    const groupKey = `${s.problem}|||${s.suggestion}`;
+    const groupKey = s.suggestion;
     if (groupMap.has(groupKey)) {
       groupMap.get(groupKey).members.push(s);
     } else {
