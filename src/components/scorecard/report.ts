@@ -4,7 +4,7 @@
  * Pure business logic — no HTTP framework dependencies.
  */
 
-import { and, gte, lt, sql } from "drizzle-orm";
+import { and, gte, lt } from "drizzle-orm";
 import { getDb } from "../db";
 import { scorecardRuns } from "../db/schema";
 
@@ -176,10 +176,14 @@ export async function getAvailableReportDates(limit = 14): Promise<string[]> {
 	cutoff.setUTCDate(cutoff.getUTCDate() - limit);
 
 	const rows = await db
-		.selectDistinct({ dateIssued: scorecardRuns.dateIssued })
+		.select({ scoredAt: scorecardRuns.scoredAt })
 		.from(scorecardRuns)
-		.where(and(gte(scorecardRuns.scoredAt, cutoff), sql`${scorecardRuns.dateIssued} IS NOT NULL`))
-		.orderBy(sql`${scorecardRuns.dateIssued} DESC`);
+		.where(gte(scorecardRuns.scoredAt, cutoff));
 
-	return rows.map((r) => r.dateIssued);
+	// Derive YYYY-MM-DD from scoredAt timestamps; deduplicate and sort most-recent first
+	const seen = new Set<string>();
+	for (const r of rows) {
+		seen.add(r.scoredAt.toISOString().slice(0, 10));
+	}
+	return [...seen].sort((a, b) => b.localeCompare(a));
 }
