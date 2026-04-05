@@ -1689,3 +1689,93 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   .sc-about-modal-body { padding: 16px; gap: 20px; }
   .sc-header-text h1 { font-size: 0.88rem; }
 }
+
+/* ---------------------------------------------------------------------------
+   Cascade delete animation overlay
+   --------------------------------------------------------------------------- */
+
+.cascade-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 18, 28, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cascade-in 0.25s ease;
+}
+
+.cascade-overlay-out {
+  animation: cascade-out 0.4s ease forwards;
+}
+
+@keyframes cascade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cascade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.cascade-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cascade-mountain {
+  width: 220px;
+  height: 154px;
+  border-radius: 12px;
+  overflow: visible;
+}
+
+/* Avalanche runout pulse */
+.cascade-runout {
+  animation: runout-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes runout-pulse {
+  from { opacity: 0.1; }
+  to   { opacity: 0.35; }
+}
+
+/* Snow flakes cascade down the slope */
+.flake {
+  animation: flake-fall 1.6s ease-in infinite;
+  opacity: 0;
+}
+.f1  { animation-delay: 0.0s; animation-duration: 1.4s; }
+.f2  { animation-delay: 0.15s; animation-duration: 1.6s; }
+.f3  { animation-delay: 0.3s;  animation-duration: 1.5s; }
+.f4  { animation-delay: 0.45s; animation-duration: 1.7s; }
+.f5  { animation-delay: 0.6s;  animation-duration: 1.4s; }
+.f6  { animation-delay: 0.1s;  animation-duration: 1.8s; }
+.f7  { animation-delay: 0.25s; animation-duration: 1.5s; }
+.f8  { animation-delay: 0.4s;  animation-duration: 1.6s; }
+.f9  { animation-delay: 0.55s; animation-duration: 1.7s; }
+.f10 { animation-delay: 0.7s;  animation-duration: 1.4s; }
+
+@keyframes flake-fall {
+  0%   { opacity: 0;   transform: translateY(0) translateX(0); }
+  15%  { opacity: 0.9; }
+  85%  { opacity: 0.7; }
+  100% { opacity: 0;   transform: translateY(52px) translateX(12px); }
+}
+
+.cascade-title {
+  color: #e8eef4;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin: 0;
+}
+
+.cascade-sub {
+  color: #7ca8c8;
+  font-size: 0.82rem;
+  margin: 0;
+}

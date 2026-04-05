@@ -1871,7 +1871,7 @@ function renderRoster() {
       ? `<div class="trainer-persona-card-tags">${(p.tags).map((t) => `<span class="trainer-persona-tag">${escHtml(t)}</span>`).join("")}</div>`
       : "";
     const inactiveBadge = p.active === false ? `<span class="trainer-persona-inactive-badge">⊘</span>` : "";
-    const deleteHintHtml = `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`;
+    const deleteHintHtml = p.isBuiltIn ? "" : `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`;
 
     card.innerHTML = `
       ${inactiveBadge}
@@ -2378,7 +2378,7 @@ function renderDetailHeader(persona) {
     ? `<button class="trainer-active-toggle active" data-key="${escAttr(persona.personaKey)}" title="Click to deactivate">&#8857; Active</button>`
     : `<button class="trainer-active-toggle inactive" data-key="${escAttr(persona.personaKey)}" title="Click to activate">&#8856; Inactive</button>`;
 
-  const deleteBtn = `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`;
+  const deleteBtn = persona.isBuiltIn ? "" : `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`;
 
   document.getElementById("trainer-detail-header").innerHTML = `
     <div class="trainer-detail-header-inner">
@@ -2520,10 +2520,58 @@ function confirmDeletePersona(key) {
   deletePersona(key);
 }
 
+function showCascadeAnimation() {
+  const el = document.createElement("div");
+  el.id = "cascade-overlay";
+  el.className = "cascade-overlay";
+  el.innerHTML = `
+    <div class="cascade-inner">
+      <svg class="cascade-mountain" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- sky -->
+        <rect width="200" height="140" fill="#0f1923"/>
+        <!-- stars -->
+        <circle cx="20" cy="18" r="1" fill="#fff" opacity="0.6"/>
+        <circle cx="55" cy="10" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="90" cy="22" r="1" fill="#fff" opacity="0.7"/>
+        <circle cx="140" cy="8" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="170" cy="20" r="1" fill="#fff" opacity="0.6"/>
+        <!-- mountain body -->
+        <polygon points="100,14 20,110 180,110" fill="#2a3f5a"/>
+        <!-- snow cap -->
+        <polygon points="100,14 74,52 126,52" fill="#e8eef4"/>
+        <!-- avalanche path highlight -->
+        <polygon points="100,14 126,52 140,110 80,110 74,52" fill="#c5d8f0" opacity="0.18" class="cascade-runout"/>
+        <!-- valley floor -->
+        <rect x="0" y="110" width="200" height="30" fill="#1a2e40"/>
+        <!-- snow particles (animated via CSS) -->
+        <circle class="flake f1" cx="95" cy="35" r="2.5" fill="#dce9f5"/>
+        <circle class="flake f2" cx="105" cy="42" r="2" fill="#dce9f5"/>
+        <circle class="flake f3" cx="98" cy="50" r="3" fill="#dce9f5"/>
+        <circle class="flake f4" cx="110" cy="58" r="2" fill="#dce9f5"/>
+        <circle class="flake f5" cx="88" cy="62" r="2.5" fill="#dce9f5"/>
+        <circle class="flake f6" cx="115" cy="74" r="3" fill="#dce9f5"/>
+        <circle class="flake f7" cx="102" cy="80" r="2" fill="#dce9f5"/>
+        <circle class="flake f8" cx="120" cy="90" r="2.5" fill="#dce9f5"/>
+        <circle class="flake f9" cx="85" cy="94" r="3" fill="#dce9f5"/>
+        <circle class="flake f10" cx="108" cy="100" r="2" fill="#dce9f5"/>
+      </svg>
+      <p class="cascade-title">Clearing the Runout Zone</p>
+      <p class="cascade-sub">Cascading delete through all scored data…</p>
+    </div>`;
+  document.body.appendChild(el);
+  return el;
+}
+
 async function deletePersona(key) {
+  const overlay = showCascadeAnimation();
   try {
     const res = await fetch(`/api/personas/${key}`, { method: "DELETE" });
-    if (!res.ok) throw new Error("Delete failed");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? "Delete failed");
+    }
+    // Hold animation for at least 1.8s so the avalanche plays out
+    await new Promise((r) => setTimeout(r, 1800));
     trainerPersonas = trainerPersonas.filter((p) => p.personaKey !== key);
     trainerActiveKey = trainerPersonas[0]?.personaKey ?? null;
     renderRoster();
@@ -2533,11 +2581,13 @@ async function deletePersona(key) {
       document.getElementById("trainer-detail-empty").classList.remove("hidden");
       document.getElementById("trainer-detail-panel").classList.add("hidden");
     }
-    showTrainerToast("Persona deleted");
-    // Refresh all scored data so deleted persona disappears from every tab
+    showTrainerToast("Persona deleted — runout zone cleared");
     loadData();
   } catch (err) {
     showTrainerToast(`Failed to delete: ${err.message}`, true);
+  } finally {
+    overlay.classList.add("cascade-overlay-out");
+    setTimeout(() => overlay.remove(), 400);
   }
 }
 

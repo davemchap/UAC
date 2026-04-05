@@ -5,7 +5,7 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "../db";
-import { personas } from "../db/schema";
+import { personas, scorecardRuns } from "../db/schema";
 import { PERSONA_IDS, PERSONAS } from "../scorecard/personas";
 
 // ---------------------------------------------------------------------------
@@ -377,6 +377,7 @@ export async function deletePersona(key: string): Promise<boolean> {
 	if (!existing || existing.isBuiltIn) return false;
 
 	const db = getDb();
+	await db.delete(scorecardRuns).where(eq(scorecardRuns.personaId, key));
 	await db.delete(personas).where(eq(personas.personaKey, key));
 	return true;
 }
