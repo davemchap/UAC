@@ -215,6 +215,15 @@
             </nav>
             <!-- Background tab — persona snapshot + reading limits + dimension sliders -->
             <div class="trainer-tab-panel active" id="trainer-panel-background">
+              <!-- Travel Mode segmented control -->
+              <div class="trainer-travel-mode" id="trainer-travel-mode-group">
+                <div class="trainer-travel-mode-label">Travel Mode</div>
+                <div class="trainer-travel-btns" role="group" aria-label="Travel mode">
+                  <button class="trainer-travel-btn" data-travel-mode="human-powered" type="button">🎿 Human-Powered</button>
+                  <button class="trainer-travel-btn" data-travel-mode="motorized" type="button">🛷 Motorized</button>
+                  <button class="trainer-travel-btn" data-travel-mode="out-of-bounds" type="button">⛷ Out-of-Bounds</button>
+                </div>
+              </div>
               <!-- Persona Snapshot: read-only summary, updates after save -->
               <div class="trainer-baseline-profile" id="trainer-persona-snapshot"></div>
               <p class="trainer-snapshot-hint">Updates when you save changes below</p>

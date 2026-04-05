@@ -24,6 +24,8 @@ export interface PersonaRecord {
 	maxGradeLevel: number;
 	successCriteria: string;
 	behavioralContext: string | null;
+	// Travel mode
+	travelMode: string;
 	// Domain dimensions
 	yearsOfMountainExperience: number;
 	avalancheTrainingLevel: number;
@@ -54,6 +56,8 @@ export interface PersonaUpdate {
 	maxGradeLevel?: number;
 	successCriteria?: string;
 	behavioralContext?: string | null;
+	// Travel mode
+	travelMode?: string;
 	// Domain dimensions
 	yearsOfMountainExperience?: number;
 	avalancheTrainingLevel?: number;
@@ -85,6 +89,8 @@ interface DimensionSeed {
 	riskTolerance: number;
 	localTerrainFamiliarity: number;
 	tags: string[];
+	travelMode?: string;
+	avatarStyle?: string;
 }
 
 const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
@@ -132,6 +138,32 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 		localTerrainFamiliarity: 5,
 		tags: ["professional"],
 	},
+	ryan_kowalczyk: {
+		yearsOfMountainExperience: 15,
+		avalancheTrainingLevel: 0,
+		backcountryDaysPerSeason: 30,
+		weatherPatternRecognition: 2,
+		terrainAssessmentSkill: 1,
+		groupDecisionTendency: 4,
+		riskTolerance: 4,
+		localTerrainFamiliarity: 4,
+		tags: ["recreational", "motorized"],
+		travelMode: "motorized",
+		avatarStyle: "avataaars",
+	},
+	colby_reyes: {
+		yearsOfMountainExperience: 6,
+		avalancheTrainingLevel: 0,
+		backcountryDaysPerSeason: 20,
+		weatherPatternRecognition: 1,
+		terrainAssessmentSkill: 1,
+		groupDecisionTendency: 4,
+		riskTolerance: 3,
+		localTerrainFamiliarity: 2,
+		tags: ["recreational", "human-powered"],
+		travelMode: "human-powered",
+		avatarStyle: "avataaars",
+	},
 };
 
 // ---------------------------------------------------------------------------
@@ -156,6 +188,10 @@ Marcus is particularly alert to persistent weak layer problems and wind slab set
 	sasha: `Sasha engages with forecasts as a professional peer of the forecasting team — she reads for operational implications across her organization's entire area of responsibility. She's attuned to the forecaster's confidence level, the specificity of problem descriptions, and language that signals rapidly changing or poorly-understood conditions.
 
 Sasha is building a staff and client briefing, so she needs information that is both technically accurate and communicable under time pressure. Her primary question is "what could surprise us today that our team might underestimate?" She uses the forecast as one input among several (recent field observations, staff experience reports, weather records) and flags any disconnect between the written forecast and what her team has seen on the ground.`,
+
+	ryan_kowalczyk: `Ryan is a confident, experienced snowmobiler who has been riding these mountains since he was a teenager. He checks the UAC forecast but reads it fast — he's looking for a number and a color, then gets on with his day. He knows what "High" means but often convinces himself that his local knowledge means the danger is lower for the zones he rides. When his buddy says "the face looks good," that carries more weight than a warning in a forecast. Ryan is not reckless — he lost his best friend to an avalanche and it changed him. But the group dynamic is powerful, and once they're at the trailhead with sleds unloaded, the sunk cost of a two-hour drive is real. He doesn't know what "persistent weak layer" means. He does understand "remote triggering" if it's explained in plain terms: "a sled on the bench below can pull the slope above." Specific run-out language and terrain trap warnings reach him; jargon-heavy snowpack narratives do not.`,
+
+	colby_reyes: `Colby got into splitboarding because his co-workers at the startup were into it and it looked incredible on Instagram. He bought a full kit — beacon, probe, shovel — before he took any formal training. He's been out 20 days but mostly following people who know more than him, which has kept him safe so far. He took a short ride in a small slide near Alpental last season and was unhurt but shaken — it made him more cautious, though he's not sure what to do differently. Colby checks the UAC forecast on his phone the night before and reads the danger number. He understands that 4 and 5 are bad. He does not understand avalanche problem types, likelihood descriptors, or what "wind slab on north-facing terrain above 8,500 feet" means in terms of what he should actually do. He learns through YouTube and social media. A forecast that tells him specifically "don't skin the north-facing ridgeline above Snoqualmie Pass today" reaches him. A forecast full of snowpack layer names does not.`,
 };
 
 /** Fill in default behavioral context for built-in personas that have none yet.
@@ -265,6 +301,7 @@ export async function clonePersona(
 			maxGradeLevel: source.maxGradeLevel,
 			successCriteria: source.successCriteria,
 			behavioralContext: source.behavioralContext,
+			travelMode: source.travelMode,
 			yearsOfMountainExperience: source.yearsOfMountainExperience,
 			avalancheTrainingLevel: source.avalancheTrainingLevel,
 			backcountryDaysPerSeason: source.backcountryDaysPerSeason,

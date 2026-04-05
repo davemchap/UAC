@@ -25,11 +25,23 @@ function addDismissed(zoneSlug, key) {
 }
 function suggestionKey(s) { return `${s.personaId}:${s.section}`; }
 let activeTab = "readability";
+let activeCoachModeFilter = "all";
 
 const TRAINING_LABELS = ['None', 'Awareness', 'AIARE 1', 'AIARE 2', 'Pro 1', 'Pro 2+'];
 
 function trainingLabel(level) {
   return TRAINING_LABELS[Math.min(level ?? 0, 5)] ?? 'None';
+}
+
+const TRAVEL_MODE_META = {
+  'human-powered': { icon: '🎿', label: 'Human-Powered', cls: 'human-powered' },
+  'motorized':     { icon: '🛷', label: 'Motorized',     cls: 'motorized' },
+  'out-of-bounds': { icon: '⛷', label: 'Out-of-Bounds', cls: 'out-of-bounds' },
+};
+
+function travelModeBadgeHtml(mode) {
+  const meta = TRAVEL_MODE_META[mode] ?? TRAVEL_MODE_META['human-powered'];
+  return `<div class="trainer-persona-travel-badge ${escAttr(meta.cls)}">${meta.icon} ${escHtml(meta.label)}</div>`;
 }
 
 function dimTooltipText(p) {
@@ -709,6 +721,28 @@ function renderCoachHero(data) {
       </div>
     </div>` : '';
 
+  // Mode-aware summary: compare motorized vs human-powered average scores
+  const motorizedPersonas = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'motorized');
+  const humanPoweredPersonas = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'human-powered');
+  const oobPersonas = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'out-of-bounds');
+  const motorizedAvg = avgOf(motorizedPersonas);
+  const humanPoweredAvg = avgOf(humanPoweredPersonas);
+  const oobAvg = avgOf(oobPersonas);
+
+  let modeSummary = '';
+  const hasMixedModes = motorizedPersonas.length > 0 || oobPersonas.length > 0;
+  if (hasMixedModes && humanPoweredAvg !== null) {
+    if (motorizedAvg !== null && humanPoweredAvg - motorizedAvg >= 10) {
+      modeSummary = ` Today's forecast serves human-powered users well but leaves motorized riders underserved in the Travel Advice section.`;
+    } else if (oobAvg !== null && humanPoweredAvg - oobAvg >= 10) {
+      modeSummary = ` Today's forecast serves human-powered users well but leaves out-of-bounds travelers underserved.`;
+    }
+  }
+
+  const baseSummary = primaryGrade === "A" || primaryGrade === "B"
+    ? `Strong forecast — scores well across most personas.`
+    : `Today's forecast loses <strong>${weakest?.personaRole}</strong> most (score: ${weakest?.overall}).`;
+
   hero.innerHTML = `
     <div class="sc-coach-grade-card">
       <div class="sc-coach-grade" style="color:${primaryColor};border-color:${primaryColor}">${primaryGrade}</div>
@@ -717,9 +751,7 @@ function renderCoachHero(data) {
         <div class="sc-coach-date">${formatDate(data.dateIssued)}</div>
         ${splitRow}
         <div class="sc-coach-summary">
-          ${primaryGrade === "A" || primaryGrade === "B"
-            ? `Strong forecast — scores well across most personas.`
-            : `Today's forecast loses <strong>${weakest?.personaRole}</strong> most (score: ${weakest?.overall}).`}
+          ${baseSummary}${modeSummary ? `<span class="sc-coach-summary-mode">${modeSummary}</span>` : ''}
         </div>
       </div>
     </div>
@@ -761,7 +793,54 @@ function renderCoachPersonaGrades(data) {
   }).join("");
 }
 
+function suggestionTravelMode(s, personas) {
+  const persona = personas.find((p) => p.personaId === s.personaId);
+  return persona?.travelModeWeights?.mode ?? 'human-powered';
+}
+
+function renderCoachModeFilterChips(data, containerEl) {
+  const suggestions = data.coaching ?? [];
+  const modesPresent = new Set(suggestions.map((s) => suggestionTravelMode(s, data.personas)));
+
+  // Only render the chip row when more than one mode is present
+  if (modesPresent.size <= 1) {
+    containerEl.innerHTML = '';
+    return;
+  }
+
+  const modes = [
+    { key: 'all', label: 'All' },
+    { key: 'human-powered', label: '🎿 Human-Powered' },
+    { key: 'motorized', label: '🛷 Motorized' },
+    { key: 'out-of-bounds', label: '⛷ Out-of-Bounds' },
+  ].filter((m) => m.key === 'all' || modesPresent.has(m.key));
+
+  containerEl.innerHTML = `<div class="sc-coach-mode-filter">${
+    modes.map((m) =>
+      `<button class="trainer-filter-chip${activeCoachModeFilter === m.key ? ' active' : ''}" data-coach-mode="${escAttr(m.key)}">${escHtml(m.label)}</button>`
+    ).join('')
+  }</div>`;
+
+  containerEl.querySelectorAll('[data-coach-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      activeCoachModeFilter = btn.dataset.coachMode;
+      renderCoachSuggestions(data);
+    });
+  });
+}
+
 function renderCoachSuggestions(data) {
+  const panel = document.getElementById("coach-suggestions");
+  // Ensure filter chip container exists above the list
+  let chipContainer = panel.querySelector('.sc-coach-mode-filter-wrap');
+  if (!chipContainer) {
+    chipContainer = document.createElement('div');
+    chipContainer.className = 'sc-coach-mode-filter-wrap';
+    const title = panel.querySelector('.sc-suggestions-title');
+    title.after(chipContainer);
+  }
+  renderCoachModeFilterChips(data, chipContainer);
+
   const list = document.getElementById("suggestions-list");
   const suggestions = data.coaching ?? [];
   if (!suggestions.length) {
@@ -771,8 +850,17 @@ function renderCoachSuggestions(data) {
 
   const zoneSlug = data.zoneSlug ?? "";
   const dismissed = getDismissed(zoneSlug);
-  const visible = suggestions.filter((s) => !dismissed.has(suggestionKey(s)));
-  const hiddenCount = suggestions.length - visible.length;
+
+  // Determine which modes are present to decide if human-powered badge is meaningful
+  const modesPresent = new Set(suggestions.map((s) => suggestionTravelMode(s, data.personas)));
+  const hasMixedModes = modesPresent.size > 1;
+
+  // Apply mode filter then dismissed filter
+  const modeFiltered = activeCoachModeFilter === 'all'
+    ? suggestions
+    : suggestions.filter((s) => suggestionTravelMode(s, data.personas) === activeCoachModeFilter);
+  const visible = modeFiltered.filter((s) => !dismissed.has(suggestionKey(s)));
+  const hiddenCount = modeFiltered.length - visible.length;
 
   if (!visible.length) {
     list.innerHTML = `<p class='sc-no-data'>No suggestions — ${hiddenCount ? `${hiddenCount} dismissed. ` : ""}This forecast scores well across all personas.</p>`;
@@ -792,10 +880,21 @@ function renderCoachSuggestions(data) {
     const dimBadge = s.drivingDimensionLabel
       ? `<span class="sc-dim-badge sc-dim-badge--${escAttr(s.drivingDimension)}">${escHtml(s.drivingDimensionLabel)}</span>`
       : '';
-    return `<div class="sc-suggestion-card" data-key="${key}">
+
+    // Travel mode badge — only show when there are mixed modes, and only badge
+    // human-powered when there are also motorized/OOB personas for contrast
+    const mode = suggestionTravelMode(s, data.personas);
+    const showModeBadge = hasMixedModes && (mode !== 'human-powered' || modesPresent.has('motorized') || modesPresent.has('out-of-bounds'));
+    const modeMeta = TRAVEL_MODE_META[mode] ?? TRAVEL_MODE_META['human-powered'];
+    const modeBadge = showModeBadge
+      ? `<span class="sc-dim-badge sc-dim-badge--${escAttr(modeMeta.cls)}">${modeMeta.icon} ${escHtml(modeMeta.label)}</span>`
+      : '';
+
+    return `<div class="sc-suggestion-card" data-key="${key}" data-mode="${escAttr(mode)}">
       <div class="sc-suggestion-header">
         <span class="sc-suggestion-persona" style="color:${persona?.color ?? '#666'}">${s.personaName}</span>
         ${dimBadge}
+        ${modeBadge}
         <span class="sc-suggestion-section">${escHtml(sectionLabel(s.section))}</span>
         <span class="sc-suggestion-impact">+${s.scoreImpact} pts</span>
       </div>
@@ -825,19 +924,42 @@ function renderCoachSuggestions(data) {
   });
 }
 
+function progressBarHtml(p) {
+  const limDim = limitingDimension(p);
+  return `<div class="sc-progress-row">
+    <span class="sc-progress-label" style="color:${p.color}">${p.personaRole}</span>
+    <div class="sc-progress-track">
+      <div class="sc-progress-fill" style="width:${p.overall}%;background:${p.color}"></div>
+    </div>
+    <span class="sc-progress-val">${p.overall}</span>
+    ${limDim ? `<div class="sc-progress-dim">▸ ${escHtml(limDim)}</div>` : ''}
+  </div>`;
+}
+
 function renderCoachProgressBars(data) {
   const el = document.getElementById("coach-progress-bars");
-  el.innerHTML = data.personas.map((p) => {
-    const limDim = limitingDimension(p);
-    return `<div class="sc-progress-row">
-      <span class="sc-progress-label" style="color:${p.color}">${p.personaRole}</span>
-      <div class="sc-progress-track">
-        <div class="sc-progress-fill" style="width:${p.overall}%;background:${p.color}"></div>
-      </div>
-      <span class="sc-progress-val">${p.overall}</span>
-      ${limDim ? `<div class="sc-progress-dim">▸ ${escHtml(limDim)}</div>` : ''}
-    </div>`;
-  }).join("");
+
+  const humanPowered = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'human-powered');
+  const motorized = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'motorized');
+  const oob = data.personas.filter((p) => (p.travelModeWeights?.mode ?? 'human-powered') === 'out-of-bounds');
+
+  const hasMixedModes = motorized.length > 0 || oob.length > 0;
+
+  if (!hasMixedModes) {
+    el.innerHTML = data.personas.map(progressBarHtml).join("");
+    return;
+  }
+
+  const sections = [
+    { meta: TRAVEL_MODE_META['human-powered'], personas: humanPowered },
+    { meta: TRAVEL_MODE_META['motorized'], personas: motorized },
+    { meta: TRAVEL_MODE_META['out-of-bounds'], personas: oob },
+  ].filter((g) => g.personas.length > 0);
+
+  el.innerHTML = sections.map((g) =>
+    `<div class="sc-progress-mode-label">${g.meta.icon} ${escHtml(g.meta.label)}</div>` +
+    g.personas.map(progressBarHtml).join("")
+  ).join("");
 }
 
 function worstIssue(persona) {
@@ -1115,6 +1237,7 @@ function renderRoster() {
       <div class="trainer-persona-card-name">${escHtml(p.name)}</div>
       <div class="trainer-persona-card-role">${escHtml(p.role)}</div>
       <div class="trainer-persona-card-literacy">${escHtml(p.literacyLevel)}</div>
+      ${travelModeBadgeHtml(p.travelMode)}
       ${tagsHtml}
       <div class="trainer-persona-unsaved"></div>
     `;
@@ -1201,10 +1324,14 @@ function renderPersonaSnapshot(persona) {
   const jargonLine = terms.length > 0
     ? `Does not understand <strong>${terms.length} technical terms</strong>.`
     : "No jargon restrictions — reads all technical language.";
+  const travelMeta = TRAVEL_MODE_META[persona.travelMode] ?? TRAVEL_MODE_META['human-powered'];
   document.getElementById("trainer-persona-snapshot").innerHTML = `
     <div class="trainer-baseline-header">
       <span class="trainer-baseline-label">Persona Snapshot</span>
-      <span class="trainer-baseline-literacy">${escHtml(literacyLabel)}</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <span class="trainer-baseline-literacy">${escHtml(literacyLabel)}</span>
+        <span class="trainer-persona-travel-badge ${escAttr(travelMeta.cls)}">${travelMeta.icon} ${escHtml(travelMeta.label)}</span>
+      </div>
     </div>
     <div class="trainer-baseline-prose">
       ${escHtml(persona.name)} evaluates forecasts against a
@@ -1220,6 +1347,11 @@ function renderPersonaSnapshot(persona) {
 
 function populateParametersTab(persona) {
   renderPersonaSnapshot(persona);
+  // Set travel mode segmented control
+  const travelMode = persona.travelMode ?? 'human-powered';
+  document.querySelectorAll(".trainer-travel-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.travelMode === travelMode);
+  });
   renderTags(persona.unknownTerms ?? []);
   document.getElementById("trainer-max-sentence").value = persona.maxSentenceLength;
   document.getElementById("trainer-max-grade").value = persona.maxGradeLevel;
@@ -1357,6 +1489,19 @@ function wireDetailActions(key) {
     const persona = trainerPersonas.find((p) => p.personaKey === key);
     if (persona) persona.behavioralContext = document.getElementById("trainer-behavioral-context").value || null;
     markUnsaved(key, "voice");
+  });
+
+  // Travel mode segmented control → update persona + mark unsaved
+  document.querySelectorAll(".trainer-travel-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.travelMode;
+      const persona = trainerPersonas.find((p) => p.personaKey === key);
+      if (persona) persona.travelMode = mode;
+      document.querySelectorAll(".trainer-travel-btn").forEach((b) => {
+        b.classList.toggle("active", b.dataset.travelMode === mode);
+      });
+      markUnsaved(key, "background");
+    });
   });
 
   // Parameters inputs → mark unsaved
@@ -1853,7 +1998,7 @@ async function saveBackground(key) {
     const res = await fetch(`/api/personas/${key}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ unknownTerms: tags, maxSentenceLength: maxSentence, maxGradeLevel: maxGrade, successCriteria, ...dimUpdates }),
+      body: JSON.stringify({ unknownTerms: tags, maxSentenceLength: maxSentence, maxGradeLevel: maxGrade, successCriteria, travelMode: persona.travelMode ?? 'human-powered', ...dimUpdates }),
     });
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const updated = await res.json();

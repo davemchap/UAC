@@ -28,6 +28,12 @@ export interface PersonaDimensions {
 	localTerrainFamiliarity: number;
 }
 
+export interface TravelModeWeightResult {
+	mode: string;
+	signalsFound: string[];
+	signalsMissing: string[];
+}
+
 export interface PersonaScore {
 	personaId: PersonaId;
 	personaName: string;
@@ -41,6 +47,7 @@ export interface PersonaScore {
 	flags: FlaggedPhrase[];
 	dimensions?: PersonaDimensions;
 	tags?: string[];
+	travelModeWeights?: TravelModeWeightResult;
 }
 
 export interface ScorecardResult {
@@ -363,6 +370,125 @@ function findLongSentenceFlags(text: string, persona: Persona): FlaggedPhrase[] 
 	}
 
 	return flags;
+}
+
+// ---------------------------------------------------------------------------
+// Travel mode weights
+// ---------------------------------------------------------------------------
+
+type SignalWeights = Record<string, number>;
+
+const TRAVEL_MODE_WEIGHTS: Record<string, SignalWeights> = {
+	motorized: {
+		remoteTriggering: 1.4, // "remote trigger", "remotely triggered", "from a distance"
+		runOutZone: 1.3, // "run-out", "runout", "path", "below the slope"
+		terrainTrap: 1.3, // "terrain trap", "gully", "cliff band", "creek bed"
+		aspectElevation: 0.85, // N-NW-facing, above 9000 ft (less differentiating for sleds)
+		safeAlternative: 1.1, // "low angle", "below 30 degrees", specific safe zones
+	},
+	"human-powered": {
+		remoteTriggering: 1.0,
+		runOutZone: 1.0,
+		terrainTrap: 1.1,
+		aspectElevation: 1.25, // More relevant for skinning route planning
+		safeAlternative: 1.2,
+		travelAdviceSpecificity: 1.2, // Named routes, specific aspect/elevation callouts
+	},
+	"out-of-bounds": {
+		dangerRatingClarity: 1.5, // Is the danger level clearly communicated?
+		outOfBoundsWarning: 1.4, // Explicit out-of-bounds / sidecountry warnings
+		plainLanguageConsequence: 1.3, // Plain-language consequence statements
+		aspectElevation: 0.9,
+		technicalSnowpack: 0.7, // Less weight on deep snowpack science
+	},
+};
+
+/**
+ * Signal keyword patterns per signal name.
+ * Each entry is an array of substrings — if ANY match in the text the signal is "found".
+ */
+const SIGNAL_KEYWORDS: Record<string, string[]> = {
+	remoteTriggering: ["remote trigger", "remotely triggered", "from a distance", "remote triggering"],
+	runOutZone: ["run-out", "runout", "run out", "below the slope", "debris path", "avalanche path"],
+	terrainTrap: ["terrain trap", "gully", "cliff band", "creek bed", "terrain traps"],
+	aspectElevation: [
+		"north-facing",
+		"northwest",
+		"n-nw",
+		"above 9000",
+		"above 9,000",
+		"upper elevation",
+		"high elevation",
+	],
+	safeAlternative: ["low angle", "below 30", "mellow terrain", "safe zone", "lower angle"],
+	travelAdviceSpecificity: ["specifically", "named", "aspect and elevation", "below treeline", "above treeline"],
+	dangerRatingClarity: ["considerable", "high", "extreme", "low", "moderate", "danger rating", "danger level"],
+	outOfBoundsWarning: ["out-of-bounds", "sidecountry", "side country", "out of bounds", "resort boundary"],
+	plainLanguageConsequence: ["could be deadly", "burial", "carried", "could kill", "serious injury", "fatality"],
+	technicalSnowpack: ["swe", "temperature gradient", "facets", "depth hoar", "hn24", "hn72", "loading rate"],
+};
+
+/**
+ * Detect which signals from a travel mode's weight map are present/absent in the forecast text.
+ * Returns found and missing signal names.
+ */
+function detectTravelModeSignals(
+	forecastText: string,
+	mode: string,
+): { signalsFound: string[]; signalsMissing: string[] } {
+	const weights = TRAVEL_MODE_WEIGHTS[mode] ?? TRAVEL_MODE_WEIGHTS["human-powered"];
+	const lowerText = forecastText.toLowerCase();
+
+	const signalsFound: string[] = [];
+	const signalsMissing: string[] = [];
+
+	for (const signal of Object.keys(weights)) {
+		const keywords = SIGNAL_KEYWORDS[signal] ?? [];
+		const found = keywords.some((kw) => lowerText.includes(kw));
+		if (found) {
+			signalsFound.push(signal);
+		} else {
+			signalsMissing.push(signal);
+		}
+	}
+
+	return { signalsFound, signalsMissing };
+}
+
+/**
+ * Apply travel-mode signal weights to the raw actionability score.
+ * For each signal the mode upweights (>1.0): boost if present, reduce if absent.
+ * For each signal the mode downweights (<1.0): always apply the reduction.
+ * Clamps result to 0–100.
+ */
+function applyTravelModeWeights(
+	rawActionability: number,
+	forecastText: string,
+	mode: string,
+): { adjustedActionability: number; signalsFound: string[]; signalsMissing: string[] } {
+	const weights = TRAVEL_MODE_WEIGHTS[mode] ?? TRAVEL_MODE_WEIGHTS["human-powered"];
+	const { signalsFound, signalsMissing } = detectTravelModeSignals(forecastText, mode);
+
+	let adjustment = 0;
+
+	for (const [signal, weight] of Object.entries(weights)) {
+		const isFound = signalsFound.includes(signal);
+		if (weight > 1.0) {
+			// Upweighted signal: boost if present, penalize if absent
+			if (isFound) {
+				adjustment += (weight - 1.0) * 10;
+			} else {
+				adjustment -= (weight - 1.0) * 10;
+			}
+		} else if (weight < 1.0) {
+			// Downweighted signal: always reduce contribution
+			adjustment -= (1.0 - weight) * 5;
+		}
+		// weight === 1.0: no adjustment
+	}
+
+	const adjustedActionability = Math.round(Math.max(0, Math.min(100, rawActionability + adjustment)));
+	return { adjustedActionability, signalsFound, signalsMissing };
 }
 
 // ---------------------------------------------------------------------------
@@ -753,7 +879,20 @@ export function scoreForecast(
 			forecaster: [0.1, 0.5, 0.4],
 		};
 		const sectionWeights = sectionWeightMap[persona.literacyLevel].slice(0, sections.length);
-		const { clarity, jargonLoad, actionability } = weightedSectionScore(sectionScores, sectionWeights);
+		const {
+			clarity,
+			jargonLoad,
+			actionability: rawActionability,
+		} = weightedSectionScore(sectionScores, sectionWeights);
+
+		// Apply travel-mode signal weights to actionability (post-processing step).
+		// Personas without travelMode default to "human-powered" weights.
+		const travelMode = persona.travelMode ?? "human-powered";
+		const {
+			adjustedActionability: actionability,
+			signalsFound,
+			signalsMissing,
+		} = applyTravelModeWeights(rawActionability, fullText, travelMode);
 
 		// Flags: use dimension-adjusted thresholds for highlight positions
 		const adjustedPersona = {
@@ -792,6 +931,12 @@ export function scoreForecast(
 			localTerrainFamiliarity: persona.localTerrainFamiliarity ?? 1,
 		};
 
+		const travelModeWeights: TravelModeWeightResult = {
+			mode: travelMode,
+			signalsFound,
+			signalsMissing,
+		};
+
 		return {
 			personaId: persona.id,
 			personaName: persona.name,
@@ -805,6 +950,7 @@ export function scoreForecast(
 			flags: allFlags,
 			dimensions,
 			tags: persona.tags ? [...persona.tags] : [],
+			travelModeWeights,
 		};
 	});
 }

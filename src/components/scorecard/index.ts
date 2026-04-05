@@ -10,6 +10,7 @@ export type {
 	PersonaJourney,
 	JourneyStep,
 	CoachingSuggestion,
+	TravelModeWeightResult,
 } from "./scoring";
 export type { PersonaId, Persona } from "./personas";
 export type { ForecastForScoring } from "./queries";

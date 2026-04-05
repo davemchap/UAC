@@ -24,6 +24,7 @@ function toScoringPersona(r: PersonaRecord): Persona {
 		maxGradeLevel: r.maxGradeLevel,
 		successCriteria: r.successCriteria,
 		tags: r.tags,
+		travelMode: r.travelMode,
 		yearsOfMountainExperience: r.yearsOfMountainExperience,
 		avalancheTrainingLevel: r.avalancheTrainingLevel,
 		backcountryDaysPerSeason: r.backcountryDaysPerSeason,

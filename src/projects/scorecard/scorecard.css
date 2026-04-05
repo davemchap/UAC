@@ -346,6 +346,12 @@ mark.sc-highlight--hidden { background: transparent !important; border-bottom-co
 .sc-dim-badge--generalVocabulary      { background: #ede9fe; color: #5b21b6; }
 .sc-dim-badge--fieldExperience        { background: #dbeafe; color: #1e40af; }
 .sc-dim-badge--riskTolerance          { background: #d1fae5; color: #065f46; }
+.sc-dim-badge--motorized              { background: #fff7ed; color: #c2410c; }
+.sc-dim-badge--human-powered          { background: #f0fdf4; color: #166534; }
+.sc-dim-badge--out-of-bounds          { background: #eff6ff; color: #1d4ed8; }
+.sc-coach-mode-filter { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.sc-progress-mode-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-text-dim); padding: 8px 0 4px; }
+.sc-coach-summary-mode { display: block; margin-top: 4px; font-size: 0.8rem; color: var(--sc-text-muted); }
 
 .sc-design-principles { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 14px; }
 .sc-principles-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sc-text-muted); margin-bottom: 8px; }
@@ -868,6 +874,50 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   position: absolute; top: 8px; right: 18px;
 }
 .trainer-persona-avatar-wrap { margin-bottom: 6px; }
+
+/* ---- Travel mode segmented control ---- */
+.trainer-travel-mode {
+  margin-bottom: 16px;
+}
+.trainer-travel-mode-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--sc-text-muted); margin-bottom: 8px;
+}
+.trainer-travel-btns {
+  display: flex; gap: 0;
+}
+.trainer-travel-btn {
+  flex: 1; padding: 8px 4px;
+  font-size: 0.8rem; font-weight: 500;
+  background: var(--sc-surface2); color: var(--sc-text-muted);
+  border: 1px solid var(--sc-border); cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.trainer-travel-btn:first-child { border-radius: var(--sc-radius) 0 0 var(--sc-radius); }
+.trainer-travel-btn:last-child  { border-radius: 0 var(--sc-radius) var(--sc-radius) 0; }
+.trainer-travel-btn + .trainer-travel-btn { border-left: none; }
+.trainer-travel-btn:hover { background: var(--sc-surface); color: var(--sc-text); }
+.trainer-travel-btn.active {
+  background: var(--sc-accent); color: #fff;
+  border-color: var(--sc-accent); font-weight: 600;
+}
+
+/* ---- Travel mode badge on roster cards ---- */
+.trainer-persona-travel-badge {
+  display: inline-block; font-size: 0.65rem; padding: 1px 7px;
+  border-radius: 99px; margin-top: 4px; font-weight: 500;
+  border: 1px solid transparent;
+}
+.trainer-persona-travel-badge.human-powered {
+  background: #f0faf2; border-color: #bbddc4; color: #2d6a3f;
+}
+.trainer-persona-travel-badge.motorized {
+  background: #fff7ed; border-color: #fcd4a4; color: #92400e;
+}
+.trainer-persona-travel-badge.out-of-bounds {
+  background: #eff6ff; border-color: #bfdbfe; color: #1e4fad;
+}
 
 /* ---- Background tab: snapshot hint + section dividers ---- */
 .trainer-snapshot-hint {

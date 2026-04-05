@@ -3,7 +3,7 @@
  * Personas are synthetic scoring subjects — not tool users.
  */
 
-export type PersonaId = "jordan" | "priya" | "marcus" | "sasha";
+export type PersonaId = "jordan" | "priya" | "marcus" | "sasha" | "ryan_kowalczyk" | "colby_reyes";
 
 export interface Persona {
 	id: PersonaId;
@@ -38,6 +38,8 @@ export interface Persona {
 	groupDecisionTendency?: number;
 	/** Familiarity with local terrain features (1–5) */
 	localTerrainFamiliarity?: number;
+	/** Travel mode — affects actionability signal weighting: "motorized" | "human-powered" | "out-of-bounds" */
+	travelMode?: string;
 }
 
 export const PERSONAS: Record<PersonaId, Persona> = {
@@ -146,6 +148,70 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		successCriteria: "Forecast passes peer review without substantive revision",
 		unknownTerms: [],
 	},
+	ryan_kowalczyk: {
+		id: "ryan_kowalczyk",
+		name: "Ryan Kowalczyk",
+		role: "Recreational snowmobiler, co-owns a construction company",
+		color: "#ea580c",
+		literacyLevel: "low",
+		travelMode: "motorized",
+		tags: ["recreational", "motorized"],
+		maxSentenceLength: 20,
+		maxGradeLevel: 8.0,
+		successCriteria:
+			"Ryan reads the forecast, correctly identifies that today is a high-consequence day for the terrain he rides, and either postpones his trip or explicitly changes his planned zones. He can tell his riding group in plain terms why they should avoid a specific area. He does not interpret 'Considerable' as moderate or acceptable.",
+		unknownTerms: [
+			"persistent weak layer",
+			"PWL",
+			"facets",
+			"depth hoar",
+			"ECTP",
+			"ECT",
+			"spatial variability",
+			"storm slab",
+			"likelihood",
+			"D3",
+			"D4",
+			"propagation",
+			"aspect",
+			"terrain trap",
+			"convexity",
+			"isothermal",
+		],
+	},
+	colby_reyes: {
+		id: "colby_reyes",
+		name: "Colby Reyes",
+		role: "Software developer, splitboarder",
+		color: "#7c3aed",
+		literacyLevel: "low",
+		travelMode: "human-powered",
+		tags: ["recreational", "human-powered"],
+		maxSentenceLength: 18,
+		maxGradeLevel: 7.5,
+		successCriteria:
+			"Colby reads the forecast on his phone before leaving home, correctly understands that today is not a low-risk day, and either cancels the tour or adjusts the objective to something significantly lower-angle. He can explain the key reason to his group without needing to reference technical terms.",
+		unknownTerms: [
+			"persistent weak layer",
+			"PWL",
+			"facets",
+			"depth hoar",
+			"ECTP",
+			"ECT",
+			"storm slab",
+			"wind slab",
+			"likelihood",
+			"D2",
+			"D3",
+			"aspect",
+			"propagation",
+			"spatial variability",
+			"isothermal",
+			"spaghetti model",
+			"SWE",
+			"HN72",
+		],
+	},
 } as const;
 
-export const PERSONA_IDS: PersonaId[] = ["jordan", "priya", "marcus", "sasha"];
+export const PERSONA_IDS: PersonaId[] = ["jordan", "priya", "marcus", "sasha", "ryan_kowalczyk", "colby_reyes"];

@@ -92,6 +92,13 @@
 			"when": 1775155000000,
 			"tag": "0012_persona_dimensions",
 			"breakpoints": true
+		},
+		{
+			"idx": 13,
+			"version": "7",
+			"when": 1775160000000,
+			"tag": "0013_persona_travel_mode",
+			"breakpoints": true
 		}
 	]
 }

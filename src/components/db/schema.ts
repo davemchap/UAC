@@ -21,6 +21,8 @@ export const personas = pgTable("personas", {
 	groupDecisionTendency: integer("group_decision_tendency").notNull().default(3), // 1-5
 	riskTolerance: integer("risk_tolerance").notNull().default(3), // 1-5
 	localTerrainFamiliarity: integer("local_terrain_familiarity").notNull().default(1), // 1-5
+	// Travel mode: human-powered | motorized | out-of-bounds
+	travelMode: text("travel_mode").notNull().default("human-powered"),
 	// Persona management
 	active: boolean("active").notNull().default(true),
 	tags: text("tags").array().notNull().default([]),
