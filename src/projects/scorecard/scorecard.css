@@ -1413,3 +1413,279 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 /* =========================================================
    UX Audit fixes — minimum text size + contrast
    ========================================================= */
+
+/* =========================================================
+   Tab Intro Block (solution header — all tabs)
+   ========================================================= */
+.sc-tab-intro-block {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px;
+  padding: 16px 24px 18px;
+  background: var(--sc-surface2);
+  border-bottom: 1px solid var(--sc-border);
+  margin-bottom: 0;
+}
+.sc-tab-intro-label {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--sc-text-dim);
+  white-space: nowrap;
+}
+.sc-tab-intro-name {
+  font-size: 0.88rem; font-weight: 700; color: var(--sc-accent);
+  white-space: nowrap;
+}
+.sc-tab-intro-desc {
+  font-size: 0.82rem; color: var(--sc-text-muted); line-height: 1.45;
+}
+
+/* =========================================================
+   About button in header
+   ========================================================= */
+.sc-about-btn {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(232,237,242,0.8); padding: 6px 12px; border-radius: var(--sc-radius);
+  font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  white-space: nowrap;
+}
+.sc-about-btn:hover { background: rgba(255,255,255,0.18); color: var(--sc-header-text); }
+
+/* =========================================================
+   About Modal
+   ========================================================= */
+.sc-about-modal {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(15,25,40,0.65); backdrop-filter: blur(3px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 40px 16px 24px;
+  overflow-y: auto;
+}
+.sc-about-modal[hidden] { display: none; }
+.sc-about-modal-inner {
+  background: var(--sc-surface); border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+  width: 100%; max-width: 780px;
+  display: flex; flex-direction: column;
+}
+.sc-about-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--sc-border);
+  position: sticky; top: 0; background: var(--sc-surface);
+  border-radius: 12px 12px 0 0; z-index: 1;
+}
+.sc-about-modal-title { font-size: 1.1rem; font-weight: 700; color: var(--sc-text); }
+.sc-about-close-btn {
+  background: none; border: none; font-size: 1.4rem; color: var(--sc-text-dim);
+  cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px;
+}
+.sc-about-close-btn:hover { background: var(--sc-surface2); color: var(--sc-text); }
+.sc-about-modal-body { padding: 24px; display: flex; flex-direction: column; gap: 28px; }
+.sc-about-section h3 {
+  font-size: 0.9rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--sc-accent);
+  margin-bottom: 10px;
+}
+.sc-about-section p { font-size: 0.88rem; color: var(--sc-text-muted); line-height: 1.55; }
+.sc-about-tabs-list { display: flex; flex-direction: column; gap: 10px; }
+.sc-about-tabs-list dt {
+  font-size: 0.88rem; font-weight: 700; color: var(--sc-text); margin-bottom: 2px;
+}
+.sc-about-tabs-list dd {
+  font-size: 0.83rem; color: var(--sc-text-muted); line-height: 1.5;
+  margin-left: 0; padding-left: 16px; border-left: 2px solid var(--sc-border);
+}
+.sc-about-attr-table {
+  width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 8px;
+}
+.sc-about-attr-table th {
+  text-align: left; padding: 8px 10px; background: var(--sc-surface2);
+  border-bottom: 2px solid var(--sc-border); font-weight: 700; color: var(--sc-text);
+  font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sc-about-attr-table td {
+  padding: 9px 10px; border-bottom: 1px solid var(--sc-border);
+  vertical-align: top; line-height: 1.45; color: var(--sc-text-muted);
+}
+.sc-about-attr-table td:first-child { font-weight: 600; color: var(--sc-text); white-space: nowrap; }
+.sc-about-attr-table td:nth-child(2) { white-space: nowrap; color: var(--sc-accent); text-align: center; }
+.sc-about-attr-table tr:last-child td { border-bottom: none; }
+
+/* =========================================================
+   Help Tip (?) buttons — inline tooltips
+   ========================================================= */
+.sc-help-tip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--sc-surface2); border: 1px solid var(--sc-border);
+  color: var(--sc-text-dim); font-size: 0.65rem; font-weight: 700;
+  cursor: help; vertical-align: middle; margin-left: 4px;
+  position: relative; flex-shrink: 0;
+}
+.sc-help-tip:hover { background: var(--sc-accent); border-color: var(--sc-accent); color: #fff; }
+/* Tooltip via [title] — browser native for simplicity */
+
+/* =========================================================
+   Report Controls (date pickers for daily/weekly)
+   ========================================================= */
+.sc-report-controls {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 14px 24px; background: var(--sc-surface);
+  border-bottom: 1px solid var(--sc-border);
+}
+.sc-report-date-label { font-size: 0.84rem; color: var(--sc-text-muted); }
+.sc-report-load-btn {
+  background: var(--sc-accent); color: #fff; border: none;
+  padding: 7px 16px; border-radius: var(--sc-radius);
+  font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+}
+.sc-report-load-btn:hover { opacity: 0.85; }
+
+/* =========================================================
+   Report content areas (daily / weekly)
+   ========================================================= */
+.sc-report-loading, .sc-report-empty, .sc-report-error, .sc-report-demo-notice {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 48px 24px; text-align: center;
+}
+.sc-report-error { color: #dc2626; }
+.sc-report-demo-notice { color: var(--sc-text-muted); }
+.sc-report-date-header {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding: 14px 24px; font-size: 1rem; font-weight: 700; color: var(--sc-text);
+  border-bottom: 1px solid var(--sc-border);
+}
+.sc-report-generated { font-size: 0.75rem; color: var(--sc-text-dim); font-weight: 400; }
+.sc-report-kpi-row {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  padding: 16px 24px; border-bottom: 1px solid var(--sc-border);
+}
+.sc-report-kpi {
+  flex: 1 1 140px; background: var(--sc-surface); border: 1px solid var(--sc-border);
+  border-radius: var(--sc-radius); padding: 12px 14px;
+}
+.sc-report-kpi-value { font-size: 1.2rem; font-weight: 800; line-height: 1.2; }
+.sc-report-kpi-label { font-size: 0.72rem; color: var(--sc-text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+.sc-report-section-title {
+  font-size: 0.84rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--sc-text-dim);
+  padding: 14px 24px 6px; border-top: 1px solid var(--sc-border);
+}
+.sc-report-table-wrap { overflow-x: auto; padding: 0 24px 20px; }
+.sc-report-table {
+  width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 480px;
+}
+.sc-report-table th {
+  text-align: left; padding: 8px 10px; background: var(--sc-surface2);
+  border-bottom: 2px solid var(--sc-border); font-weight: 700;
+  font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--sc-text); white-space: nowrap;
+}
+.sc-report-table td {
+  padding: 9px 10px; border-bottom: 1px solid var(--sc-border);
+  vertical-align: middle; color: var(--sc-text);
+}
+.sc-report-table tr:last-child td { border-bottom: none; }
+.sc-report-table tr:hover td { background: var(--sc-surface2); }
+
+/* Comprehension badges */
+.sc-comp-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 4px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sc-comp-high   { background: #dcfce7; color: #15803d; }
+.sc-comp-medium { background: #fef9c3; color: #92400e; }
+.sc-comp-low    { background: #ffedd5; color: #c2410c; }
+.sc-comp-misread { background: #fee2e2; color: #b91c1c; }
+
+/* Trend indicators */
+.sc-trend-up   { color: #16a34a; font-weight: 700; }
+.sc-trend-down { color: #dc2626; font-weight: 700; }
+.sc-trend-stable { color: var(--sc-text-dim); }
+
+/* =========================================================
+   Mobile — responsive layout (≤ 768px)
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Header: stack vertically */
+  .sc-header {
+    flex-wrap: wrap; padding: 10px 14px; gap: 8px;
+  }
+  .sc-logo { display: none; }
+  .sc-header-text h1 { font-size: 0.95rem; }
+  .sc-header-text p { display: none; }
+  .sc-controls {
+    width: 100%; flex-wrap: wrap; gap: 6px;
+  }
+  .sc-select { flex: 1 1 120px; font-size: 0.82rem; }
+  .sc-demo-btn, .sc-train-btn, .sc-about-btn { font-size: 0.75rem; padding: 5px 8px; }
+  .sc-back-link { font-size: 0.75rem; }
+
+  /* Tab strip: horizontal scroll */
+  .sc-tabs {
+    display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory; gap: 0;
+    padding-bottom: 1px; /* prevent bottom border clip */
+  }
+  .sc-tab {
+    flex-shrink: 0; scroll-snap-align: start;
+    font-size: 0.75rem; padding: 10px 12px;
+  }
+  .sc-tab-icon { display: none; }
+
+  /* Tab intro: tighter on mobile */
+  .sc-tab-intro-block {
+    padding: 8px 14px; gap: 4px 8px;
+  }
+  .sc-tab-intro-desc { font-size: 0.78rem; }
+
+  /* Readability: single column */
+  .sc-readability-layout {
+    flex-direction: column;
+  }
+  .sc-sidebar { width: 100% !important; border-left: none !important; border-top: 1px solid var(--sc-border); }
+
+  /* Coach: single column */
+  .sc-coach-layout { flex-direction: column; }
+  .sc-coach-sidebar { display: none; }
+
+  /* Audit: single column */
+  .sc-audit-layout { flex-direction: column; }
+
+  /* Lens: persona strip wraps */
+  .sc-lens-persona-strip { flex-wrap: wrap; gap: 6px; }
+
+  /* Mirror: cards stack */
+  .sc-mirror-grid { grid-template-columns: 1fr !important; }
+
+  /* Summary table: scroll */
+  .sc-summary-table-wrap { overflow-x: auto; }
+  .sc-summary-table { min-width: 480px; }
+
+  /* Report KPIs: 2 per row */
+  .sc-report-kpi { flex: 1 1 calc(50% - 6px); min-width: 0; }
+  .sc-report-table-wrap { padding: 0 14px 16px; }
+  .sc-report-controls { padding: 10px 14px; gap: 8px; }
+  .sc-report-date-header { padding: 10px 14px; font-size: 0.9rem; }
+
+  /* About modal: full screen on mobile */
+  .sc-about-modal { padding: 0; align-items: flex-end; }
+  .sc-about-modal-inner {
+    max-width: 100%; border-radius: 16px 16px 0 0;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .sc-about-attr-table { font-size: 0.76rem; }
+  .sc-about-attr-table td:first-child { white-space: normal; }
+  .sc-about-attr-table td:nth-child(2) { display: none; }
+
+  /* Persona cards: full width */
+  .sc-persona-card { width: 100% !important; }
+
+  /* Main content padding */
+  .sc-main { padding: 0; }
+  .sc-tab-panel { padding: 0; }
+}
+
+@media (max-width: 480px) {
+  .sc-tab { padding: 8px 10px; font-size: 0.72rem; }
+  .sc-report-kpi { flex: 1 1 100%; }
+  .sc-about-modal-body { padding: 16px; gap: 20px; }
+  .sc-header-text h1 { font-size: 0.88rem; }
+}

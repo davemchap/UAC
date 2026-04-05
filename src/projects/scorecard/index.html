@@ -30,6 +30,7 @@
       <button id="train-personas-btn" class="sc-train-btn" aria-label="Train Persona Evaluators">
         &#9881; Train Personas
       </button>
+      <button id="about-btn" class="sc-about-btn" aria-label="About this app">&#63; About</button>
       <a href="/dashboard" class="sc-back-link">← Dashboard</a>
     </div>
   </header>
@@ -73,6 +74,14 @@
       <span class="sc-tab-icon">&#127919;</span>
       Decision Mirror
     </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-daily" id="btn-daily" data-tab="daily">
+      <span class="sc-tab-icon">&#128197;</span>
+      Daily Report
+    </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-weekly" id="btn-weekly" data-tab="weekly">
+      <span class="sc-tab-icon">&#128200;</span>
+      Weekly Report
+    </button>
   </nav>
 
   <main class="sc-main">
@@ -94,6 +103,11 @@
     <!-- TAB 1: Readability Lens                                             -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel active" id="tab-readability" role="tabpanel" aria-labelledby="btn-readability">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 1 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Readability Lens</strong>
+        <span class="sc-tab-intro-desc">Scores how readable this forecast is for each type of backcountry user. Colored underlines highlight phrases that may confuse a specific reader &mdash; click a persona chip to toggle visibility.</span>
+      </div>
       <div class="sc-solution-meta">
         <div class="sc-metrics-row" id="readability-persona-scores"></div>
         <p class="sc-lens-hint" id="readability-lens-hint"></p>
@@ -137,6 +151,11 @@
     <!-- TAB 2: Forecaster Coach                                             -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel hidden" id="tab-coach" role="tabpanel" aria-labelledby="btn-coach">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 2 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Forecaster Coach</strong>
+        <span class="sc-tab-intro-desc">Gives the forecaster writing feedback based on how each persona scored. Use the grade card and coaching suggestions to identify where to improve clarity, reduce jargon, and add decision cues.</span>
+      </div>
       <div id="sc-worst-outcome-callout" class="sc-worst-outcome-callout hidden"></div>
 
       <details class="sc-report-details" id="coach-report-details">
@@ -178,6 +197,11 @@
     <!-- TAB 3: Assumption Audit                                           -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel hidden" id="tab-audit" role="tabpanel" aria-labelledby="btn-audit">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 3 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Assumption Audit</strong>
+        <span class="sc-tab-intro-desc">Shows which technical concepts this forecast assumes readers already know. The Knowledge Gap Matrix reveals which personas have gaps &mdash; orange or red cells mean the forecast lost that reader at that concept.</span>
+      </div>
       <div id="audit-critical-gap" class="sc-audit-gap-banner" hidden></div>
       <div class="sc-audit-layout">
         <div class="sc-audit-concepts" id="audit-concepts">
@@ -201,6 +225,11 @@
     <!-- TAB 4: What They Heard (Persona Lens)                              -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel hidden" id="tab-lens" role="tabpanel" aria-labelledby="btn-lens">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 4 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">What They Heard</strong>
+        <span class="sc-tab-intro-desc">Simulates how each persona interpreted this forecast, section by section. Select a persona chip to see their comprehension level for each part &mdash; MISREAD means they likely drew the wrong conclusion.</span>
+      </div>
       <div class="sc-lens-header" id="lens-header">
         <div id="lens-persona-strip" class="sc-lens-persona-strip" role="tablist" aria-label="Select persona"></div>
       </div>
@@ -215,12 +244,152 @@
     <!-- TAB 5: Decision Mirror                                             -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel hidden" id="tab-mirror" role="tabpanel" aria-labelledby="btn-mirror">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 5 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Decision Mirror</strong>
+        <span class="sc-tab-intro-desc">Shows what decision each persona likely made based on how they read this forecast &mdash; and whether it matches what the forecast intended. INVERTED means the forecast communicated the opposite of the intended message.</span>
+      </div>
       <div id="mirror-all-clear" class="sc-mirror-all-clear" hidden></div>
       <div id="mirror-grid" class="sc-mirror-grid" aria-label="Decision accuracy per persona"></div>
       <div class="sc-audit-empty hidden" id="mirror-empty">
         <p class="sc-empty-title">Select a zone to see the decision mirror.</p>
       </div>
     </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 6: Daily Report                                               -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-daily" role="tabpanel" aria-labelledby="btn-daily">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 6 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Daily Report</strong>
+        <span class="sc-tab-intro-desc">An aggregated quality report for all zones on a given day. See which zones had the worst comprehension, which personas struggled most, and where assumption density was highest.</span>
+      </div>
+      <div class="sc-report-controls" id="daily-report-controls">
+        <label for="daily-date-input" class="sc-report-date-label">Report date:</label>
+        <input type="date" id="daily-date-input" class="sc-date-input" />
+        <button id="daily-load-btn" class="sc-report-load-btn">Load Report</button>
+      </div>
+      <div id="daily-report-content"></div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 7: Weekly Report                                               -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-weekly" role="tabpanel" aria-labelledby="btn-weekly">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 7 of 7 &mdash; Prototype</div>
+        <strong class="sc-tab-intro-name">Weekly Report</strong>
+        <span class="sc-tab-intro-desc">Weekly aggregated forecast quality trends by forecaster and zone. Track whether scores are improving or declining over time &mdash; requires at least one week of live scoring data.</span>
+      </div>
+      <div class="sc-report-controls" id="weekly-report-controls">
+        <label for="weekly-date-input" class="sc-report-date-label">Week of (any day in week):</label>
+        <input type="date" id="weekly-date-input" class="sc-date-input" />
+        <button id="weekly-load-btn" class="sc-report-load-btn">Load Report</button>
+      </div>
+      <div id="weekly-report-content"></div>
+    </section>
+
+  <!-- -------------------------------------------------------------------- -->
+  <!-- About This App Modal                                                 -->
+  <!-- -------------------------------------------------------------------- -->
+  <div id="about-modal" class="sc-about-modal" role="dialog" aria-modal="true" aria-label="About this app" hidden>
+    <div class="sc-about-modal-inner">
+      <header class="sc-about-modal-header">
+        <h2 class="sc-about-modal-title">About the Forecast Usability Scorecard</h2>
+        <button class="sc-about-close-btn" id="about-close-btn" aria-label="Close">&times;</button>
+      </header>
+      <div class="sc-about-modal-body">
+
+        <section class="sc-about-section">
+          <h3>What is this app?</h3>
+          <p>The Forecast Usability Scorecard evaluates avalanche forecasts for how well different types of backcountry users can read, understand, and act on them. Each tab is a separate prototype solution exploring a different angle of forecast usability.</p>
+        </section>
+
+        <section class="sc-about-section">
+          <h3>The 7 Solutions</h3>
+          <dl class="sc-about-tabs-list">
+            <dt>&#9685; Readability Lens</dt>
+            <dd>Scores each forecast for clarity, jargon load, and actionability across all personas. Colored underlines show phrases that may confuse a specific reader. Click persona chips to toggle highlights on/off.</dd>
+
+            <dt>&#9733; Forecaster Coach</dt>
+            <dd>Translates persona scores into writing feedback for forecasters. The grade card shows overall performance; coaching suggestions offer specific rewrites. Uses the worst-outcome callout to flag the most dangerous misread.</dd>
+
+            <dt>&#128269; Assumption Audit</dt>
+            <dd>Inventories the technical concepts a forecast assumes readers know (e.g. "wind slab", "aspect"). The Knowledge Gap Matrix maps each persona against each concept &mdash; orange/red cells mean that reader likely missed that concept entirely.</dd>
+
+            <dt>&#128100; What They Heard</dt>
+            <dd>Simulates how each persona interpreted each section of the forecast. Comprehension levels: HIGH = understood correctly, MEDIUM = partial understanding, LOW = missed key points, MISREAD = drew the wrong conclusion.</dd>
+
+            <dt>&#127919; Decision Mirror</dt>
+            <dd>Predicts what decision each persona made (go/caution/no-go) and whether it matches the forecast's intent. INVERTED = the forecast communicated the opposite of its intended message to that reader.</dd>
+
+            <dt>&#128197; Daily Report</dt>
+            <dd>An aggregated summary for all zones on a given day &mdash; shows which zones had the worst comprehension, which personas struggled most, and where assumption density was highest. Requires live scoring data.</dd>
+
+            <dt>&#128200; Weekly Report</dt>
+            <dd>Aggregated quality trends over a calendar week, broken down by forecaster and zone. Shows improving/declining/stable trends vs. the prior 3-week average. Requires at least one week of live data.</dd>
+          </dl>
+        </section>
+
+        <section class="sc-about-section">
+          <h3>The Persona Builder (&#9881; Train Personas)</h3>
+          <p>The Train Personas button opens the persona builder. Each persona represents a type of backcountry user. You can edit their background, add behavioral rules, and test-drive how they respond. Active built-in personas drive all scoring.</p>
+        </section>
+
+        <section class="sc-about-section">
+          <h3>How Persona Attributes Affect Scoring</h3>
+          <p>Each persona has attributes that directly change how forecasts are scored. Here is what each one does:</p>
+          <table class="sc-about-attr-table">
+            <thead><tr><th>Attribute</th><th>Range</th><th>How it affects scoring</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Avalanche Training Level</strong></td>
+                <td>0 – 5</td>
+                <td>Determines which jargon terms are recognized. Level 0 (no training) = UAC technical terms score as 0. Level 3+ (AIARE 2) = most UAC jargon is understood. The single strongest driver of jargon score.</td>
+              </tr>
+              <tr>
+                <td><strong>Risk Tolerance</strong></td>
+                <td>1 – 5</td>
+                <td>High tolerance (4–5) = persona needs explicit go/no-go language or they default to go. Low tolerance (1–2) = a general warning triggers caution without a specific action cue. Drives actionability score and Decision Mirror.</td>
+              </tr>
+              <tr>
+                <td><strong>Terrain Assessment Skill</strong></td>
+                <td>1 – 5</td>
+                <td>Affects comprehension of aspect, elevation band, and terrain-feature language. Low skill = "E-facing slopes above 9,000 ft" is meaningless. High skill = that phrase is a precise, actionable signal.</td>
+              </tr>
+              <tr>
+                <td><strong>Years of Mountain Experience</strong></td>
+                <td>0 – 40+</td>
+                <td>Baseline experience modifier for general mountain conditions language. Experienced users recognize seasonal snowpack references that novices skip over.</td>
+              </tr>
+              <tr>
+                <td><strong>Backcountry Days per Season</strong></td>
+                <td>0 – 100+</td>
+                <td>Frequency modifier &mdash; heavy users (30+ days) have high familiarity with snowpack language and seasonal patterns. Occasional users (1–5 days) process the same terms more slowly and with less context.</td>
+              </tr>
+              <tr>
+                <td><strong>Local Terrain Familiarity</strong></td>
+                <td>1 – 5</td>
+                <td>Affects comprehension of zone-specific place names, local hazard indicators, and named terrain features. Low familiarity = place names add noise rather than signal.</td>
+              </tr>
+              <tr>
+                <td><strong>Group Decision Tendency</strong></td>
+                <td>solo / group / leader</td>
+                <td>Used in the Decision Mirror to simulate whether risk is amplified (group pressure) or dampened (solo caution). Groups with a risk-tolerant leader tend to normalize danger ratings downward.</td>
+              </tr>
+              <tr>
+                <td><strong>Weather Pattern Recognition</strong></td>
+                <td>1 – 5</td>
+                <td>Affects comprehension of wind, temperature, and weather-driven hazard descriptions. Low recognition = wind slab formation language is abstract. High recognition = it is a concrete, actionable warning.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </div>
+    </div>
+  </div>
 
   <!-- -------------------------------------------------------------------- -->
   <!-- Persona Trainer Modal                                                -->

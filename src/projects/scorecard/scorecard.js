@@ -84,6 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
   wireDatePicker();
   wireDrawerClose();
   wireTrainerModal();
+  wireAboutModal();
+  wireDailyReport();
+  wireWeeklyReport();
 });
 
 // ---------------------------------------------------------------------------
@@ -278,11 +281,18 @@ function updateHistoricalBadge(isHistorical) {
   badge.classList.toggle("hidden", !isHistorical);
 }
 
+function getTwoWeeksAgoIso() {
+  const d = new Date();
+  d.setDate(d.getDate() - 14);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function wireDatePicker() {
   const dateInput = document.getElementById("sc-date-input");
   if (!dateInput) return;
   dateInput.value = getTodayIso();
   dateInput.max = getTodayIso();
+  dateInput.min = getTwoWeeksAgoIso();
 
   dateInput.addEventListener("change", () => {
     if (!activeZoneSlug) return;
@@ -325,6 +335,9 @@ function wireTabButtons() {
   });
 }
 
+// Tabs that have their own independent data source (not driven by zone select)
+const REPORT_TABS = new Set(["daily", "weekly"]);
+
 function switchTab(tab) {
   activeTab = tab;
   location.hash = tab;
@@ -340,6 +353,22 @@ function switchTab(tab) {
     panel.classList.toggle("active", active);
     panel.classList.toggle("hidden", !active);
   });
+
+  // Auto-load report tabs when first activated
+  if (tab === "daily") {
+    const el = document.getElementById("daily-report-content");
+    if (el && el.innerHTML === "") {
+      const dateInput = document.getElementById("daily-date-input");
+      loadDailyReport(dateInput?.value || undefined);
+    }
+  }
+  if (tab === "weekly") {
+    const el = document.getElementById("weekly-report-content");
+    if (el && el.innerHTML === "") {
+      const dateInput = document.getElementById("weekly-date-input");
+      loadWeeklyReport(dateInput?.value || undefined);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -356,9 +385,12 @@ function renderSummaryOrZone() {
 function renderSummary(zones) {
   const summaryEl = document.getElementById("sc-summary");
   const tabsEl = document.querySelector(".sc-tabs");
-  // Hide tabs + tab panels, show summary
+  // Hide tabs + zone-driven tab panels, show summary (leave report tabs untouched)
   tabsEl.classList.add("hidden");
-  document.querySelectorAll(".sc-tab-panel").forEach((p) => p.classList.add("hidden"));
+  document.querySelectorAll(".sc-tab-panel").forEach((p) => {
+    const tabId = p.id.replace("tab-", "");
+    if (!REPORT_TABS.has(tabId)) p.classList.add("hidden");
+  });
   summaryEl.classList.remove("hidden");
   const emptyEl = document.getElementById("sc-filter-empty");
   if (emptyEl) emptyEl.classList.add("hidden");
@@ -469,9 +501,10 @@ function renderAll(data) {
   // Clear empty state if present
   const emptyEl = document.getElementById("sc-filter-empty");
   if (emptyEl) emptyEl.classList.add("hidden");
-  // Restore tab panels
+  // Restore tab panels (skip report tabs — they have independent data)
   document.querySelectorAll(".sc-tab-panel").forEach((p) => {
     const tabId = p.id.replace("tab-", "");
+    if (REPORT_TABS.has(tabId)) return;
     p.classList.toggle("hidden", tabId !== activeTab);
     p.classList.toggle("active", tabId === activeTab);
   });
@@ -567,11 +600,20 @@ function renderPersonaScoreRow(containerId, personas) {
     const toggle = () => {
       if (chip.dataset.hasFlags === "false") return; // no highlights to toggle
       const active = chip.getAttribute("aria-pressed") === "true";
+      const nowHidden = active; // true = we are hiding
       chip.setAttribute("aria-pressed", active ? "false" : "true");
       const id = chip.dataset.personaId;
+      // Hide/show highlights in forecast text
       document.querySelectorAll(`.sc-highlight[data-persona-id="${id}"]`).forEach((m) => {
-        m.classList.toggle("sc-highlight--hidden", active);
+        m.classList.toggle("sc-highlight--hidden", nowHidden);
       });
+      // Hide/show individual persona dots in multi-persona highlights
+      document.querySelectorAll(`.sc-flag-dot[data-dot-persona-id="${id}"]`).forEach((dot) => {
+        dot.style.display = nowHidden ? "none" : "";
+      });
+      // Hide/show the sidebar persona card
+      const card = document.querySelector(`[data-card-persona-id="${id}"]`);
+      if (card) card.style.display = nowHidden ? "none" : "";
       updateLensHint(el);
     };
     chip.addEventListener("click", toggle);
@@ -593,7 +635,7 @@ function renderPersonaSidebar(containerId, personas) {
           <span>Terrain ${d.terrainAssessmentSkill}/5</span>
         </div>`
       : '';
-    return `<div class="sc-persona-card">
+    return `<div class="sc-persona-card" data-card-persona-id="${escAttr(p.personaId)}">
       <div class="sc-persona-card-header">
         <span class="sc-persona-avatar" style="background:${p.color}20;color:${p.color}">
           ${p.personaName[0]}
@@ -692,7 +734,7 @@ function buildAnnotatedText(data, forecastText) {
     const personas = flags.map((f) => data.personas.find((p) => p.personaId === f.personaId)).filter(Boolean);
     const primaryColor = personas[0]?.color ?? "#999";
     const dotHtml = personas.length > 1
-      ? `<span class="sc-flag-dots" aria-hidden="true">${personas.map((p) => `<span class="sc-flag-dot" style="background:${p.color}" title="${escAttr(p.personaRole)}"></span>`).join('')}</span>`
+      ? `<span class="sc-flag-dots" aria-hidden="true">${personas.map((p) => `<span class="sc-flag-dot" data-dot-persona-id="${escAttr(p.personaId)}" style="background:${p.color}" title="${escAttr(p.personaRole)}"></span>`).join('')}</span>`
       : '';
 
     // Store all flags as JSON for the drawer
@@ -2627,4 +2669,226 @@ async function saveBackground(key) {
   } catch (err) {
     showTrainerToast(`Save failed: ${err.message}`, true);
   }
+}
+
+// ---------------------------------------------------------------------------
+// About modal
+// ---------------------------------------------------------------------------
+
+function wireAboutModal() {
+  const btn = document.getElementById("about-btn");
+  const modal = document.getElementById("about-modal");
+  const closeBtn = document.getElementById("about-close-btn");
+  if (!btn || !modal) return;
+
+  const open = () => { modal.removeAttribute("hidden"); modal.focus(); };
+  const close = () => modal.setAttribute("hidden", "");
+
+  btn.addEventListener("click", open);
+  closeBtn.addEventListener("click", close);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) close(); });
+}
+
+// ---------------------------------------------------------------------------
+// Daily Report (Tab 6)
+// ---------------------------------------------------------------------------
+
+function wireDailyReport() {
+  const dateInput = document.getElementById("daily-date-input");
+  const loadBtn = document.getElementById("daily-load-btn");
+  if (!dateInput || !loadBtn) return;
+  dateInput.value = getTodayIso();
+  dateInput.max = getTodayIso();
+  loadBtn.addEventListener("click", () => loadDailyReport(dateInput.value || undefined));
+}
+
+async function loadDailyReport(date) {
+  const el = document.getElementById("daily-report-content");
+  if (!el) return;
+  if (isDemoMode) {
+    el.innerHTML = `<div class="sc-report-demo-notice">
+      <p class="sc-empty-title">Daily report requires live data.</p>
+      <p class="sc-empty-hint">Exit demo mode and load today's live forecasts to see this report.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading daily report…</p></div>`;
+  try {
+    const url = date ? `/api/scorecard/report/daily?date=${encodeURIComponent(date)}` : "/api/scorecard/report/daily";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const json = await res.json();
+    renderDailyReport(json.data, el);
+  } catch (err) {
+    el.innerHTML = `<div class="sc-report-error">Failed to load daily report: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function renderDailyReport(report, el) {
+  if (!report || !report.zones || report.zones.length === 0) {
+    el.innerHTML = `<div class="sc-report-empty">
+      <p class="sc-empty-title">No scoring data for this date.</p>
+      <p class="sc-empty-hint">The daily scheduler runs at 6am MT. Try a date after the app has been running for at least one day.</p>
+    </div>`;
+    return;
+  }
+
+  const s = report.summary ?? {};
+  const scoreColor = (n) => n >= 80 ? "#16a34a" : n >= 60 ? "#ca8a04" : "#dc2626";
+
+  const summaryCards = [
+    { label: "Overall Avg Score", value: s.avgOverallScore ?? "—", color: scoreColor(s.avgOverallScore) },
+    { label: "Forecasts Scored", value: s.totalForecastsScored ?? "—", color: "#3a7f9c" },
+    { label: "Worst Comprehension Zone", value: s.worstComprehensionZone ?? "—", color: "#dc2626" },
+    { label: "Most Inverted Persona", value: s.mostInvertedPersona ?? "—", color: "#ea580c" },
+    { label: "Highest Assumption Density", value: s.highestAssumptionDensityZone ?? "—", color: "#7c3aed" },
+  ].map((c) => `
+    <div class="sc-report-kpi">
+      <div class="sc-report-kpi-value" style="color:${c.color}">${escHtml(String(c.value))}</div>
+      <div class="sc-report-kpi-label">${escHtml(c.label)}</div>
+    </div>`).join("");
+
+  const zoneRows = report.zones.map((z) => {
+    const avg = z.avgOverallScore ?? z.overallScore ?? "—";
+    const comp = z.comprehensionLevel ?? "—";
+    const compClass = { HIGH: "sc-comp-high", MEDIUM: "sc-comp-medium", LOW: "sc-comp-low", MISREAD: "sc-comp-misread" }[comp] ?? "";
+    return `<tr>
+      <td>${escHtml(z.zoneName ?? "—")}</td>
+      <td>${escHtml(z.forecasterName ?? "—")}</td>
+      <td style="color:${scoreColor(avg)};font-weight:600">${avg}</td>
+      <td><span class="sc-comp-badge ${compClass}">${escHtml(comp)}</span></td>
+      <td>${escHtml(z.worstPersona ?? z.dominantGap ?? "—")}</td>
+    </tr>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="sc-report-date-header">
+      Daily Report &mdash; ${escHtml(report.date ?? "today")}
+      <span class="sc-report-generated">Generated ${escHtml(report.generatedAt ? new Date(report.generatedAt).toLocaleTimeString() : "")}</span>
+    </div>
+    <div class="sc-report-kpi-row">${summaryCards}</div>
+    <div class="sc-report-table-wrap">
+      <table class="sc-report-table">
+        <thead><tr><th>Zone</th><th>Forecaster</th><th>Avg Score <button class="sc-help-tip" title="Average overall score across all active personas for this zone. 0–100 scale — below 60 is a concern.">?</button></th><th>Comprehension <button class="sc-help-tip" title="Worst comprehension level across personas. MISREAD means at least one persona likely drew the wrong conclusion from the forecast.">?</button></th><th>Worst Persona Gap</th></tr></thead>
+        <tbody>${zoneRows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Weekly Report (Tab 7)
+// ---------------------------------------------------------------------------
+
+function wireWeeklyReport() {
+  const dateInput = document.getElementById("weekly-date-input");
+  const loadBtn = document.getElementById("weekly-load-btn");
+  if (!dateInput || !loadBtn) return;
+  dateInput.value = getTodayIso();
+  dateInput.max = getTodayIso();
+  loadBtn.addEventListener("click", () => loadWeeklyReport(dateInput.value || undefined));
+}
+
+async function loadWeeklyReport(weekOf) {
+  const el = document.getElementById("weekly-report-content");
+  if (!el) return;
+  if (isDemoMode) {
+    el.innerHTML = `<div class="sc-report-demo-notice">
+      <p class="sc-empty-title">Weekly report requires live data.</p>
+      <p class="sc-empty-hint">Exit demo mode and run the app for at least a week to see trend data here.</p>
+    </div>`;
+    return;
+  }
+  el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading weekly report…</p></div>`;
+  try {
+    const url = weekOf ? `/api/scorecard/report/weekly?week=${encodeURIComponent(weekOf)}` : "/api/scorecard/report/weekly";
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const json = await res.json();
+    renderWeeklyReport(json.data, el);
+  } catch (err) {
+    el.innerHTML = `<div class="sc-report-error">Failed to load weekly report: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function renderWeeklyReport(report, el) {
+  if (!report || (report.byForecaster.length === 0 && report.byZone.length === 0)) {
+    el.innerHTML = `<div class="sc-report-empty">
+      <p class="sc-empty-title">No data for this week yet.</p>
+      <p class="sc-empty-hint">The daily scorer runs at 6am MT. Run the app for a full week to see forecaster and zone trends.</p>
+    </div>`;
+    return;
+  }
+
+  const s = report.summary ?? {};
+  const scoreColor = (n) => n >= 80 ? "#16a34a" : n >= 60 ? "#ca8a04" : "#dc2626";
+  const trendIcon = (t) => ({ improving: "▲", declining: "▼", stable: "–" }[t] ?? "–");
+  const trendClass = (t) => ({ improving: "sc-trend-up", declining: "sc-trend-down", stable: "sc-trend-stable" }[t] ?? "");
+
+  const kpis = [
+    { label: "Best Forecaster", value: s.bestForecaster ?? "—", color: "#16a34a" },
+    { label: "Overall Avg Score", value: s.overallAvgScore ?? "—", color: scoreColor(s.overallAvgScore) },
+    { label: "Forecasts Scored", value: s.totalForecastsScored ?? "—", color: "#3a7f9c" },
+    { label: "Most Improved Zone", value: s.mostImprovedZone ?? "—", color: "#16a34a" },
+    { label: "Most Declining Zone", value: s.mostDecliningZone ?? "—", color: "#dc2626" },
+  ].map((c) => `
+    <div class="sc-report-kpi">
+      <div class="sc-report-kpi-value" style="color:${c.color}">${escHtml(String(c.value))}</div>
+      <div class="sc-report-kpi-label">${escHtml(c.label)}</div>
+    </div>`).join("");
+
+  const forecasterRows = report.byForecaster.map((f) => `<tr>
+    <td>${escHtml(f.forecasterName)}</td>
+    <td>${f.forecastsScored}</td>
+    <td style="color:${scoreColor(f.avgOverallScore)};font-weight:600">${f.avgOverallScore}</td>
+    <td>${f.avgClarityScore}</td>
+    <td>${f.avgActionabilityScore}</td>
+    <td>${f.invertedDecisionCount > 0 ? `<span style="color:#dc2626">${f.invertedDecisionCount}</span>` : "0"}</td>
+    <td>${escHtml(f.mostCommonFlag ?? "—")}</td>
+    <td>${escHtml(f.worstPersonaComprehension ?? "—")}</td>
+  </tr>`).join("");
+
+  const zoneRows = report.byZone.map((z) => `<tr>
+    <td>${escHtml(z.zoneName)}</td>
+    <td style="color:${scoreColor(z.avgOverallScore)};font-weight:600">${z.avgOverallScore}</td>
+    <td>${z.forecastsScored}</td>
+    <td><span class="${trendClass(z.trend)}">${trendIcon(z.trend)} ${escHtml(z.trend)}</span></td>
+  </tr>`).join("");
+
+  el.innerHTML = `
+    <div class="sc-report-date-header">
+      Weekly Report &mdash; ${escHtml(report.weekOf)} to ${escHtml(report.weekEnd)}
+      <span class="sc-report-generated">Generated ${escHtml(report.generatedAt ? new Date(report.generatedAt).toLocaleTimeString() : "")}</span>
+    </div>
+    <div class="sc-report-kpi-row">${kpis}</div>
+
+    <h4 class="sc-report-section-title">By Forecaster</h4>
+    <div class="sc-report-table-wrap">
+      <table class="sc-report-table">
+        <thead><tr>
+          <th>Forecaster</th>
+          <th>Forecasts</th>
+          <th>Avg Score <button class="sc-help-tip" title="Average overall readability score across all zones and personas this week. 0–100 scale.">?</button></th>
+          <th>Clarity</th>
+          <th>Actionability</th>
+          <th>Inverted <button class="sc-help-tip" title="Number of times the forecast communicated the opposite of its intended message to at least one persona.">?</button></th>
+          <th>Common Flag</th>
+          <th>Worst Persona</th>
+        </tr></thead>
+        <tbody>${forecasterRows}</tbody>
+      </table>
+    </div>
+
+    <h4 class="sc-report-section-title">By Zone</h4>
+    <div class="sc-report-table-wrap">
+      <table class="sc-report-table">
+        <thead><tr>
+          <th>Zone</th>
+          <th>Avg Score</th>
+          <th>Forecasts</th>
+          <th>Trend <button class="sc-help-tip" title="Compared to the prior 3-week average. Improving = score up 3+ points. Declining = score down 3+ points.">?</button></th>
+        </tr></thead>
+        <tbody>${zoneRows}</tbody>
+      </table>
+    </div>`;
 }
