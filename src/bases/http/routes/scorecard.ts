@@ -143,6 +143,16 @@ scorecard.get("/golden", async (c) => {
 			currentConditions: currentConditions || null,
 			personas: personaScores,
 			coaching,
+			personaLens: computePersonaLens(
+				forecastText,
+				f.overallDangerRating,
+				problems,
+				bottomLine,
+				currentConditions,
+				personas,
+			),
+			decisionMirror: computeDecisionMirror(forecastText, f.overallDangerRating, problems, bottomLine, personas),
+			assumptionAudit: analyzeAssumptions(forecastText, f.overallDangerRating, problems, personas),
 			scoredAt: new Date().toISOString(),
 			// Golden-specific metadata
 			isGolden: true,

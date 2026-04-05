@@ -406,7 +406,13 @@ function renderSummary(zones) {
     const select = () => {
       activeZoneSlug = row.dataset.slug;
       document.getElementById("zone-select").value = activeZoneSlug;
-      loadZone(activeZoneSlug);
+      if (isDemoMode) {
+        // In demo mode, data is already loaded — find locally to avoid 404 on golden slugs
+        const zoneData = getZoneData(activeZoneSlug);
+        if (zoneData) { hideSummary(); renderAll(zoneData); }
+      } else {
+        loadZone(activeZoneSlug);
+      }
     };
     row.addEventListener("click", select);
     row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); } });
