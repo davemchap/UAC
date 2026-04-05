@@ -255,12 +255,19 @@ function renderSummary(zones) {
     </div>
     <div class="sc-summary-table-wrap">
       <table class="sc-summary-table">
+        <colgroup>
+          <col class="col-zone" />
+          <col class="col-forecaster" />
+          <col class="col-danger" />
+          ${personas.map(() => `<col class="col-persona" />`).join("")}
+          <col class="col-avg" />
+        </colgroup>
         <thead>
           <tr>
             <th>Zone</th>
             <th>Forecaster</th>
             <th>Danger</th>
-            ${personas.map((p) => `<th style="color:${p.color}">${p.personaRole}</th>`).join("")}
+            ${personas.map((p) => `<th class="col-persona-th" style="color:${p.color}" title="${escAttr(p.personaName)} — ${escAttr(p.personaRole)}">${escHtml(p.personaName.split(" ")[0])}</th>`).join("")}
             <th>Avg</th>
           </tr>
         </thead>
@@ -271,10 +278,10 @@ function renderSummary(zones) {
             const danger = z.overallDangerRating ?? "—";
             const dColor = dangerColors[danger] ?? "#8a9bac";
             return `<tr class="sc-summary-row" data-slug="${escAttr(z.zoneSlug)}" tabindex="0" role="button" aria-label="View ${escHtml(z.zoneName)}">
-              <td class="sc-summary-zone">${escHtml(z.zoneName)}</td>
-              <td class="sc-summary-forecaster">${escHtml(z.forecasterName ?? "—")}</td>
+              <td><span class="sc-summary-zone">${escHtml(z.zoneName)}</span></td>
+              <td><span class="sc-summary-forecaster">${escHtml(z.forecasterName ?? "—")}</span></td>
               <td><span class="sc-summary-danger" style="color:${dColor}">${escHtml(danger)}</span></td>
-              ${z.personas.map((p) => `<td><span class="sc-summary-score" style="color:${p.color}">${p.overall}</span></td>`).join("")}
+              ${z.personas.map((p) => `<td class="col-score-td"><span class="sc-summary-score" style="color:${p.color}">${p.overall}</span></td>`).join("")}
               <td><span class="sc-summary-avg" style="color:${avgColor}">${avg}</span></td>
             </tr>`;
           }).join("")}
@@ -396,28 +403,19 @@ function renderPersonaScoreRow(containerId, personas) {
   const el = document.getElementById(containerId);
   el.innerHTML = personas.map((p) => {
     const hasFlags = (p.flags ?? []).length > 0;
-    const tooltip = escAttr(dimTooltipText(p));
-    if (!hasFlags) {
-      return `<div class="sc-metric-chip" style="border-color:${p.color}"
-          aria-disabled="true" disabled
-          data-dim-tooltip="${tooltip}"
-          data-persona-id="${escAttr(p.personaId)}"
-          data-persona-role="${escAttr(p.personaRole)}">
-        <span class="sc-metric-dot" style="background:${p.color}"></span>
-        <span class="sc-metric-name">${p.personaRole}</span>
-        <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
-        <span class="sc-metric-eye" aria-hidden="true">○</span>
-      </div>`;
-    }
-    return `<div class="sc-metric-chip" style="border-color:${p.color}"
-        role="button" aria-pressed="true" tabindex="0"
+    const shortName = escHtml(p.personaName.split(" ")[0]);
+    const tooltip = escAttr(`${p.personaName} — ${p.personaRole}\n${dimTooltipText(p)}`);
+    const eyeIcon = hasFlags ? "●" : "✓";
+    return `<div class="sc-metric-chip${hasFlags ? "" : " sc-metric-chip--clean"}" style="border-color:${p.color}"
+        role="button" aria-pressed="${hasFlags ? "true" : "false"}" tabindex="0"
+        data-has-flags="${hasFlags}"
         data-dim-tooltip="${tooltip}"
         data-persona-id="${escAttr(p.personaId)}"
         data-persona-role="${escAttr(p.personaRole)}">
       <span class="sc-metric-dot" style="background:${p.color}"></span>
-      <span class="sc-metric-name">${p.personaRole}</span>
+      <span class="sc-metric-name">${shortName}</span>
       <span class="sc-metric-score" style="color:${p.color}">${p.overall}</span>
-      <span class="sc-metric-eye" aria-hidden="true">●</span>
+      <span class="sc-metric-eye" aria-hidden="true">${eyeIcon}</span>
     </div>`;
   }).join("");
 
@@ -430,6 +428,7 @@ function renderPersonaScoreRow(containerId, personas) {
 
   el.querySelectorAll(".sc-metric-chip[role='button']").forEach((chip) => {
     const toggle = () => {
+      if (chip.dataset.hasFlags === "false") return; // no highlights to toggle
       const active = chip.getAttribute("aria-pressed") === "true";
       chip.setAttribute("aria-pressed", active ? "false" : "true");
       const id = chip.dataset.personaId;
