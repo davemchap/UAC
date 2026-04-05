@@ -71,6 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireTabButtons();
   wireForecasterSelect();
   wireZoneSelect();
+  wireDatePicker();
   wireDrawerClose();
   wireTrainerModal();
 });
@@ -237,9 +238,65 @@ function populateZoneSelect(data) {
 function wireZoneSelect() {
   document.getElementById("zone-select").addEventListener("change", (e) => {
     activeZoneSlug = e.target.value || null;
+    // Reset date picker to today when zone changes
+    const dateInput = document.getElementById("sc-date-input");
+    if (dateInput) dateInput.value = getTodayIso();
+    updateHistoricalBadge(false);
     if (activeZoneSlug) loadZone(activeZoneSlug);
     else renderSummaryOrZone();
   });
+}
+
+// ---------------------------------------------------------------------------
+// Date picker
+// ---------------------------------------------------------------------------
+
+function getTodayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function updateHistoricalBadge(isHistorical) {
+  const badge = document.getElementById("sc-historical-badge");
+  if (!badge) return;
+  badge.classList.toggle("hidden", !isHistorical);
+}
+
+function wireDatePicker() {
+  const dateInput = document.getElementById("sc-date-input");
+  if (!dateInput) return;
+  dateInput.value = getTodayIso();
+  dateInput.max = getTodayIso();
+
+  dateInput.addEventListener("change", () => {
+    if (!activeZoneSlug) return;
+    const selected = dateInput.value;
+    const today = getTodayIso();
+    if (!selected || selected === today) {
+      updateHistoricalBadge(false);
+      loadZone(activeZoneSlug);
+    } else {
+      updateHistoricalBadge(true);
+      loadZoneByDate(activeZoneSlug, selected);
+    }
+  });
+}
+
+async function loadZoneByDate(slug, date) {
+  showLoading(true);
+  try {
+    const res = await fetch(`/api/scorecard/${encodeURIComponent(slug)}/${encodeURIComponent(date)}`);
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error ?? `API error ${res.status}`);
+    }
+    const json = await res.json();
+    renderAll(json.data);
+  } catch (err) {
+    showError(`Failed to load forecast for ${date}: ${err.message}`);
+  } finally {
+    showLoading(false);
+  }
 }
 
 // ---------------------------------------------------------------------------

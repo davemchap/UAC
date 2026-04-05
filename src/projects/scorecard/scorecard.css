@@ -179,7 +179,12 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
 
 .sc-forecast-column { background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); overflow: hidden; }
 .sc-forecast-header { padding: 14px 16px; border-bottom: 1px solid var(--sc-border); display: flex; flex-direction: column; gap: 8px; }
+.sc-forecast-header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .sc-forecast-header h2 { font-size: 0.95rem; font-weight: 600; }
+.sc-date-picker-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.sc-date-label { font-size: 0.78rem; color: var(--sc-text-muted); white-space: nowrap; }
+.sc-date-input { font-size: 0.78rem; padding: 3px 6px; border: 1px solid var(--sc-border); border-radius: 4px; background: var(--sc-surface); color: var(--sc-text); cursor: pointer; }
+.sc-historical-badge { font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; white-space: nowrap; }
 .sc-persona-legend { display: flex; flex-wrap: wrap; gap: 10px; }
 .sc-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--sc-text-muted); }
 .sc-legend-dot { width: 10px; height: 10px; border-radius: 50%; }

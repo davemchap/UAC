@@ -106,7 +106,14 @@
       <div class="sc-readability-layout">
         <div class="sc-forecast-column" id="readability-forecast-text">
           <div class="sc-forecast-header">
-            <h2 id="readability-zone-title">Select a zone</h2>
+            <div class="sc-forecast-header-top">
+              <h2 id="readability-zone-title">Select a zone</h2>
+              <div class="sc-date-picker-wrap" id="sc-date-picker-wrap">
+                <label for="sc-date-input" class="sc-date-label">View past forecast:</label>
+                <input type="date" id="sc-date-input" class="sc-date-input" />
+                <span class="sc-historical-badge hidden" id="sc-historical-badge">Viewing historical forecast</span>
+              </div>
+            </div>
             <div class="sc-persona-legend" id="readability-legend"></div>
           </div>
           <div class="sc-forecast-body" id="readability-body"></div>

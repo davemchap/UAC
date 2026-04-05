@@ -1,5 +1,9 @@
 export { scoreForecast, simulateJourney, buildCoachingSuggestions, normalizeText } from "./scoring";
-export { getLatestForecastsForScoring, getForecastForScoringByZone } from "./queries";
+export {
+	getLatestForecastsForScoring,
+	getForecastForScoringByZone,
+	getForecastForScoringByZoneAndDate,
+} from "./queries";
 export { PERSONAS, PERSONA_IDS } from "./personas";
 export { loadGoldenScenarios } from "./golden";
 export { TRAINING_LABELS } from "./scoring";

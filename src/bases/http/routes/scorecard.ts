@@ -11,6 +11,7 @@ import {
 	computeDecisionMirror,
 	analyzeAssumptions,
 	buildDailyReport,
+	getForecastForScoringByZoneAndDate,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -163,6 +164,66 @@ scorecard.get("/report/daily", async (c) => {
 	const date = c.req.query("date");
 	const report = await buildDailyReport(date);
 	return c.json({ success: true, data: report });
+});
+
+/**
+ * GET /api/scorecard/:zoneSlug/:date
+ * Returns scored forecast for a single zone on a specific date (YYYY-MM-DD).
+ */
+scorecard.get("/:zoneSlug/:date", async (c) => {
+	const zoneSlug = c.req.param("zoneSlug");
+	const date = c.req.param("date");
+
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+		return c.json({ success: false, error: "Invalid date format. Expected YYYY-MM-DD" }, 400);
+	}
+
+	const [forecast, personas] = await Promise.all([
+		getForecastForScoringByZoneAndDate(zoneSlug, date),
+		loadScoringPersonas(),
+	]);
+
+	if (!forecast) {
+		return c.json({ success: false, error: "No forecast found for zone on date" }, 404);
+	}
+
+	const bottomLine = normalizeText(forecast.bottomLine);
+	const currentConditions = normalizeText(forecast.currentConditions);
+	const problems = [forecast.avalancheProblem1, forecast.avalancheProblem2, forecast.avalancheProblem3].filter(
+		Boolean,
+	) as string[];
+	const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
+	const personaScores = scoreForecast(forecastText, forecast.overallDangerRating, problems, bottomLine, personas);
+	const journeys = personaScores.map((ps) =>
+		simulateJourney(forecast.overallDangerRating, problems, bottomLine, currentConditions, ps),
+	);
+	const coaching = personaScores.flatMap((ps) =>
+		buildCoachingSuggestions(
+			forecastText,
+			ps,
+			personas?.find((p) => p.id === ps.personaId),
+		),
+	);
+
+	return c.json({
+		success: true,
+		data: {
+			forecastId: forecast.id,
+			zoneId: forecast.zoneId,
+			zoneName: forecast.zoneName,
+			zoneSlug: forecast.zoneSlug,
+			forecasterName: forecast.forecasterName,
+			dateIssued: forecast.dateIssued,
+			overallDangerRating: forecast.overallDangerRating,
+			bottomLine: bottomLine || null,
+			currentConditions: currentConditions || null,
+			personas: personaScores,
+			journeys,
+			coaching,
+			scoredAt: new Date().toISOString(),
+			dateQueried: date,
+		},
+	});
 });
 
 /**
