@@ -267,7 +267,20 @@ function renderSummary(zones) {
             <th>Zone</th>
             <th>Forecaster</th>
             <th>Danger</th>
-            ${personas.map((p) => `<th class="col-persona-th" style="color:${p.color}" title="${escAttr(p.personaName)} — ${escAttr(p.personaRole)}">${escHtml(p.personaName.split(" ")[0])}</th>`).join("")}
+            ${personas.map((p) => {
+              const initials = p.personaName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+              const mode = p.travelModeWeights?.mode ?? "human-powered";
+              const tMeta = TRAVEL_MODE_META[mode] ?? TRAVEL_MODE_META["human-powered"];
+              const firstName = escHtml(p.personaName.split(" ")[0]);
+              const ttip = escAttr(`${p.personaName} — ${p.personaRole}\n${tMeta.label}`);
+              return `<th class="col-persona-th" title="${ttip}">
+                <div class="sc-col-persona-header">
+                  <span class="sc-col-persona-chip" style="background:${p.color}">${initials}</span>
+                  <span class="sc-col-persona-mode">${tMeta.icon}</span>
+                  <span class="sc-col-persona-name" style="color:${p.color}">${firstName}</span>
+                </div>
+              </th>`;
+            }).join("")}
             <th>Avg</th>
           </tr>
         </thead>
@@ -1003,7 +1016,7 @@ function showChipTooltip(chip, text) {
   tip.classList.add('visible');
   const rect = chip.getBoundingClientRect();
   tip.style.left = `${rect.left + rect.width / 2 + window.scrollX}px`;
-  tip.style.top = `${rect.top + window.scrollY - tip.offsetHeight - 8}px`;
+  tip.style.top = `${rect.top + window.scrollY - 8}px`;
 }
 
 function hideChipTooltip() {
@@ -1229,9 +1242,13 @@ function renderRoster() {
       ? `<div class="trainer-persona-card-tags">${(p.tags).map((t) => `<span class="trainer-persona-tag">${escHtml(t)}</span>`).join("")}</div>`
       : "";
     const inactiveBadge = p.active === false ? `<span class="trainer-persona-inactive-badge">⊘</span>` : "";
+    const deleteHintHtml = !p.isBuiltIn
+      ? `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`
+      : "";
 
     card.innerHTML = `
       ${inactiveBadge}
+      ${deleteHintHtml}
       <div class="trainer-persona-avatar-wrap">${renderAvatar(p, 36)}</div>
       <div class="trainer-persona-card-name">${escHtml(p.name)}</div>
       <div class="trainer-persona-card-role">${escHtml(p.role)}</div>
@@ -1241,6 +1258,10 @@ function renderRoster() {
       <div class="trainer-persona-unsaved"></div>
     `;
     card.addEventListener("click", () => selectPersona(p.personaKey));
+    card.querySelector(".trainer-card-delete-btn")?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      confirmDeletePersona(p.personaKey);
+    });
     roster.appendChild(card);
   }
 }
