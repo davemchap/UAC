@@ -268,16 +268,13 @@ function renderSummary(zones) {
             <th>Forecaster</th>
             <th>Danger</th>
             ${personas.map((p) => {
-              const initials = p.personaName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
               const mode = p.travelModeWeights?.mode ?? "human-powered";
               const tMeta = TRAVEL_MODE_META[mode] ?? TRAVEL_MODE_META["human-powered"];
-              const firstName = escHtml(p.personaName.split(" ")[0]);
               const ttip = escAttr(`${p.personaName} — ${p.personaRole}\n${tMeta.label}`);
               return `<th class="col-persona-th" title="${ttip}">
                 <div class="sc-col-persona-header">
-                  <span class="sc-col-persona-chip" style="background:${p.color}">${initials}</span>
                   <span class="sc-col-persona-mode">${tMeta.icon}</span>
-                  <span class="sc-col-persona-name" style="color:${p.color}">${firstName}</span>
+                  <span class="sc-col-persona-role" style="color:${p.color}">${escHtml(p.personaRole)}</span>
                 </div>
               </th>`;
             }).join("")}
