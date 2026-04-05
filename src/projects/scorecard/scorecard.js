@@ -50,11 +50,21 @@ function dimTooltipText(p) {
   if (!p.dimensions) return '';
   const d = p.dimensions;
   const tl = trainingLabel(d.avalancheTrainingLevel);
-  const tlLine = d.avalancheTrainingLevel === 0 ? 'No formal training' : `${tl} training`;
+  const tlLine = d.avalancheTrainingLevel === 0 ? 'No formal training → jargon is invisible' : `${tl} training`;
+  const rtLine = d.riskTolerance >= 4 ? `Risk tolerance ${d.riskTolerance}/5 → needs explicit action cues`
+    : d.riskTolerance <= 2 ? `Risk tolerance ${d.riskTolerance}/5 → conservatively cautious`
+    : `Risk tolerance ${d.riskTolerance}/5`;
+  const scores = { clarity: p.clarity, actionability: p.actionability, jargon: p.jargonLoad };
+  const worst = Object.entries(scores).sort((a, b) => a[1] - b[1])[0];
+  const worstLine = { clarity: `Clarity ${p.clarity} — sentence complexity too high for this reader`,
+    actionability: `Action ${p.actionability} — decision cues too buried or hedged`,
+    jargon: `Jargon ${p.jargonLoad} — ${(p.flags ?? []).filter(f => f.category === 'jargon').length} unknown terms found` }[worst[0]] ?? '';
   return [
-    `${tlLine} · ${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs`,
-    `Terrain ${d.terrainAssessmentSkill}/5 · Weather ${d.weatherPatternRecognition}/5`,
-  ].join('\n');
+    `${tlLine}`,
+    `${rtLine}`,
+    `${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs experience`,
+    worstLine,
+  ].filter(Boolean).join('\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -242,8 +252,14 @@ function wireZoneSelect() {
     const dateInput = document.getElementById("sc-date-input");
     if (dateInput) dateInput.value = getTodayIso();
     updateHistoricalBadge(false);
-    if (activeZoneSlug) loadZone(activeZoneSlug);
-    else renderSummaryOrZone();
+    if (activeZoneSlug) {
+      if (isDemoMode) {
+        const zoneData = getZoneData(activeZoneSlug);
+        if (zoneData) { hideSummary(); renderAll(zoneData); }
+      } else {
+        loadZone(activeZoneSlug);
+      }
+    } else renderSummaryOrZone();
   });
 }
 
@@ -793,9 +809,38 @@ function stateIcon(state) {
 function renderCoach(data) {
   renderReportPreview("coach-report-body", data);
   renderCoachHero(data);
+  renderWorstOutcomeCallout(data);
   renderCoachPersonaGrades(data);
   renderCoachSuggestions(data);
   renderCoachProgressBars(data);
+}
+
+function renderWorstOutcomeCallout(data) {
+  const el = document.getElementById("sc-worst-outcome-callout");
+  if (!el) return;
+  const lens = data.personaLens;
+  if (!lens || !lens.length) { el.classList.add("hidden"); return; }
+
+  // Priority: MISREAD > INVERTED decision > LOW comprehension
+  const priority = { MISREAD: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+  const worst = [...lens].sort((a, b) =>
+    (priority[a.overallComprehension] ?? 4) - (priority[b.overallComprehension] ?? 4)
+  )[0];
+
+  if (!worst || worst.overallComprehension === "HIGH") { el.classList.add("hidden"); return; }
+
+  const mirror = (data.decisionMirror ?? []).find((m) => m.personaId === worst.personaId);
+  const isInverted = mirror?.decisionConfidence === "INVERTED";
+
+  const icon = worst.overallComprehension === "MISREAD" || isInverted ? "⚠" : "ℹ";
+  const urgency = worst.overallComprehension === "MISREAD" || isInverted ? "sc-worst-outcome-callout--alert" : "sc-worst-outcome-callout--warn";
+
+  el.className = `sc-worst-outcome-callout ${urgency}`;
+  el.innerHTML = `<span class="sc-worst-outcome-icon">${icon}</span>
+    <div class="sc-worst-outcome-body">
+      <span class="sc-worst-outcome-who" style="color:${worst.color}">${escHtml(worst.personaName)}</span>
+      <span class="sc-worst-outcome-text">${escHtml(worst.whatTheyWillDo)}</span>
+    </div>`;
 }
 
 function renderCoachHero(data) {
@@ -1413,11 +1458,10 @@ function renderPersonaLens(data) {
   if (!personaLens || !personaLens.length) {
     stripEl.innerHTML = '';
     contentEl.innerHTML = '';
-    contentEl.appendChild(emptyEl);
-    emptyEl.classList.remove('hidden');
+    if (emptyEl) emptyEl.classList.remove('hidden');
     return;
   }
-  emptyEl.classList.add('hidden');
+  if (emptyEl) emptyEl.classList.add('hidden');
 
   // Build pill strip
   stripEl.innerHTML = personaLens.map((pl) =>

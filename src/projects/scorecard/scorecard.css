@@ -1389,3 +1389,27 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   font-size: 0.78rem; color: #dc2626; margin-top: 4px;
 }
 .trainer-modal-inner { position: relative; }
+
+/* =========================================================
+   Worst-Outcome Callout (Coach tab — COM-B Capability fix)
+   ========================================================= */
+.sc-worst-outcome-callout {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;
+  border-left: 3px solid;
+}
+.sc-worst-outcome-callout.hidden { display: none; }
+.sc-worst-outcome-callout--alert {
+  background: #fef2f2; border-color: #dc2626;
+}
+.sc-worst-outcome-callout--warn {
+  background: #fffbeb; border-color: #d97706;
+}
+.sc-worst-outcome-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.sc-worst-outcome-body { display: flex; flex-direction: column; gap: 2px; }
+.sc-worst-outcome-who { font-size: 0.78rem; font-weight: 700; }
+.sc-worst-outcome-text { font-size: 0.82rem; color: var(--sc-text); line-height: 1.4; }
+
+/* =========================================================
+   UX Audit fixes — minimum text size + contrast
+   ========================================================= */
