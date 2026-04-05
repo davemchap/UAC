@@ -1229,6 +1229,18 @@ function hideChipTooltip() {
   if (tip) { tip.classList.remove('visible'); tip.setAttribute('aria-hidden', 'true'); }
 }
 
+function wireHelpTips(container) {
+  (container ?? document).querySelectorAll('.sc-help-tip').forEach((btn) => {
+    const text = btn.getAttribute('title') ?? btn.getAttribute('data-tip') ?? '';
+    if (!text) return;
+    btn.removeAttribute('title'); // prevent double tooltip
+    btn.addEventListener('mouseenter', () => showChipTooltip(btn, text));
+    btn.addEventListener('mouseleave', hideChipTooltip);
+    btn.addEventListener('focus', () => showChipTooltip(btn, text));
+    btn.addEventListener('blur', hideChipTooltip);
+  });
+}
+
 function wireDrawerClose() {
   document.getElementById("drawer-close").addEventListener("click", () =>
     document.getElementById("suggestion-drawer").classList.add("hidden"));
@@ -2845,6 +2857,7 @@ function renderDailyReport(report, el) {
         <tbody>${zoneRows}</tbody>
       </table>
     </div>`;
+  wireHelpTips(el);
 }
 
 // ---------------------------------------------------------------------------
@@ -2962,4 +2975,5 @@ function renderWeeklyReport(report, el) {
         <tbody>${zoneRows}</tbody>
       </table>
     </div>`;
+  wireHelpTips(el);
 }
