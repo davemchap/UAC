@@ -84,17 +84,14 @@
 ### 5. Weekly report by region and forecaster — forecast "quality"
 **Request:** Weekly aggregated report by region and forecaster showing forecast quality over time.
 
-**Status:** ❌ **Not started**
+**Status:** ✅ **Done**
 
-**Evidence:** No weekly report component, no forecaster attribution aggregation, no trend data.
-
-**Missing:**
-- No `forecaster_scores` or `forecast_quality_log` table
-- No weekly aggregation query
-- No report generation for "by forecaster" or "by region" breakdowns
-- No trend visualization (quality improving/declining over time)
-
-**Next:** Build `reports` component with `generateWeeklyReport()`, add DB table for persisting per-forecast scores, add `/api/reports/weekly` endpoint.
+**Evidence:**
+- `generateWeeklyReport(weekOf?)` in `src/components/scorecard/weekly-report.ts`
+- Aggregates `scorecard_runs` by forecaster: avgOverallScore, avgClarityScore, avgActionabilityScore, invertedDecisionCount, worstPersonaComprehension
+- Aggregates by zone: avgOverallScore, forecastsScored, trend (improving/declining/stable vs prior 3 weeks)
+- Summary fields: bestForecaster, mostImprovedZone, mostDecliningZone, overallAvgScore, totalForecastsScored
+- `GET /api/scorecard/report/weekly?week=YYYY-MM-DD` — defaults to current week, accepts any past Monday
 
 ---
 
@@ -111,8 +108,4 @@
 
 ## Iteration Queue (active)
 
-- [ ] Daily batch scorecard job (Item 2)
-- [ ] Daily management report endpoint + format (Item 3)
-- [ ] Historical forecast evaluation by date (Item 4)
-- [ ] Weekly report by region + forecaster (Item 5)
-- [ ] Frontend tabs: Assumption Audit, What They Heard, Decision Mirror (backlog story app-gsm.3/4)
+All 5 of Chad's requests are ✅ complete. No remaining items.
