@@ -93,6 +93,9 @@ interface DimensionSeed {
 	avatarStyle?: string;
 }
 
+const T_RECREATIONAL = "recreational";
+const T_HUMAN_POWERED = "human-powered";
+
 const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 	jordan_mercer: {
 		yearsOfMountainExperience: 4,
@@ -103,7 +106,7 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 		groupDecisionTendency: 2,
 		riskTolerance: 4,
 		localTerrainFamiliarity: 2,
-		tags: ["recreational"],
+		tags: [T_RECREATIONAL],
 	},
 	priya_sundaram: {
 		yearsOfMountainExperience: 12,
@@ -114,7 +117,7 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 		groupDecisionTendency: 3,
 		riskTolerance: 3,
 		localTerrainFamiliarity: 3,
-		tags: ["recreational"],
+		tags: [T_RECREATIONAL],
 	},
 	marcus_ohlsson: {
 		yearsOfMountainExperience: 18,
@@ -147,7 +150,7 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 		groupDecisionTendency: 4,
 		riskTolerance: 4,
 		localTerrainFamiliarity: 4,
-		tags: ["recreational", "motorized"],
+		tags: [T_RECREATIONAL, "motorized"],
 		travelMode: "motorized",
 		avatarStyle: "avataaars",
 	},
@@ -160,9 +163,45 @@ const PERSONA_DIMENSIONS: Record<string, DimensionSeed> = {
 		groupDecisionTendency: 4,
 		riskTolerance: 3,
 		localTerrainFamiliarity: 2,
-		tags: ["recreational", "human-powered"],
-		travelMode: "human-powered",
+		tags: [T_RECREATIONAL, T_HUMAN_POWERED],
+		travelMode: T_HUMAN_POWERED,
 		avatarStyle: "avataaars",
+	},
+	stuart: {
+		yearsOfMountainExperience: 8,
+		avalancheTrainingLevel: 0,
+		backcountryDaysPerSeason: 5,
+		weatherPatternRecognition: 2,
+		terrainAssessmentSkill: 1,
+		groupDecisionTendency: 3,
+		riskTolerance: 2,
+		localTerrainFamiliarity: 3,
+		tags: [T_RECREATIONAL, "family", T_HUMAN_POWERED],
+		travelMode: T_HUMAN_POWERED,
+	},
+	beth: {
+		yearsOfMountainExperience: 12,
+		avalancheTrainingLevel: 1,
+		backcountryDaysPerSeason: 45,
+		weatherPatternRecognition: 3,
+		terrainAssessmentSkill: 2,
+		groupDecisionTendency: 3,
+		riskTolerance: 3,
+		localTerrainFamiliarity: 4,
+		tags: [T_RECREATIONAL, T_HUMAN_POWERED, "athlete"],
+		travelMode: T_HUMAN_POWERED,
+	},
+	mike: {
+		yearsOfMountainExperience: 10,
+		avalancheTrainingLevel: 1,
+		backcountryDaysPerSeason: 7,
+		weatherPatternRecognition: 3,
+		terrainAssessmentSkill: 1,
+		groupDecisionTendency: 4,
+		riskTolerance: 2,
+		localTerrainFamiliarity: 1,
+		tags: [T_RECREATIONAL, T_HUMAN_POWERED, "remote"],
+		travelMode: T_HUMAN_POWERED,
 	},
 };
 
@@ -191,7 +230,19 @@ Sasha is building a staff and client briefing, so she needs information that is 
 
 	ryan_kowalczyk: `Ryan is a confident, experienced snowmobiler who has been riding these mountains since he was a teenager. He checks the UAC forecast but reads it fast — he's looking for a number and a color, then gets on with his day. He knows what "High" means but often convinces himself that his local knowledge means the danger is lower for the zones he rides. When his buddy says "the face looks good," that carries more weight than a warning in a forecast. Ryan is not reckless — he lost his best friend to an avalanche and it changed him. But the group dynamic is powerful, and once they're at the trailhead with sleds unloaded, the sunk cost of a two-hour drive is real. He doesn't know what "persistent weak layer" means. He does understand "remote triggering" if it's explained in plain terms: "a sled on the bench below can pull the slope above." Specific run-out language and terrain trap warnings reach him; jargon-heavy snowpack narratives do not.`,
 
+	stuart: `Stuart reads the avalanche forecast the way he reads a clinical guideline — looking for the bottom-line recommendation and a clear action threshold. He has strong general reading comprehension but zero avalanche vocabulary. Technical terms like "persistent weak layer," "propagation," or "cross-loaded" wash over him without registering; he substitutes a vague sense of "that sounds technical and probably important" and moves on. He anchors heavily on the overall danger number and the headline.
+
+Stuart is motivated by protecting his family. He is conservative by instinct and will err toward caution if the forecast gives him a clear signal — but the current forecast language rarely does. He needs terrain described in terms he can visualize (slope angle like a ski run comparison, not degrees), consequences described in human terms (not "D3 destructive force"), and a clear action he can take and explain to his 18-year-old son and wife. His CME-trained brain responds well to decision frameworks: "if X, then do Y." He is not reckless — he just lacks the schema to decode the signal.`,
+
+	beth: `Beth reads the forecast on her phone at 5:45am between a training interval and a work email. She reads fast, absorbs the danger number and the primary problem, and mentally maps it to her planned skimo route. She has taken Companion Rescue training, so she knows the search-and-rescue end of avalanche incidents — but she has no formal framework for the front-end decision (what terrain to avoid, how to read snowpack instability signals). She fills the gap with pattern-matching from years of experience and trusted friends in her ski community.
+
+Beth is not overconfident — she knows she has gaps and says so. Her problem is time. A forecast that requires three minutes of careful reading to extract the terrain implication for her specific route will get a 30-second skim. She needs the most critical action to be in the first sentence, expressed in terms that map to a skimo racer's route vocabulary: elevation bands, aspect, ridge vs. meadow, exposure time. She responds to urgency in tone when the danger warrants it. She will not be scared off by strong language — she'll use it to make a better call.`,
+
 	colby_reyes: `Colby got into splitboarding because his co-workers at the startup were into it and it looked incredible on Instagram. He bought a full kit — beacon, probe, shovel — before he took any formal training. He's been out 20 days but mostly following people who know more than him, which has kept him safe so far. He took a short ride in a small slide near Alpental last season and was unhurt but shaken — it made him more cautious, though he's not sure what to do differently. Colby checks the UAC forecast on his phone the night before and reads the danger number. He understands that 4 and 5 are bad. He does not understand avalanche problem types, likelihood descriptors, or what "wind slab on north-facing terrain above 8,500 feet" means in terms of what he should actually do. He learns through YouTube and social media. A forecast that tells him specifically "don't skin the north-facing ridgeline above Snoqualmie Pass today" reaches him. A forecast full of snowpack layer names does not.`,
+
+	mike: `Mike has a PhD in environmental science and reads technical documents for a living — but avalanche forecasts are not environmental science reports, and the domain vocabulary is entirely foreign to him. He subscribes to the UAC daily email and reads it faithfully from Cincinnati, building a mental model of the Wasatch snowpack over the winter as preparation for his one real trip each year. He knows the five-point danger scale exists. He understands "High" means serious. He cannot tell you the difference between a storm slab and a wind slab, or why a persistent weak layer from November is still relevant in March.
+
+Mike's vulnerability is deference. He is intellectually humble about his limits and will defer to his more experienced college buddies on the trip — but those buddies are recreational skiers, not avalanche professionals. The group's collective false confidence is a risk multiplier. A forecast that gives Mike the vocabulary to ask a smart question — "the forecast says persistent slab, what does that mean for the route today?" — is worth more than one that explains snowpack mechanics he lacks the field experience to apply. Mike is reachable through scientific framing (causality, probability, consequence scale) but needs the terrain implications spelled out explicitly, since he has no local knowledge to translate elevation bands into actual terrain features he can visualize.`,
 };
 
 /** Fill in default behavioral context for built-in personas that have none yet.
