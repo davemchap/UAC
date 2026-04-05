@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS scorecard_runs (
+  id SERIAL PRIMARY KEY,
+  forecast_id INTEGER NOT NULL,
+  zone_id INTEGER NOT NULL,
+  zone_slug TEXT NOT NULL,
+  zone_name TEXT NOT NULL,
+  forecaster_name TEXT,
+  date_issued TEXT NOT NULL,
+  overall_danger_rating TEXT,
+  persona_id TEXT NOT NULL,
+  persona_name TEXT NOT NULL,
+  overall_score INTEGER,
+  clarity_score INTEGER,
+  jargon_score INTEGER,
+  actionability_score INTEGER,
+  comprehension_level TEXT,
+  divergence_score INTEGER,
+  decision_confidence TEXT,
+  assumption_density INTEGER,
+  scored_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(forecast_id, persona_id)
+);

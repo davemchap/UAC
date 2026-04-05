@@ -240,3 +240,29 @@ export const observerHandles = pgTable("observer_handles", {
 	observationCount: integer("observation_count").notNull().default(0),
 	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
+
+export const scorecardRuns = pgTable(
+	"scorecard_runs",
+	{
+		id: serial("id").primaryKey(),
+		forecastId: integer("forecast_id").notNull(),
+		zoneId: integer("zone_id").notNull(),
+		zoneSlug: text("zone_slug").notNull(),
+		zoneName: text("zone_name").notNull(),
+		forecasterName: text("forecaster_name"),
+		dateIssued: text("date_issued").notNull(),
+		overallDangerRating: text("overall_danger_rating"),
+		personaId: text("persona_id").notNull(),
+		personaName: text("persona_name").notNull(),
+		overallScore: integer("overall_score"),
+		clarityScore: integer("clarity_score"),
+		jargonScore: integer("jargon_score"),
+		actionabilityScore: integer("actionability_score"),
+		comprehensionLevel: text("comprehension_level"),
+		divergenceScore: integer("divergence_score"),
+		decisionConfidence: text("decision_confidence"),
+		assumptionDensity: integer("assumption_density"),
+		scoredAt: timestamp("scored_at", { withTimezone: true }).notNull().defaultNow(),
+	},
+	(t) => [unique().on(t.forecastId, t.personaId)],
+);

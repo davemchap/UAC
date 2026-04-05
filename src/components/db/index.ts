@@ -15,6 +15,7 @@ import {
 	forecastZones,
 	observationReports,
 	observerHandles,
+	scorecardRuns,
 	snowpackReadings,
 	snotelStations,
 	weatherReadings,
@@ -207,4 +208,5 @@ export {
 	snowpackReadings,
 	alertThresholds,
 	escalationRules,
+	scorecardRuns,
 };
