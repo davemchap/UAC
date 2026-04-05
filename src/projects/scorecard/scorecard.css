@@ -98,8 +98,13 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
   flex: 1; display: flex; align-items: center; gap: 10px;
 }
 .sc-date-nav-label {
-  font-size: 0.9rem; font-weight: 600; color: var(--sc-text); min-width: 100px;
+  font-size: 0.9rem; font-weight: 600; color: var(--sc-text);
+  min-width: 100px; padding: 4px 10px; border-radius: 6px;
+  background: transparent; border: 1px solid transparent; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
 }
+.sc-date-nav-label:hover { background: var(--sc-surface3); border-color: var(--sc-border); }
+.sc-date-nav-label.is-historical { color: #f59e0b; }
 .sc-historical-badge {
   background: var(--sc-accent); color: #fff;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
@@ -111,6 +116,19 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
   cursor: pointer; transition: background 0.15s;
 }
 .sc-date-nav-today:hover { background: var(--sc-surface3); color: var(--sc-text); }
+.sc-date-nav-status {
+  display: flex; align-items: center; gap: 5px; margin-left: auto;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+}
+.sc-date-nav-status-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.sc-date-nav-status.is-live .sc-date-nav-status-dot { background: #22c55e; }
+.sc-date-nav-status.is-live .sc-date-nav-status-text { color: #22c55e; }
+.sc-date-nav-status.is-historical .sc-date-nav-status-dot { background: #f59e0b; }
+.sc-date-nav-status.is-historical .sc-date-nav-status-text { color: #f59e0b; }
+.sc-date-nav-status.is-no-data .sc-date-nav-status-dot { background: #ef4444; }
+.sc-date-nav-status.is-no-data .sc-date-nav-status-text { color: #ef4444; }
 
 .sc-problem-banner {
   background: var(--sc-surface2); border-bottom: 1px solid var(--sc-border);

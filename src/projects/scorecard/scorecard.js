@@ -289,11 +289,27 @@ function wireDatePicker() {
   const prevBtn = document.getElementById("sc-date-prev");
   const nextBtn = document.getElementById("sc-date-next");
   const todayBtn = document.getElementById("sc-date-today");
+  const labelBtn = document.getElementById("sc-date-nav-label");
+  const hiddenInput = document.getElementById("sc-date-input");
   if (!prevBtn || !nextBtn) return;
 
   prevBtn.addEventListener("click", () => stepGlobalDate(-1));
   nextBtn.addEventListener("click", () => stepGlobalDate(1));
   todayBtn?.addEventListener("click", () => setGlobalDate(null));
+
+  // Label button opens native date picker
+  labelBtn?.addEventListener("click", () => {
+    if (hiddenInput) {
+      hiddenInput.value = globalSelectedDate ?? getTodayIso();
+      hiddenInput.max = getTodayIso();
+      hiddenInput.min = getTwoWeeksAgoIso();
+      try { hiddenInput.showPicker(); } catch { hiddenInput.click(); }
+    }
+  });
+  hiddenInput?.addEventListener("change", () => {
+    const val = hiddenInput.value;
+    setGlobalDate(val && val !== getTodayIso() ? val : null);
+  });
 }
 
 function stepGlobalDate(delta) {
@@ -309,22 +325,39 @@ function stepGlobalDate(delta) {
 
 function setGlobalDate(date) {
   globalSelectedDate = date;
-  const today = getTodayIso();
+  const isHistorical = date !== null;
+
+  // Update label button
   const label = document.getElementById("sc-date-nav-label");
-  const badge = document.getElementById("sc-historical-badge");
+  if (label) {
+    label.textContent = isHistorical ? formatNavDate(date) : "Today";
+    label.setAttribute("aria-label", isHistorical
+      ? `Select date — currently ${formatNavDate(date)}`
+      : "Select date — currently today");
+    label.classList.toggle("is-historical", isHistorical);
+  }
+
+  // Update arrows and Today button
   const nextBtn = document.getElementById("sc-date-next");
   const todayBtn = document.getElementById("sc-date-today");
-  const hiddenInput = document.getElementById("sc-date-input");
-
-  const isHistorical = date !== null;
-  if (label) label.textContent = isHistorical ? formatNavDate(date) : "Today";
-  if (badge) badge.classList.toggle("hidden", !isHistorical);
   if (nextBtn) nextBtn.disabled = !isHistorical;
   if (todayBtn) todayBtn.classList.toggle("hidden", !isHistorical);
-  if (hiddenInput) hiddenInput.value = date ?? today;
 
-  // Reload active zone-based tab with new date
-  if (REPORT_TABS.has(activeTab)) return;
+  // Update status indicator
+  const status = document.getElementById("sc-date-nav-status");
+  if (status) {
+    status.className = `sc-date-nav-status ${isHistorical ? "is-historical" : "is-live"}`;
+    const dot = status.querySelector(".sc-date-nav-status-dot");
+    const text = status.querySelector(".sc-date-nav-status-text");
+    if (text) text.textContent = isHistorical ? "Historical" : "Live";
+  }
+
+  // Drive data loads — zone tabs and report tabs
+  if (REPORT_TABS.has(activeTab)) {
+    if (activeTab === "daily") loadDailyReport(date ?? getTodayIso());
+    else if (activeTab === "weekly") loadWeeklyReport(date ?? getTodayIso());
+    return;
+  }
   if (activeZoneSlug) {
     if (isHistorical) {
       loadZoneByDate(activeZoneSlug, date);
