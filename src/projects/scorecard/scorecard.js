@@ -586,21 +586,46 @@ function buildAnnotatedText(data, forecastText) {
       <p class="sc-clean-note">No readability flags found — this forecast scores well across all personas.</p>`;
   }
 
-  // Forward pass: sort ascending, skip overlapping flags, escape plain segments
-  const sorted = [...allFlags]
-    .filter((f) => f.startIndex >= 0 && f.startIndex < f.endIndex && f.endIndex <= forecastText.length)
-    .sort((a, b) => a.startIndex - b.startIndex);
+  // Group flags by span so overlapping/identical ranges render as one mark with multiple persona dots
+  const spanMap = new Map();
+  for (const flag of allFlags) {
+    if (flag.startIndex < 0 || flag.startIndex >= flag.endIndex || flag.endIndex > forecastText.length) continue;
+    const key = `${flag.startIndex}:${flag.endIndex}`;
+    if (!spanMap.has(key)) spanMap.set(key, []);
+    spanMap.get(key).push(flag);
+  }
+
+  // Sort unique spans by start position
+  const spans = [...spanMap.values()].sort((a, b) => a[0].startIndex - b[0].startIndex);
 
   let result = "";
   let pos = 0;
-  for (const flag of sorted) {
-    if (flag.startIndex < pos) continue; // skip overlapping
-    const persona = data.personas.find((p) => p.personaId === flag.personaId);
-    const color = persona?.color ?? "#999";
-    const phrase = forecastText.slice(flag.startIndex, flag.endIndex);
-    result += escHtml(forecastText.slice(pos, flag.startIndex));
-    result += `<mark class="sc-highlight" style="border-bottom:2px solid ${color};background:${color}15" data-persona-id="${flag.personaId}" data-reason="${escAttr(flag.reason)}" data-suggestion="${escAttr(flag.suggestion)}" data-phrase="${escAttr(phrase)}" tabindex="0" role="button" aria-label="Readability flag: ${escAttr(flag.reason)}">${escHtml(phrase)}</mark>`;
-    pos = flag.endIndex;
+  for (const flags of spans) {
+    const first = flags[0];
+    if (first.startIndex < pos) continue; // skip fully overlapping spans
+    const phrase = forecastText.slice(first.startIndex, first.endIndex);
+    result += escHtml(forecastText.slice(pos, first.startIndex));
+
+    // Build persona dots for multi-persona flags
+    const personas = flags.map((f) => data.personas.find((p) => p.personaId === f.personaId)).filter(Boolean);
+    const primaryColor = personas[0]?.color ?? "#999";
+    const dotHtml = personas.length > 1
+      ? `<span class="sc-flag-dots" aria-hidden="true">${personas.map((p) => `<span class="sc-flag-dot" style="background:${p.color}" title="${escAttr(p.personaRole)}"></span>`).join('')}</span>`
+      : '';
+
+    // Store all flags as JSON for the drawer
+    const flagsJson = escAttr(JSON.stringify(flags.map((f) => ({
+      personaId: f.personaId,
+      reason: f.reason,
+      suggestion: f.suggestion,
+    }))));
+
+    const borderStyle = personas.length > 1
+      ? `border-bottom:3px solid ${primaryColor};background:${primaryColor}15`
+      : `border-bottom:2px solid ${primaryColor};background:${primaryColor}15`;
+
+    result += `<mark class="sc-highlight${personas.length > 1 ? ' sc-highlight--multi' : ''}" style="${borderStyle}" data-persona-id="${escAttr(first.personaId)}" data-reason="${escAttr(first.reason)}" data-suggestion="${escAttr(first.suggestion)}" data-phrase="${escAttr(phrase)}" data-all-flags="${flagsJson}" tabindex="0" role="button" aria-label="Readability flag for ${personas.length} persona${personas.length > 1 ? 's' : ''}: ${escAttr(first.reason)}">${escHtml(phrase)}${dotHtml}</mark>`;
+    pos = first.endIndex;
   }
   result += escHtml(forecastText.slice(pos));
 
@@ -616,20 +641,50 @@ function getForecastDisplayText(data) {
 function openSuggestionDrawer(dataset) {
   const drawer = document.getElementById("suggestion-drawer");
   const content = document.getElementById("drawer-content");
-  const persona = allData.flatMap((d) => d.personas).find((p) => p.personaId === dataset.personaId);
 
-  content.innerHTML = `
-    <div class="sc-drawer-persona" style="color:${persona?.color ?? "#666"}">
-      ${persona?.personaRole ?? dataset.personaId}
-    </div>
-    <div class="sc-drawer-phrase">"${escHtml(dataset.phrase ?? "")}"</div>
-    <div class="sc-drawer-reason">${escHtml(dataset.reason ?? "")}</div>
-    <div class="sc-drawer-suggestion-label">Suggestion</div>
-    <div class="sc-drawer-suggestion">${escHtml(dataset.suggestion ?? "").replace(/\n/g, "<br>")}</div>
-    <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(dataset.suggestion ?? "")}')">
-      Copy suggestion
-    </button>
-  `;
+  // Parse multi-persona flags if present, fall back to single-flag compat
+  let flags = [];
+  if (dataset.allFlags) {
+    try { flags = JSON.parse(dataset.allFlags); } catch { /* ignore */ }
+  }
+  if (flags.length === 0) {
+    flags = [{ personaId: dataset.personaId, reason: dataset.reason, suggestion: dataset.suggestion }];
+  }
+
+  const allPersonas = allData.flatMap((d) => d.personas);
+  const phraseHtml = dataset.phrase ? `<div class="sc-drawer-phrase">"${escHtml(dataset.phrase)}"</div>` : "";
+
+  // Deduplicate by suggestion text so identical suggestions merge into one block with persona pills
+  const seen = new Set();
+  const dedupedFlags = flags.filter((f) => {
+    if (seen.has(f.suggestion)) return false;
+    seen.add(f.suggestion);
+    return true;
+  });
+
+  const flagsHtml = dedupedFlags.map((f) => {
+    const persona = allPersonas.find((p) => p.personaId === f.personaId);
+    const color = persona?.color ?? "#666";
+    const role = persona?.personaRole ?? f.personaId;
+    // Find all personas sharing this exact suggestion
+    const sharedPersonas = flags.filter((sf) => sf.suggestion === f.suggestion);
+    const pillsHtml = sharedPersonas.map((sf) => {
+      const sp = allPersonas.find((p) => p.personaId === sf.personaId);
+      const sc = sp?.color ?? "#666";
+      return `<span class="sc-suggestion-persona-pill" style="background:${sc}20;color:${sc};border-color:${sc}40">${escHtml(sp?.personaRole ?? sf.personaId)}</span>`;
+    }).join("");
+
+    return `<div class="sc-drawer-flag-block">
+      <div class="sc-drawer-persona" style="color:${color}">${escHtml(role)}</div>
+      ${sharedPersonas.length > 1 ? `<div class="sc-suggestion-personas">${pillsHtml}</div>` : ""}
+      <div class="sc-drawer-reason">${escHtml(f.reason ?? "")}</div>
+      <div class="sc-drawer-suggestion-label">Suggestion</div>
+      <div class="sc-drawer-suggestion">${escHtml(f.suggestion ?? "").replace(/\n/g, "<br>")}</div>
+      <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(f.suggestion ?? "")}')">Copy suggestion</button>
+    </div>`;
+  }).join('<hr class="sc-drawer-divider">');
+
+  content.innerHTML = phraseHtml + flagsHtml;
   drawer.classList.remove("hidden");
   drawer.focus();
 }

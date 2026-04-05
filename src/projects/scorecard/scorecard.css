@@ -197,6 +197,17 @@ mark.sc-highlight {
 }
 mark.sc-highlight:hover, mark.sc-highlight:focus { background: rgba(30,45,61,0.06) !important; outline: none; }
 mark.sc-highlight--hidden { background: transparent !important; border-bottom-color: transparent !important; }
+mark.sc-highlight--multi { position: relative; }
+
+/* Multi-persona dot badges on highlighted spans */
+.sc-flag-dots {
+  display: inline-flex; gap: 2px; margin-left: 3px;
+  vertical-align: middle; pointer-events: none;
+}
+.sc-flag-dot {
+  display: inline-block; width: 6px; height: 6px;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,0.4);
+}
 
 /* Lens instruction hint below persona chips */
 .sc-lens-hint {
@@ -259,6 +270,8 @@ mark.sc-highlight--hidden { background: transparent !important; border-bottom-co
 .sc-drawer-suggestion, .sc-drawer-reasoning { font-size: 0.9rem; color: var(--sc-text); line-height: 1.6; background: var(--sc-surface); border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 10px 12px; margin-bottom: 16px; }
 .sc-drawer-interpretation { font-size: 0.9rem; color: var(--sc-text); margin-bottom: 14px; line-height: 1.6; }
 .sc-drawer-section-label { font-size: 0.78rem; font-weight: 600; color: var(--sc-text-muted); margin-bottom: 10px; }
+.sc-drawer-flag-block { margin-bottom: 4px; }
+.sc-drawer-divider { border: none; border-top: 1px solid var(--sc-border); margin: 16px 0; }
 
 .sc-copy-btn {
   background: var(--sc-accent); color: #ffffff; border: none;
