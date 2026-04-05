@@ -139,7 +139,7 @@ function parseAvalancheOrg(raw: Record<string, unknown>, expected: Record<string
 // Main loader
 // ---------------------------------------------------------------------------
 
-const GOLDEN_DIR = join(import.meta.dir, "../../../../data/shared/golden-datasets");
+const GOLDEN_DIR = join(import.meta.dir, "../../../data/shared/golden-datasets");
 
 export function loadGoldenScenarios(): GoldenScenario[] {
 	const files = readdirSync(GOLDEN_DIR)
