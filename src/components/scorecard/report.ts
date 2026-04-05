@@ -4,7 +4,7 @@
  * Pure business logic — no HTTP framework dependencies.
  */
 
-import { and, gte, lt } from "drizzle-orm";
+import { and, gte, lt, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { scorecardRuns } from "../db/schema";
 
@@ -160,4 +160,26 @@ export async function buildDailyReport(date?: string): Promise<DailyReport> {
 			avgOverallScore,
 		},
 	};
+}
+
+// ---------------------------------------------------------------------------
+// Available dates
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns distinct dates (YYYY-MM-DD) that have scorecard_runs data,
+ * most recent first, up to `limit` days back.
+ */
+export async function getAvailableReportDates(limit = 14): Promise<string[]> {
+	const db = getDb();
+	const cutoff = new Date();
+	cutoff.setUTCDate(cutoff.getUTCDate() - limit);
+
+	const rows = await db
+		.selectDistinct({ dateIssued: scorecardRuns.dateIssued })
+		.from(scorecardRuns)
+		.where(and(gte(scorecardRuns.scoredAt, cutoff), sql`${scorecardRuns.dateIssued} IS NOT NULL`))
+		.orderBy(sql`${scorecardRuns.dateIssued} DESC`);
+
+	return rows.map((r) => r.dateIssued);
 }

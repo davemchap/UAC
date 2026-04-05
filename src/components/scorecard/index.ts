@@ -3,6 +3,7 @@ export {
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
 	getForecastForScoringByZoneAndDate,
+	getForecastsForScoringByDate,
 } from "./queries";
 export { PERSONAS, PERSONA_IDS } from "./personas";
 export { loadGoldenScenarios } from "./golden";
@@ -10,7 +11,7 @@ export { TRAINING_LABELS } from "./scoring";
 export { computePersonaLens } from "./persona-lens";
 export { computeDecisionMirror } from "./decision-mirror";
 export { analyzeAssumptions } from "./assumption-audit";
-export { buildDailyReport } from "./report";
+export { buildDailyReport, getAvailableReportDates } from "./report";
 export { generateWeeklyReport } from "./weekly-report";
 export type {
 	PersonaScore,

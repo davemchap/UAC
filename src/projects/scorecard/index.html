@@ -265,8 +265,10 @@
         <span class="sc-tab-intro-desc">An aggregated quality report for all zones on a given day. See which zones had the worst comprehension, which personas struggled most, and where assumption density was highest.</span>
       </div>
       <div class="sc-report-controls" id="daily-report-controls">
-        <label for="daily-date-input" class="sc-report-date-label">Report date:</label>
-        <input type="date" id="daily-date-input" class="sc-date-input" />
+        <label for="daily-date-select" class="sc-report-date-label">Report date:</label>
+        <select id="daily-date-select" class="sc-select sc-report-date-select">
+          <option value="">Loading available dates…</option>
+        </select>
         <button id="daily-load-btn" class="sc-report-load-btn">Load Report</button>
       </div>
       <div id="daily-report-content"></div>

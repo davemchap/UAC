@@ -6,7 +6,7 @@
 import { getDb } from "../db";
 import { scorecardRuns } from "../db/schema";
 import { getAllPersonas } from "../persona-trainer";
-import { scoreForecast, normalizeText, getLatestForecastsForScoring } from "../scorecard";
+import { scoreForecast, normalizeText, getLatestForecastsForScoring, getForecastsForScoringByDate } from "../scorecard";
 import type { Persona, PersonaId } from "../scorecard";
 
 // ---------------------------------------------------------------------------
@@ -191,9 +191,96 @@ async function runSafe(): Promise<void> {
 	}
 }
 
+/** Score all zones for a specific date string (YYYY-MM-DD). Used by backfill. */
+async function runBatchForDate(date: string, runtimePersonas: Persona[] | undefined): Promise<void> {
+	const forecasts = await getForecastsForScoringByDate(date);
+	if (forecasts.length === 0) return;
+
+	const db = getDb();
+	for (const forecast of forecasts) {
+		try {
+			const bottomLine = normalizeText(forecast.bottomLine);
+			const currentConditions = normalizeText(forecast.currentConditions);
+			const problems = [forecast.avalancheProblem1, forecast.avalancheProblem2, forecast.avalancheProblem3].filter(
+				Boolean,
+			) as string[];
+			const forecastText = [bottomLine, currentConditions].filter(Boolean).join("\n\n");
+			const personaScores = scoreForecast(
+				forecastText,
+				forecast.overallDangerRating,
+				problems,
+				bottomLine,
+				runtimePersonas,
+			);
+
+			for (const ps of personaScores) {
+				const comprehensionLevel = deriveComprehensionLevel(ps.overall);
+				await db
+					.insert(scorecardRuns)
+					.values({
+						forecastId: forecast.id,
+						zoneId: forecast.zoneId,
+						zoneSlug: forecast.zoneSlug,
+						zoneName: forecast.zoneName,
+						forecasterName: forecast.forecasterName,
+						dateIssued: forecast.dateIssued,
+						overallDangerRating: forecast.overallDangerRating,
+						personaId: ps.personaId,
+						personaName: ps.personaName,
+						overallScore: ps.overall,
+						clarityScore: ps.clarity,
+						jargonScore: ps.jargonLoad,
+						actionabilityScore: ps.actionability,
+						comprehensionLevel,
+						divergenceScore: ps.flags.length,
+						decisionConfidence: ps.decisionOutcome,
+						assumptionDensity: ps.flags.filter((f) => !f.reason.includes("words")).length,
+					})
+					.onConflictDoUpdate({
+						target: [scorecardRuns.forecastId, scorecardRuns.personaId],
+						set: {
+							overallScore: ps.overall,
+							clarityScore: ps.clarity,
+							jargonScore: ps.jargonLoad,
+							actionabilityScore: ps.actionability,
+							comprehensionLevel,
+							divergenceScore: ps.flags.length,
+							decisionConfidence: ps.decisionOutcome,
+							assumptionDensity: ps.flags.filter((f) => !f.reason.includes("words")).length,
+							scoredAt: new Date(),
+						},
+					});
+			}
+		} catch (err) {
+			console.error(`[scorecard-scheduler] Backfill error for zone ${forecast.zoneSlug} on ${date}:`, err);
+		}
+	}
+	console.log(`[scorecard-scheduler] Backfilled ${forecasts.length} zones for ${date}`);
+}
+
+/** Score the past N days of ingested forecast data, skipping dates already scored. */
+async function backfillLastNDays(days = 7): Promise<void> {
+	let runtimePersonas: Persona[] | undefined;
+	try {
+		const records = await getAllPersonas();
+		const active = records.filter((r) => r.active);
+		runtimePersonas = active.length > 0 ? active.map(toScoringPersona) : undefined;
+	} catch {
+		/* use static defaults */
+	}
+
+	for (let i = 1; i <= days; i++) {
+		const d = new Date();
+		d.setUTCDate(d.getUTCDate() - i);
+		const date = d.toISOString().slice(0, 10);
+		await runBatchForDate(date, runtimePersonas);
+	}
+}
+
 export function startScorecardScheduler(): void {
-	// Fire immediately on startup
+	// Fire immediately on startup + backfill last 7 days
 	void runSafe();
+	void backfillLastNDays(7);
 
 	// Schedule next run at 6am MT, then every 24h
 	const delayMs = msUntilNext6amMT();

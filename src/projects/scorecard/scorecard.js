@@ -358,8 +358,8 @@ function switchTab(tab) {
   if (tab === "daily") {
     const el = document.getElementById("daily-report-content");
     if (el && el.innerHTML === "") {
-      const dateInput = document.getElementById("daily-date-input");
-      loadDailyReport(dateInput?.value || undefined);
+      const dateSelect = document.getElementById("daily-date-select");
+      loadDailyReport(dateSelect?.value || undefined);
     }
   }
   if (tab === "weekly") {
@@ -2698,13 +2698,30 @@ function wireAboutModal() {
 // Daily Report (Tab 6)
 // ---------------------------------------------------------------------------
 
-function wireDailyReport() {
-  const dateInput = document.getElementById("daily-date-input");
+async function wireDailyReport() {
+  const dateSelect = document.getElementById("daily-date-select");
   const loadBtn = document.getElementById("daily-load-btn");
-  if (!dateInput || !loadBtn) return;
-  dateInput.value = getTodayIso();
-  dateInput.max = getTodayIso();
-  loadBtn.addEventListener("click", () => loadDailyReport(dateInput.value || undefined));
+  if (!dateSelect || !loadBtn) return;
+
+  if (!isDemoMode) {
+    try {
+      const res = await fetch("/api/scorecard/report/available-dates");
+      if (res.ok) {
+        const json = await res.json();
+        const dates = json.data ?? [];
+        dateSelect.innerHTML = dates.length === 0
+          ? `<option value="">No data available</option>`
+          : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
+        if (dates.length > 0) {
+          dateSelect.value = dates[0];
+        }
+      }
+    } catch {
+      dateSelect.innerHTML = `<option value="">Could not load dates</option>`;
+    }
+  }
+
+  loadBtn.addEventListener("click", () => loadDailyReport(dateSelect.value || undefined));
 }
 
 async function loadDailyReport(date) {

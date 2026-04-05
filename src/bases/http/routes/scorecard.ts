@@ -11,6 +11,7 @@ import {
 	computeDecisionMirror,
 	analyzeAssumptions,
 	buildDailyReport,
+	getAvailableReportDates,
 	getForecastForScoringByZoneAndDate,
 	generateWeeklyReport,
 	type Persona,
@@ -165,6 +166,15 @@ scorecard.get("/golden", async (c) => {
 	});
 
 	return c.json({ success: true, data: results });
+});
+
+/**
+ * GET /api/scorecard/report/available-dates
+ * Returns dates (up to 14 days back) that have scorecard_runs data.
+ */
+scorecard.get("/report/available-dates", async (c) => {
+	const dates = await getAvailableReportDates(14);
+	return c.json({ success: true, data: dates });
 });
 
 /**

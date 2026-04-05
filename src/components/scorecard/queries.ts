@@ -123,3 +123,39 @@ export async function getForecastForScoringByZoneAndDate(
 		avalancheProblem3: f.avalancheProblem3,
 	};
 }
+
+/** Returns all zones' latest forecast for a specific date (YYYY-MM-DD). */
+export async function getForecastsForScoringByDate(date: string): Promise<ForecastForScoring[]> {
+	const db = getDb();
+	const zones = await db.select().from(forecastZones).orderBy(forecastZones.name);
+
+	const forecasts = await Promise.all(
+		zones.map(async (zone) => {
+			const rows = await db
+				.select()
+				.from(avalancheForecasts)
+				.where(and(eq(avalancheForecasts.zoneId, zone.zoneId), eq(avalancheForecasts.dateIssued, date)))
+				.orderBy(desc(avalancheForecasts.createdAt))
+				.limit(1);
+
+			if (rows.length === 0) return null;
+			const f = rows[0];
+			return {
+				id: f.id,
+				zoneId: zone.zoneId,
+				zoneName: zone.name,
+				zoneSlug: zone.slug,
+				forecasterName: f.forecasterName,
+				dateIssued: f.dateIssued,
+				overallDangerRating: f.overallDangerRating,
+				bottomLine: f.bottomLine,
+				currentConditions: f.currentConditions,
+				avalancheProblem1: f.avalancheProblem1,
+				avalancheProblem2: f.avalancheProblem2,
+				avalancheProblem3: f.avalancheProblem3,
+			};
+		}),
+	);
+
+	return forecasts.filter((f): f is ForecastForScoring => f !== null);
+}
