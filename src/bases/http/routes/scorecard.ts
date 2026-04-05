@@ -7,6 +7,8 @@ import {
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
 	loadGoldenScenarios,
+	computePersonaLens,
+	computeDecisionMirror,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -87,6 +89,15 @@ scorecard.get("/", async (c) => {
 			personas: personaScores,
 			journeys,
 			coaching,
+			personaLens: computePersonaLens(
+				forecastText,
+				f.overallDangerRating,
+				problems,
+				bottomLine,
+				currentConditions,
+				personas,
+			),
+			decisionMirror: computeDecisionMirror(forecastText, f.overallDangerRating, problems, bottomLine, personas),
 			scoredAt: new Date().toISOString(),
 		};
 	});
@@ -186,6 +197,15 @@ scorecard.get("/:zoneSlug", async (c) => {
 			personas: personaScores,
 			journeys,
 			coaching,
+			personaLens: computePersonaLens(
+				forecastText,
+				forecast.overallDangerRating,
+				problems,
+				bottomLine,
+				currentConditions,
+				personas,
+			),
+			decisionMirror: computeDecisionMirror(forecastText, forecast.overallDangerRating, problems, bottomLine, personas),
 			scoredAt: new Date().toISOString(),
 		},
 	});
