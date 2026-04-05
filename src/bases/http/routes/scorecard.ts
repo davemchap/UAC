@@ -6,6 +6,7 @@ import {
 	normalizeText,
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
+	generateWeeklyReport,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -91,6 +92,19 @@ scorecard.get("/", async (c) => {
 	});
 
 	return c.json({ success: true, data: results });
+});
+
+/**
+ * GET /api/scorecard/report/weekly?week=YYYY-MM-DD
+ * Returns weekly forecast quality report aggregated by forecaster and zone.
+ */
+scorecard.get("/report/weekly", async (c) => {
+	const week = c.req.query("week");
+	if (week !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(week)) {
+		return c.json({ success: false, error: "Invalid week parameter — expected YYYY-MM-DD" }, 400);
+	}
+	const report = await generateWeeklyReport(week);
+	return c.json({ success: true, data: report });
 });
 
 /**
