@@ -152,6 +152,10 @@ function renderDemoActiveScenario() {
 }
 
 async function loadZone(slug) {
+  // Respect the global date selection
+  if (globalSelectedDate) {
+    return loadZoneByDate(slug, globalSelectedDate);
+  }
   showLoading(true);
   try {
     const res = await fetch(`/api/scorecard/${slug}`);
@@ -251,10 +255,6 @@ function populateZoneSelect(data) {
 function wireZoneSelect() {
   document.getElementById("zone-select").addEventListener("change", (e) => {
     activeZoneSlug = e.target.value || null;
-    // Reset date picker to today when zone changes
-    const dateInput = document.getElementById("sc-date-input");
-    if (dateInput) dateInput.value = getTodayIso();
-    updateHistoricalBadge(false);
     if (activeZoneSlug) {
       if (isDemoMode) {
         const zoneData = getZoneData(activeZoneSlug);
@@ -275,11 +275,6 @@ function getTodayIso() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function updateHistoricalBadge(isHistorical) {
-  const badge = document.getElementById("sc-historical-badge");
-  if (!badge) return;
-  badge.classList.toggle("hidden", !isHistorical);
-}
 
 function getTwoWeeksAgoIso() {
   const d = new Date();
@@ -287,25 +282,63 @@ function getTwoWeeksAgoIso() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function wireDatePicker() {
-  const dateInput = document.getElementById("sc-date-input");
-  if (!dateInput) return;
-  dateInput.value = getTodayIso();
-  dateInput.max = getTodayIso();
-  dateInput.min = getTwoWeeksAgoIso();
+// Global selected date — drives all zone-based tabs. null = today (live).
+let globalSelectedDate = null;
 
-  dateInput.addEventListener("change", () => {
-    if (!activeZoneSlug) return;
-    const selected = dateInput.value;
-    const today = getTodayIso();
-    if (!selected || selected === today) {
-      updateHistoricalBadge(false);
-      loadZone(activeZoneSlug);
+function wireDatePicker() {
+  const prevBtn = document.getElementById("sc-date-prev");
+  const nextBtn = document.getElementById("sc-date-next");
+  const todayBtn = document.getElementById("sc-date-today");
+  if (!prevBtn || !nextBtn) return;
+
+  prevBtn.addEventListener("click", () => stepGlobalDate(-1));
+  nextBtn.addEventListener("click", () => stepGlobalDate(1));
+  todayBtn?.addEventListener("click", () => setGlobalDate(null));
+}
+
+function stepGlobalDate(delta) {
+  const base = globalSelectedDate ?? getTodayIso();
+  const d = new Date(`${base}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + delta);
+  const next = d.toISOString().slice(0, 10);
+  const min = getTwoWeeksAgoIso();
+  const today = getTodayIso();
+  if (next < min || next > today) return;
+  setGlobalDate(next === today ? null : next);
+}
+
+function setGlobalDate(date) {
+  globalSelectedDate = date;
+  const today = getTodayIso();
+  const label = document.getElementById("sc-date-nav-label");
+  const badge = document.getElementById("sc-historical-badge");
+  const nextBtn = document.getElementById("sc-date-next");
+  const todayBtn = document.getElementById("sc-date-today");
+  const hiddenInput = document.getElementById("sc-date-input");
+
+  const isHistorical = date !== null;
+  if (label) label.textContent = isHistorical ? formatNavDate(date) : "Today";
+  if (badge) badge.classList.toggle("hidden", !isHistorical);
+  if (nextBtn) nextBtn.disabled = !isHistorical;
+  if (todayBtn) todayBtn.classList.toggle("hidden", !isHistorical);
+  if (hiddenInput) hiddenInput.value = date ?? today;
+
+  // Reload active zone-based tab with new date
+  if (REPORT_TABS.has(activeTab)) return;
+  if (activeZoneSlug) {
+    if (isHistorical) {
+      loadZoneByDate(activeZoneSlug, date);
     } else {
-      updateHistoricalBadge(true);
-      loadZoneByDate(activeZoneSlug, selected);
+      loadZone(activeZoneSlug);
     }
-  });
+  }
+}
+
+function formatNavDate(iso) {
+  if (!iso) return "Today";
+  const [y, m, d] = iso.split("-").map(Number);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[m - 1]} ${d}, ${y}`;
 }
 
 async function loadZoneByDate(slug, date) {

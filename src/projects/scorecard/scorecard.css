@@ -79,6 +79,39 @@ body { background: var(--sc-bg); color: var(--sc-text); min-height: 100vh; }
 .sc-demo-exit:hover { border-color: #fbbf24; color: #fbbf24; }
 
 /* ---- Problem banner ---- */
+/* ---- Global date navigation bar ---- */
+.sc-date-nav {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--sc-surface2); border-bottom: 1px solid var(--sc-border);
+  padding: 8px 20px; min-height: 44px;
+}
+.sc-date-nav-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 6px;
+  background: var(--sc-surface3); border: 1px solid var(--sc-border);
+  color: var(--sc-text); font-size: 1.3rem; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sc-date-nav-btn:hover:not(:disabled) { background: var(--sc-accent); border-color: var(--sc-accent); color: #fff; }
+.sc-date-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.sc-date-nav-center {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+}
+.sc-date-nav-label {
+  font-size: 0.9rem; font-weight: 600; color: var(--sc-text); min-width: 100px;
+}
+.sc-historical-badge {
+  background: var(--sc-accent); color: #fff;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em;
+  padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+}
+.sc-date-nav-today {
+  padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+  background: transparent; border: 1px solid var(--sc-border); color: var(--sc-text-dim);
+  cursor: pointer; transition: background 0.15s;
+}
+.sc-date-nav-today:hover { background: var(--sc-surface3); color: var(--sc-text); }
+
 .sc-problem-banner {
   background: var(--sc-surface2); border-bottom: 1px solid var(--sc-border);
   padding: 10px 24px; font-size: 0.82rem; color: var(--sc-text-muted);
@@ -1617,6 +1650,11 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   .sc-select { flex: 1 1 120px; font-size: 0.82rem; }
   .sc-demo-btn, .sc-train-btn, .sc-about-btn { font-size: 0.75rem; padding: 5px 8px; }
   .sc-back-link { font-size: 0.75rem; }
+
+  /* Date nav bar: compact on mobile */
+  .sc-date-nav { padding: 6px 12px; gap: 6px; }
+  .sc-date-nav-label { font-size: 0.82rem; min-width: 80px; }
+  .sc-date-nav-today { padding: 3px 8px; font-size: 0.72rem; }
 
   /* Tab strip: horizontal scroll */
   .sc-tabs {

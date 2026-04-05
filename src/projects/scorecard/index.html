@@ -48,6 +48,17 @@
     <button class="sc-demo-exit" id="sc-demo-exit">&#215; Exit Demo</button>
   </div>
 
+  <!-- Global date navigation bar -->
+  <div class="sc-date-nav" id="sc-date-nav" role="navigation" aria-label="Browse forecast dates">
+    <button class="sc-date-nav-btn" id="sc-date-prev" aria-label="Previous day">&#8249;</button>
+    <div class="sc-date-nav-center">
+      <span class="sc-date-nav-label" id="sc-date-nav-label">Today</span>
+      <span class="sc-date-nav-badge hidden" id="sc-historical-badge" aria-live="polite">Historical</span>
+    </div>
+    <button class="sc-date-nav-btn" id="sc-date-next" aria-label="Next day" disabled>&#8250;</button>
+    <button class="sc-date-nav-today hidden" id="sc-date-today">Today</button>
+  </div>
+
   <!-- Problem statement banner (shown per solution tab) -->
   <div class="sc-problem-banner" id="problem-banner" aria-live="polite"></div>
 
@@ -117,11 +128,8 @@
           <div class="sc-forecast-header">
             <div class="sc-forecast-header-top">
               <h2 id="readability-zone-title">Select a zone</h2>
-              <div class="sc-date-picker-wrap" id="sc-date-picker-wrap">
-                <label for="sc-date-input" class="sc-date-label">View past forecast:</label>
-                <input type="date" id="sc-date-input" class="sc-date-input" />
-                <span class="sc-historical-badge hidden" id="sc-historical-badge">Viewing historical forecast</span>
-              </div>
+              <!-- Date input kept for JS wiring; navigation is via top banner -->
+              <input type="date" id="sc-date-input" class="sc-date-input" style="display:none" aria-hidden="true" />
             </div>
             <div class="sc-persona-legend" id="readability-legend"></div>
           </div>
