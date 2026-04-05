@@ -9,6 +9,7 @@ import {
 	loadGoldenScenarios,
 	computePersonaLens,
 	computeDecisionMirror,
+	analyzeAssumptions,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -98,6 +99,7 @@ scorecard.get("/", async (c) => {
 				personas,
 			),
 			decisionMirror: computeDecisionMirror(forecastText, f.overallDangerRating, problems, bottomLine, personas),
+			assumptionAudit: analyzeAssumptions(forecastText, f.overallDangerRating, problems, personas),
 			scoredAt: new Date().toISOString(),
 		};
 	});
@@ -206,6 +208,7 @@ scorecard.get("/:zoneSlug", async (c) => {
 				personas,
 			),
 			decisionMirror: computeDecisionMirror(forecastText, forecast.overallDangerRating, problems, bottomLine, personas),
+			assumptionAudit: analyzeAssumptions(forecastText, forecast.overallDangerRating, problems, personas),
 			scoredAt: new Date().toISOString(),
 		},
 	});

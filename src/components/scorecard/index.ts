@@ -5,6 +5,7 @@ export { loadGoldenScenarios } from "./golden";
 export { TRAINING_LABELS } from "./scoring";
 export { computePersonaLens } from "./persona-lens";
 export { computeDecisionMirror } from "./decision-mirror";
+export { analyzeAssumptions } from "./assumption-audit";
 export type {
 	PersonaScore,
 	PersonaDimensions,
@@ -20,3 +21,4 @@ export type { PersonaId, Persona } from "./personas";
 export type { ForecastForScoring } from "./queries";
 export type { PersonaLensResult, SectionHearing, ComprehensionLevel } from "./persona-lens";
 export type { DecisionMirrorResult, DecisionSignal, DecisionConfidence } from "./decision-mirror";
+export type { AssumptionAuditResult, ConceptRequirement, PersonaConceptGap, KnowledgeDomain } from "./assumption-audit";
