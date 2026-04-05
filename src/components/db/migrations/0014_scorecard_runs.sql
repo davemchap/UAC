@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS scorecard_runs (
   divergence_score INTEGER,
   decision_confidence TEXT,
   assumption_density INTEGER,
+  most_common_flag TEXT,
   scored_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(forecast_id, persona_id)
 );

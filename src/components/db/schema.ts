@@ -262,6 +262,7 @@ export const scorecardRuns = pgTable(
 		divergenceScore: integer("divergence_score"),
 		decisionConfidence: text("decision_confidence"),
 		assumptionDensity: integer("assumption_density"),
+		mostCommonFlag: text("most_common_flag"),
 		scoredAt: timestamp("scored_at", { withTimezone: true }).notNull().defaultNow(),
 	},
 	(t) => [unique().on(t.forecastId, t.personaId)],

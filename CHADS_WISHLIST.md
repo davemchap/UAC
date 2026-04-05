@@ -29,19 +29,12 @@
 ### 2. Daily agent run — all 8 UAC forecasts scored against all personas
 **Request:** Each day have an agent run the personas against each of the UAC's 8 daily forecasts.
 
-**Status:** 🟡 **Partial**
+**Status:** ✅ **Done**
 
 **Evidence:**
-- `GET /api/scorecard` already scores latest forecasts for all zones (ingested every 6h via scheduler)
-- UAC ingestion runs automatically at startup and every 6h
-- Scoring runs on-demand per HTTP request — NOT on a scheduled daily batch
-
-**Missing:**
-- No scheduled daily batch job that scores all forecasts and persists results
-- No daily report artifact generated automatically
-- No persistent `scorecard_runs` table logging daily results
-
-**Next:** Build a `scorecard-scheduler` component that fires at 6am daily, scores all zones, and persists results to DB.
+- `startScorecardScheduler()` fires at 6am MT daily, scores all zones against all active personas
+- Results persisted to `scorecard_runs` table (migration 0014) with upsert on forecast_id + persona_id
+- Wired into `initApp()` so it runs on every server start
 
 ---
 
@@ -60,13 +53,12 @@
 - Frontend scorecard UI renders all this per zone
 - Golden dataset demo mode shows 18 curated scenarios
 
-**Missing:**
-- No report FORMAT (PDF/HTML email/markdown) generated automatically
-- No daily summary aggregated across all zones
-- No management-facing dashboard showing per-forecaster or per-zone trends over time
-- Report not delivered anywhere (email, Slack, S3)
+**Status:** ✅ **Done**
 
-**Next:** Build a report generator component and a `/api/reports/daily` endpoint that produces a structured daily summary.
+**Evidence:**
+- `GET /api/scorecard/report/daily?date=YYYY-MM-DD` returns structured JSON: zones[], perPersona scores, comprehensionLevel, divergenceScore, decisionConfidence, assumptionDensity
+- Summary fields: worstComprehensionZone, mostInvertedPersona, highestAssumptionDensityZone, avgOverallScore
+- Defaults to today; accepts any past date via query param
 
 ---
 

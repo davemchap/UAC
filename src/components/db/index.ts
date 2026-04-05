@@ -201,6 +201,7 @@ export {
 	forecastZones,
 	observationReports,
 	observerHandles,
+	scorecardRuns,
 	snotelStations,
 	avalancheForecasts,
 	avalancheProblems,
@@ -208,5 +209,4 @@ export {
 	snowpackReadings,
 	alertThresholds,
 	escalationRules,
-	scorecardRuns,
 };

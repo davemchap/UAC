@@ -11,6 +11,7 @@ export { computePersonaLens } from "./persona-lens";
 export { computeDecisionMirror } from "./decision-mirror";
 export { analyzeAssumptions } from "./assumption-audit";
 export { buildDailyReport } from "./report";
+export { generateWeeklyReport } from "./weekly-report";
 export type {
 	PersonaScore,
 	PersonaDimensions,
@@ -28,3 +29,4 @@ export type { PersonaLensResult, SectionHearing, ComprehensionLevel } from "./pe
 export type { DecisionMirrorResult, DecisionSignal, DecisionConfidence } from "./decision-mirror";
 export type { AssumptionAuditResult, ConceptRequirement, PersonaConceptGap, KnowledgeDomain } from "./assumption-audit";
 export type { DailyReport, ZoneReportEntry, PersonaReportEntry, DailyReportSummary } from "./report";
+export type { WeeklyReport, ForecasterWeeklyStats, ZoneWeeklyStats } from "./weekly-report";
