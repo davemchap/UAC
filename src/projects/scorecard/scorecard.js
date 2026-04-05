@@ -614,6 +614,10 @@ function renderPersonaScoreRow(containerId, personas) {
       // Hide/show the sidebar persona card
       const card = document.querySelector(`[data-card-persona-id="${id}"]`);
       if (card) card.style.display = nowHidden ? "none" : "";
+      // Hide/show score distribution bars for this persona
+      document.querySelectorAll(`[data-dist-persona-id="${id}"]`).forEach((bar) => {
+        bar.style.display = nowHidden ? "none" : "";
+      });
       updateLensHint(el);
     };
     chip.addEventListener("click", toggle);
@@ -672,7 +676,7 @@ function renderScoreDistribution(data) {
       <span class="sc-dist-label">${dim.label}</span>
       <div class="sc-dist-bars">
         ${data.personas.map((p) =>
-          `<div class="sc-dist-bar-wrap" title="${escAttr(p.personaRole)}: ${p[dim.key]}">
+          `<div class="sc-dist-bar-wrap" data-dist-persona-id="${escAttr(p.personaId)}" title="${escAttr(p.personaRole)}: ${p[dim.key]}">
             <div class="sc-dist-bar" style="width:${p[dim.key]}%;background:${p.color}"></div>
           </div>`
         ).join("")}

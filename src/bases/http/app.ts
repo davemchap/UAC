@@ -141,20 +141,13 @@ app.use(
 	}),
 );
 
-app.use(
-	"/*",
-	serveStatic({
-		root: "./src/projects/dashboard",
-		rewriteRequestPath: (path) => {
-			if (path === "/observe") return "/observe.html";
-			if (path === "/report") return "/report.html";
-			if (!path.includes(".") && !path.startsWith("/api")) {
-				return INDEX_HTML;
-			}
-			return path;
-		},
-	}),
-);
+// Redirect all unmatched non-API paths to the scorecard
+app.get("/*", (c) => {
+	if (!c.req.path.startsWith("/api") && !c.req.path.includes(".")) {
+		return c.redirect("/scorecard/");
+	}
+	return c.notFound();
+});
 
 // ---------------------------------------------------------------------------
 // 404 / error handlers
