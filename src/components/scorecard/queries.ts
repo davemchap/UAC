@@ -3,7 +3,7 @@
  * Returns typed forecast data for scoring.
  */
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getDb } from "../db";
 import { avalancheForecasts, forecastZones } from "../db/schema";
 
@@ -69,6 +69,40 @@ export async function getForecastForScoringByZone(zoneSlug: string): Promise<For
 		.select()
 		.from(avalancheForecasts)
 		.where(eq(avalancheForecasts.zoneId, zone.zoneId))
+		.orderBy(desc(avalancheForecasts.createdAt))
+		.limit(1);
+
+	if (rows.length === 0) return null;
+	const f = rows[0];
+	return {
+		id: f.id,
+		zoneId: zone.zoneId,
+		zoneName: zone.name,
+		zoneSlug: zone.slug,
+		forecasterName: f.forecasterName,
+		dateIssued: f.dateIssued,
+		overallDangerRating: f.overallDangerRating,
+		bottomLine: f.bottomLine,
+		currentConditions: f.currentConditions,
+		avalancheProblem1: f.avalancheProblem1,
+		avalancheProblem2: f.avalancheProblem2,
+		avalancheProblem3: f.avalancheProblem3,
+	};
+}
+
+export async function getForecastForScoringByZoneAndDate(
+	zoneSlug: string,
+	date: string, // YYYY-MM-DD
+): Promise<ForecastForScoring | null> {
+	const db = getDb();
+	const zoneRows = await db.select().from(forecastZones).where(eq(forecastZones.slug, zoneSlug)).limit(1);
+	if (zoneRows.length === 0) return null;
+	const zone = zoneRows[0];
+
+	const rows = await db
+		.select()
+		.from(avalancheForecasts)
+		.where(and(eq(avalancheForecasts.zoneId, zone.zoneId), eq(avalancheForecasts.dateIssued, date)))
 		.orderBy(desc(avalancheForecasts.createdAt))
 		.limit(1);
 
