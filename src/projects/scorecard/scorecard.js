@@ -45,12 +45,11 @@ function travelModeBadgeHtml(mode) {
 }
 
 function dimTooltipText(p) {
-  if (!p.dimensions) return p.personaRole;
+  if (!p.dimensions) return '';
   const d = p.dimensions;
   const tl = trainingLabel(d.avalancheTrainingLevel);
   const tlLine = d.avalancheTrainingLevel === 0 ? 'No formal training' : `${tl} training`;
   return [
-    `${p.personaName} — ${p.personaRole}`,
     `${tlLine} · ${d.backcountryDaysPerSeason} days/season · ${d.yearsOfMountainExperience} yrs`,
     `Terrain ${d.terrainAssessmentSkill}/5 · Weather ${d.weatherPatternRecognition}/5`,
   ].join('\n');
