@@ -6,6 +6,7 @@ export { TRAINING_LABELS } from "./scoring";
 export { computePersonaLens } from "./persona-lens";
 export { computeDecisionMirror } from "./decision-mirror";
 export { analyzeAssumptions } from "./assumption-audit";
+export { buildDailyReport } from "./report";
 export type {
 	PersonaScore,
 	PersonaDimensions,
@@ -22,3 +23,4 @@ export type { ForecastForScoring } from "./queries";
 export type { PersonaLensResult, SectionHearing, ComprehensionLevel } from "./persona-lens";
 export type { DecisionMirrorResult, DecisionSignal, DecisionConfidence } from "./decision-mirror";
 export type { AssumptionAuditResult, ConceptRequirement, PersonaConceptGap, KnowledgeDomain } from "./assumption-audit";
+export type { DailyReport, ZoneReportEntry, PersonaReportEntry, DailyReportSummary } from "./report";

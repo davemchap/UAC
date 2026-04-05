@@ -10,6 +10,7 @@ import {
 	computePersonaLens,
 	computeDecisionMirror,
 	analyzeAssumptions,
+	buildDailyReport,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -152,6 +153,16 @@ scorecard.get("/golden", async (c) => {
 	});
 
 	return c.json({ success: true, data: results });
+});
+
+/**
+ * GET /api/scorecard/report/daily?date=YYYY-MM-DD
+ * Returns the daily scorecard report for all zones. Defaults to today.
+ */
+scorecard.get("/report/daily", async (c) => {
+	const date = c.req.query("date");
+	const report = await buildDailyReport(date);
+	return c.json({ success: true, data: report });
 });
 
 /**

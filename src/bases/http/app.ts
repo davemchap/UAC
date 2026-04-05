@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData, seedSnapshotData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
+import { startScorecardScheduler } from "../../components/scorecard-scheduler";
 import aiAlerts from "./routes/ai-alerts";
 import alertConfig from "./routes/alert-config";
 import notifications from "./routes/notifications";
@@ -211,6 +212,7 @@ export async function initApp(): Promise<void> {
 		console.log("Continuing without database...");
 	}
 	_stopScheduler = startScheduler();
+	startScorecardScheduler();
 }
 
 export function stopScheduler(): void {
