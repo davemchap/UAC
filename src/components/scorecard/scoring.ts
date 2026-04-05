@@ -338,8 +338,661 @@ function getJargonSuggestion(term: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Sentence length flags
+// Dimension-driven flag helpers
 // ---------------------------------------------------------------------------
+
+const CONSEQUENCE_ANCHOR_TERMS = [
+	"buried",
+	"burial",
+	"bury",
+	"could kill",
+	"can kill",
+	"fatal",
+	"fatality",
+	"serious injury",
+	"carried",
+	"swept",
+	"knocked off",
+	"deadly",
+	"dangerous",
+	"life-threatening",
+	"caught in",
+	"lethal",
+	"will not survive",
+];
+
+function hasConsequenceAnchor(sentence: string): boolean {
+	const lower = sentence.toLowerCase();
+	return CONSEQUENCE_ANCHOR_TERMS.some((t) => lower.includes(t));
+}
+
+function parseDangerLevel(dangerRating: string): number {
+	const map: Record<string, number> = {
+		none: 0,
+		low: 1,
+		moderate: 2,
+		considerable: 3,
+		high: 4,
+		extreme: 5,
+	};
+	return map[dangerRating.toLowerCase()] ?? 0;
+}
+
+function sentenceContaining(text: string, idx: number): string {
+	const before = text.lastIndexOf(".", idx - 1);
+	const after = text.indexOf(".", idx);
+	return text.slice(before === -1 ? 0 : before + 1, after === -1 ? text.length : after + 1).trim();
+}
+
+function makeFlag(
+	flagText: string,
+	startIndex: number,
+	endIndex: number,
+	personaId: PersonaId,
+	reason: string,
+	suggestion: string,
+	flagCategory: FlagCategory,
+	severity: "blocker" | "warning",
+): FlaggedPhrase {
+	return { text: flagText, startIndex, endIndex, personaId, reason, suggestion, flagCategory, severity };
+}
+
+function findKeywordFlags(
+	text: string,
+	terms: string[],
+	personaId: PersonaId,
+	flagCategory: FlagCategory,
+	severity: "blocker" | "warning",
+	reason: (term: string) => string,
+	suggestion: (term: string) => string,
+): FlaggedPhrase[] {
+	const flags: FlaggedPhrase[] = [];
+	const lower = text.toLowerCase();
+	for (const term of terms) {
+		const lowerTerm = term.toLowerCase();
+		let searchFrom = 0;
+		while (searchFrom < lower.length) {
+			const idx = lower.indexOf(lowerTerm, searchFrom);
+			if (idx === -1) break;
+			const before = idx === 0 || /\W/.test(lower[idx - 1]);
+			const after = idx + lowerTerm.length >= lower.length || /\W/.test(lower[idx + lowerTerm.length]);
+			if (before && after) {
+				flags.push(
+					makeFlag(
+						text.slice(idx, idx + term.length),
+						idx,
+						idx + term.length,
+						personaId,
+						reason(term),
+						suggestion(term),
+						flagCategory,
+						severity,
+					),
+				);
+			}
+			searchFrom = idx + 1;
+		}
+	}
+	return flags;
+}
+
+function findRegexFlags(
+	text: string,
+	pattern: RegExp,
+	personaId: PersonaId,
+	flagCategory: FlagCategory,
+	severity: "blocker" | "warning",
+	reason: (match: string) => string,
+	suggestion: (match: string) => string,
+): FlaggedPhrase[] {
+	const flags: FlaggedPhrase[] = [];
+	pattern.lastIndex = 0;
+	for (let m = pattern.exec(text); m !== null; m = pattern.exec(text)) {
+		flags.push(
+			makeFlag(m[0], m.index, m.index + m[0].length, personaId, reason(m[0]), suggestion(m[0]), flagCategory, severity),
+		);
+	}
+	return flags;
+}
+
+// ---------------------------------------------------------------------------
+// Training-gap flags (fv0.3)
+// ---------------------------------------------------------------------------
+
+const AVALANCHE_PROBLEM_TYPES = [
+	"wind slab",
+	"storm slab",
+	"persistent slab",
+	"wet avalanche",
+	"glide avalanche",
+	"loose wet",
+	"loose dry",
+	"deep slab",
+];
+
+const SPATIAL_DISTRIBUTION_TERMS = ["isolated", "specific", "widespread"];
+const LIKELIHOOD_TERMS = ["unlikely", "possible", "likely", "very likely", "almost certain"];
+const CAT_TRAINING: FlagCategory = "training-gap";
+const CAT_ACTION: FlagCategory = "action-clarity";
+
+function findLikelihoodDescriptorFlags(text: string, id: PersonaId, sev: "blocker" | "warning"): FlaggedPhrase[] {
+	const flags: FlaggedPhrase[] = [];
+	const lower = text.toLowerCase();
+	for (const term of LIKELIHOOD_TERMS) {
+		let searchFrom = 0;
+		while (searchFrom < lower.length) {
+			const idx = lower.indexOf(term, searchFrom);
+			if (idx === -1) break;
+			const before = idx === 0 || /\W/.test(lower[idx - 1]);
+			const after = idx + term.length >= lower.length || /\W/.test(lower[idx + term.length]);
+			if (before && after && !hasConsequenceAnchor(sentenceContaining(text, idx))) {
+				flags.push(
+					makeFlag(
+						text.slice(idx, idx + term.length),
+						idx,
+						idx + term.length,
+						id,
+						`"${term}" has no consequence anchor for this untrained reader`,
+						`PROBLEM: "${term}" reads as low-probability to non-technical readers.\nCONSIDER: Pair with a concrete consequence, e.g., "'likely' means a skier will probably trigger a slab on steep north-facing slopes today."`,
+						CAT_TRAINING,
+						sev,
+					),
+				);
+			}
+			searchFrom = idx + 1;
+		}
+	}
+	return flags;
+}
+
+function findTrainingGapFlags(text: string, persona: Persona): FlaggedPhrase[] {
+	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
+	if (trainingLevel > 2) return [];
+
+	const id = persona.id;
+	const sev: "blocker" | "warning" = trainingLevel === 0 ? "blocker" : "warning";
+
+	if (trainingLevel > 1) return [];
+
+	return [
+		...findKeywordFlags(
+			text,
+			AVALANCHE_PROBLEM_TYPES,
+			id,
+			CAT_TRAINING,
+			sev,
+			(t) => `"${t}" requires formal avalanche training to interpret`,
+			(t) =>
+				`PROBLEM: "${t}" is not in this persona's vocabulary — no formal training.\nCONSIDER: Add a plain-language gloss, e.g., "${t} (wind-packed snow that can break away suddenly as a slab)."`,
+		),
+		...findRegexFlags(
+			text,
+			/\bD[1-5]\b/g,
+			id,
+			CAT_TRAINING,
+			"blocker",
+			(m) => `D-scale notation "${m}" is opaque without training`,
+			() =>
+				'PROBLEM: D-scale ratings are invisible to readers without formal training.\nCONSIDER: Replace with a consequence anchor, e.g., "large enough to bury and kill a person."',
+		),
+		...findLikelihoodDescriptorFlags(text, id, sev),
+		...findRegexFlags(
+			text,
+			/(may|might|could)\s+be\s+(triggered|released|set off|initiated|unstable)/gi,
+			id,
+			CAT_TRAINING,
+			"warning",
+			(m) => `Passive construction "${m}" reads as lower-probability`,
+			() =>
+				'PROBLEM: Passive voice underplays the risk for non-technical readers.\nCONSIDER: Active voice with an agent: "A skier or rider can trigger an avalanche here today."',
+		),
+		...findRegexFlags(
+			text,
+			/\b(N|NE|E|SE|S|SW|W|NW)[\-\s]?(facing|aspect|aspects)\b/gi,
+			id,
+			CAT_TRAINING,
+			"warning",
+			(m) => `Aspect "${m}" has no compass frame for an untrained reader`,
+			() =>
+				'PROBLEM: Compass abbreviations (N-facing, NE-facing) are meaningless without a visual reference.\nCONSIDER: "north and northwest-facing slopes — the shaded sides of ridges that rarely see sun."',
+		),
+		...findKeywordFlags(
+			text,
+			SPATIAL_DISTRIBUTION_TERMS,
+			id,
+			CAT_TRAINING,
+			"warning",
+			(t) => `Spatial distribution term "${t}" requires training to interpret`,
+			(t) =>
+				`PROBLEM: "${t}" is a technical likelihood-matrix term unfamiliar to untrained readers.\nCONSIDER: Replace with a plain-language location descriptor.`,
+		),
+	];
+}
+
+// ---------------------------------------------------------------------------
+// Terrain-language flags (fv0.4)
+// ---------------------------------------------------------------------------
+
+const OVERHEAD_HAZARD_TERMS = ["overhead hazard", "cornice fall", "ice cliff"];
+const COMPLEX_TERRAIN_TERMS = ["convex roll", "convexity", "rollover", "cross-loaded", "cross loaded"];
+const RUNOUT_TERMS = ["runout zone", "run-out zone", "run out zone", "runout", "run-out"];
+
+function findTerrainTrapFlags(text: string, lower: string, id: PersonaId, sev: "blocker" | "warning"): FlaggedPhrase[] {
+	const flags: FlaggedPhrase[] = [];
+	for (const term of ["terrain trap", "terrain traps"]) {
+		let searchFrom = 0;
+		while (searchFrom < lower.length) {
+			const idx = lower.indexOf(term, searchFrom);
+			if (idx === -1) break;
+			if (!hasConsequenceAnchor(sentenceContaining(text, idx))) {
+				flags.push(
+					makeFlag(
+						text.slice(idx, idx + term.length),
+						idx,
+						idx + term.length,
+						id,
+						`"terrain trap" has no consequence anchor for a low terrain-skill reader`,
+						'PROBLEM: "Terrain trap" is meaningless to readers who cannot picture it.\nCONSIDER: "gully bottoms, cliff bases, and creek beds — places where a small avalanche can bury you deeply."',
+						"terrain-language",
+						sev,
+					),
+				);
+			}
+			searchFrom = idx + 1;
+		}
+	}
+	return flags;
+}
+
+function findOverheadHazardFlags(
+	text: string,
+	lower: string,
+	id: PersonaId,
+	sev: "blocker" | "warning",
+): FlaggedPhrase[] {
+	return OVERHEAD_HAZARD_TERMS.flatMap((term) => {
+		const idx = lower.indexOf(term);
+		if (idx === -1 || hasConsequenceAnchor(sentenceContaining(text, idx))) return [];
+		return [
+			makeFlag(
+				text.slice(idx, idx + term.length),
+				idx,
+				idx + term.length,
+				id,
+				`"${text.slice(idx, idx + term.length)}" has no description of what falls`,
+				'PROBLEM: Overhead hazard language without a description leaves low-skill readers unable to identify the risk.\nCONSIDER: "Large cornices hang above this route — they can break off without warning and trigger a slide below."',
+				"terrain-language",
+				sev,
+			),
+		];
+	});
+}
+
+function findRunoutFlags(text: string, lower: string, id: PersonaId): FlaggedPhrase[] {
+	return RUNOUT_TERMS.flatMap((term) => {
+		const idx = lower.indexOf(term);
+		if (idx === -1 || hasConsequenceAnchor(sentenceContaining(text, idx))) return [];
+		return [
+			makeFlag(
+				text.slice(idx, idx + term.length),
+				idx,
+				idx + term.length,
+				id,
+				`"${text.slice(idx, idx + term.length)}" has no size or consequence anchor`,
+				'PROBLEM: Runout zone language without a consequence leaves low-skill readers without actionable information.\nCONSIDER: "The debris path can reach the valley floor."',
+				"terrain-language",
+				"warning",
+			),
+		];
+	});
+}
+
+function findTerrainLanguageFlags(text: string, persona: Persona): FlaggedPhrase[] {
+	const terrainSkill = persona.terrainAssessmentSkill ?? 3;
+	if (terrainSkill > 3) return [];
+
+	const id = persona.id;
+	const baseSev: "blocker" | "warning" = (persona.backcountryDaysPerSeason ?? 0) < 15 ? "blocker" : "warning";
+	const lower = text.toLowerCase();
+
+	const complexFlags =
+		terrainSkill <= 2
+			? findKeywordFlags(
+					text,
+					COMPLEX_TERRAIN_TERMS,
+					id,
+					"terrain-language",
+					baseSev,
+					(t) => `"${t}" requires terrain-reading skill this persona doesn't have`,
+					(t) =>
+						t.includes("convex")
+							? 'PROBLEM: Convex roll requires field terrain reading.\nCONSIDER: "The top of a convex roll is a common trigger point — snow is thinner there and a skier\'s weight can start a slide that runs the full slope below."'
+							: `PROBLEM: "${t}" requires advanced terrain interpretation.\nCONSIDER: Describe the feature in plain terms with a consequence anchor.`,
+				)
+			: [];
+
+	return [
+		...findTerrainTrapFlags(text, lower, id, baseSev),
+		...findOverheadHazardFlags(text, lower, id, baseSev),
+		...complexFlags,
+		...findRunoutFlags(text, lower, id),
+	];
+}
+
+// ---------------------------------------------------------------------------
+// Weather-science flags (fv0.5)
+// ---------------------------------------------------------------------------
+
+const WEATHER_SCIENCE_PATTERNS: { terms: string[]; suggestion: string }[] = [
+	{
+		terms: ["temperature gradient", "facet growth", "faceting"],
+		suggestion:
+			'PROBLEM: Temperature gradient / facet growth is forecaster language.\nCONSIDER: "Cold, clear nights are creating weak sugary snow crystals deep in the pack — this is what makes buried weak layers dangerous weeks after a storm."',
+	},
+	{
+		terms: ["inversion", "temperature inversion"],
+		suggestion:
+			'PROBLEM: Inversion language is not plain English.\nCONSIDER: "Warmer air above colder air near the ground is slowing snow settlement and keeping the snowpack weak."',
+	},
+	{
+		terms: ["solar radiation loading", "solar loading", "insolation"],
+		suggestion:
+			'PROBLEM: Solar radiation loading is forecaster shorthand.\nCONSIDER: "South-facing slopes will soften and become prone to wet slides as the sun heats the snow surface this afternoon."',
+	},
+	{
+		terms: ["loading rate", "rapid loading"],
+		suggestion:
+			'PROBLEM: Loading rate is a forecaster metric.\nCONSIDER: "Snow is falling fast enough that new slabs can form before the storm ends."',
+	},
+	{
+		terms: ["surface hoar", "hoarfrost"],
+		suggestion:
+			'PROBLEM: Surface hoar requires forecasting knowledge to translate to hazard.\nCONSIDER: "A fragile, glittery layer of ice crystals formed on the snow surface — when buried by new snow, this creates a slippery weak layer that can fail weeks later."',
+	},
+	{
+		terms: ["GFS", "ECMWF", "500mb", "jet stream", "synoptic"],
+		suggestion:
+			'PROBLEM: Model and synoptic references belong in internal briefings, not public forecasts.\nCONSIDER: "A strong storm is expected Thursday — expect rapid loading and increasing danger."',
+	},
+];
+
+function findWeatherScienceFlags(text: string, persona: Persona): FlaggedPhrase[] {
+	const weatherSkill = persona.weatherPatternRecognition ?? 3;
+	if (weatherSkill > 3) return [];
+
+	const flags: FlaggedPhrase[] = [];
+	const id = persona.id;
+	const severity: "blocker" | "warning" = weatherSkill <= 1 ? "blocker" : "warning";
+	const lower = text.toLowerCase();
+	const snowpackTerms = ["slab", "weak layer", "instability", "avalanche", "hazard", "be cautious"];
+
+	for (const { terms, suggestion } of WEATHER_SCIENCE_PATTERNS) {
+		for (const term of terms) {
+			const idx = lower.indexOf(term.toLowerCase());
+			if (idx === -1) continue;
+			const sentence = sentenceContaining(text, idx);
+			const sentenceLower = sentence.toLowerCase();
+			const hasContext = hasConsequenceAnchor(sentence) || snowpackTerms.some((c) => sentenceLower.includes(c));
+			if (!hasContext) {
+				flags.push(
+					makeFlag(
+						text.slice(idx, idx + term.length),
+						idx,
+						idx + term.length,
+						id,
+						`"${term}" is weather-science language with no plain-language consequence`,
+						suggestion,
+						"weather-science",
+						severity,
+					),
+				);
+				break; // one flag per pattern group
+			}
+		}
+	}
+
+	// Multi-day pattern without snowpack consequence
+	const multiDayPattern = /(extended|prolonged)\s+(cold|clear|warm|wet)/gi;
+	for (let match = multiDayPattern.exec(text); match !== null; match = multiDayPattern.exec(text)) {
+		const sentence = sentenceContaining(text, match.index);
+		const sentenceLower = sentence.toLowerCase();
+		if (!snowpackTerms.some((c) => sentenceLower.includes(c)) && !hasConsequenceAnchor(sentence)) {
+			flags.push(
+				makeFlag(
+					match[0],
+					match.index,
+					match.index + match[0].length,
+					id,
+					`"${match[0]}" multi-day pattern with no snowpack consequence`,
+					'PROBLEM: Multi-day weather patterns without a snowpack consequence leave non-technical readers unable to connect weather to hazard.\nCONSIDER: "This extended cold clear period is creating faceted snow — expect persistent weak layers to develop."',
+					"weather-science",
+					"warning",
+				),
+			);
+		}
+	}
+
+	return flags;
+}
+
+// ---------------------------------------------------------------------------
+// Action-clarity flags (fv0.6)
+// ---------------------------------------------------------------------------
+
+const HEDGE_PHRASES = [
+	"may be acceptable",
+	"could be okay",
+	"some areas are safer",
+	"lower risk terrain exists",
+	"might be acceptable",
+];
+
+const SOFT_RECOMMENDATIONS = ["consider avoiding", "you may want to", "perhaps stay", "you might want to"];
+
+function findHedgePhraseFlags(
+	text: string,
+	lower: string,
+	id: PersonaId,
+	riskTolerance: number,
+	trainingLevel: number,
+	dangerLevel: number,
+): FlaggedPhrase[] {
+	if (riskTolerance < 4 || trainingLevel > 1 || dangerLevel < 3) return [];
+	return HEDGE_PHRASES.flatMap((phrase) => {
+		const idx = lower.indexOf(phrase);
+		if (idx === -1) return [];
+		return [
+			makeFlag(
+				text.slice(idx, idx + phrase.length),
+				idx,
+				idx + phrase.length,
+				id,
+				`"${phrase}" provides an out that aggressive untrained readers will act on`,
+				'PROBLEM: Aggressive readers anchor on the permission clause and will proceed.\nCONSIDER: Rewrite as a constraint: "Stay below treeline on south-facing aspects only. Avoid all northerly terrain above 8,500 ft."',
+				CAT_ACTION,
+				"blocker",
+			),
+		];
+	});
+}
+
+function findSoftRecFlags(
+	text: string,
+	lower: string,
+	id: PersonaId,
+	dangerRating: string,
+	dangerLevel: number,
+): FlaggedPhrase[] {
+	if (dangerLevel < 3) return [];
+	return SOFT_RECOMMENDATIONS.flatMap((phrase) => {
+		const idx = lower.indexOf(phrase);
+		if (idx === -1) return [];
+		return [
+			makeFlag(
+				text.slice(idx, idx + phrase.length),
+				idx,
+				idx + phrase.length,
+				id,
+				`"${phrase}" is too soft for ${dangerRating} danger`,
+				'PROBLEM: At Considerable or higher, soft recommendations read as suggestions, not warnings.\nCONSIDER: Replace with a directive — "Avoid" or "Do not enter" rather than "consider avoiding."',
+				CAT_ACTION,
+				dangerLevel >= 4 ? "blocker" : "warning",
+			),
+		];
+	});
+}
+
+function findActionClarityFlags(text: string, persona: Persona, dangerRating: string): FlaggedPhrase[] {
+	const flags: FlaggedPhrase[] = [];
+	const id = persona.id;
+	const lower = text.toLowerCase();
+	const dangerLevel = parseDangerLevel(dangerRating);
+	const riskTolerance = persona.riskTolerance ?? 3;
+	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
+
+	flags.push(...findHedgePhraseFlags(text, lower, id, riskTolerance, trainingLevel, dangerLevel));
+	flags.push(...findSoftRecFlags(text, lower, id, dangerRating, dangerLevel));
+
+	// "Use caution" as sole action
+	const useCautionIdx = lower.search(/use caution[\.\,\s]/);
+	if (useCautionIdx !== -1) {
+		flags.push(
+			makeFlag(
+				text.slice(useCautionIdx, useCautionIdx + 11),
+				useCautionIdx,
+				useCautionIdx + 11,
+				id,
+				'"Use caution" provides no actionable terrain guidance',
+				'PROBLEM: "Use caution" has no behavioral meaning — what does caution look like?\nCONSIDER: "Stick to slopes below 30 degrees today. If you\'re not sure how steep a slope is, it\'s probably steep enough to avalanche."',
+				CAT_ACTION,
+				"warning",
+			),
+		);
+	}
+
+	// "Conditions exist" without consequence
+	const conditionsExistMatch = /(conditions|hazard)\s+exist/i.exec(text);
+	if (conditionsExistMatch && !hasConsequenceAnchor(sentenceContaining(text, conditionsExistMatch.index))) {
+		flags.push(
+			makeFlag(
+				conditionsExistMatch[0],
+				conditionsExistMatch.index,
+				conditionsExistMatch.index + conditionsExistMatch[0].length,
+				id,
+				`"${conditionsExistMatch[0]}" has no consequence or terrain anchor`,
+				'PROBLEM: "Conditions exist" says nothing actionable.\nCONSIDER: "Hazardous conditions exist on steep north-facing slopes above treeline — a slide here would bury you."',
+				CAT_ACTION,
+				"warning",
+			),
+		);
+	}
+
+	// "Considerable" without most-accidents anchor (low literacy)
+	if (persona.literacyLevel === "low" && lower.includes("considerable")) {
+		const hasAnchor = [
+			"most accidents",
+			"most fatalities",
+			"underestimated",
+			"do not underestimate",
+			"more dangerous",
+		].some((a) => lower.includes(a));
+		if (!hasAnchor) {
+			const idx = lower.indexOf("considerable");
+			flags.push(
+				makeFlag(
+					text.slice(idx, idx + 12),
+					idx,
+					idx + 12,
+					id,
+					'"Considerable" is consistently underestimated by low-literacy readers',
+					'PROBLEM: "Considerable" is where most avalanche fatalities occur — untrained readers treat it as moderate.\nCONSIDER: Add: "Considerable danger is where most avalanche accidents happen — do not treat this as a moderate day."',
+					CAT_ACTION,
+					"blocker",
+				),
+			);
+		}
+	}
+
+	// Danger rating without behavior anchor for inexperienced readers
+	if ((persona.yearsOfMountainExperience ?? 0) < 5 && dangerLevel >= 3) {
+		const hasBehaviorAnchor = ["avoid", "do not", "stay below", "turn around", "stick to", "keep to"].some((a) =>
+			lower.includes(a),
+		);
+		if (!hasBehaviorAnchor) {
+			flags.push(
+				makeFlag(
+					dangerRating,
+					0,
+					dangerRating.length,
+					id,
+					"Danger rating stated without a behavioral consequence for an inexperienced reader",
+					'PROBLEM: Inexperienced readers need a "what this means for you" sentence paired with the danger rating.\nCONSIDER: "Considerable danger means human-triggered avalanches are likely on steep slopes — most backcountry accidents happen on Considerable days."',
+					CAT_ACTION,
+					"warning",
+				),
+			);
+		}
+	}
+
+	return flags;
+}
+
+// ---------------------------------------------------------------------------
+// Mode-gap flags (fv0.7)
+// ---------------------------------------------------------------------------
+
+const MODE_GAP_SUGGESTIONS: Record<string, Record<string, string>> = {
+	motorized: {
+		remoteTriggering:
+			'PROBLEM: No remote triggering language — critical for motorized users.\nCONSIDER: "Snowmobilers: a sled on the bench below can trigger the slope above. Keep riders spaced out and never park below loaded terrain."',
+		runOutZone:
+			'PROBLEM: No run-out zone language — motorized users park in avalanche paths.\nCONSIDER: "The debris paths from slides can reach the valley floor — do not park in or below avalanche paths."',
+		terrainTrap:
+			'PROBLEM: No terrain trap language — snowmobilers commonly ride gully and creek-bed terrain.\nCONSIDER: "Gully bottoms and creek beds are terrain traps — a small avalanche there can bury a rider."',
+	},
+	"human-powered": {
+		safeAlternative:
+			'PROBLEM: No safe terrain alternative described — human-powered travelers need a viable objective.\nCONSIDER: "Low-angle terrain below 30 degrees on southerly aspects is a lower-risk option today."',
+		aspectElevation:
+			'PROBLEM: No specific aspect and elevation callout — skinners cannot plan a route without this.\nCONSIDER: Specify the primary problem terrain: "N through NE-facing terrain above 9,000 ft" rather than generic steep terrain language.',
+		travelAdviceSpecificity:
+			"PROBLEM: Travel advice is too brief or lacks terrain specifics for route planning.\nCONSIDER: Add named aspects, elevations, and a safe terrain alternative. Three sentences minimum for human-powered travelers.",
+	},
+	"out-of-bounds": {
+		outOfBoundsWarning:
+			'PROBLEM: No out-of-bounds callout — sidecountry travelers exit into uncontrolled terrain.\nCONSIDER: "Terrain immediately outside resort boundaries is not patrolled — treat it as full backcountry terrain today."',
+		plainLanguageConsequence:
+			'PROBLEM: No plain-language burial consequence for out-of-bounds travelers without training.\nCONSIDER: "An avalanche in this terrain will likely bury you — rescue in uncontrolled terrain takes significantly longer than inside resort boundaries."',
+		dangerRatingClarity:
+			'PROBLEM: Danger rating not restated in plain terms in the travel advice for out-of-bounds travelers.\nCONSIDER: "Today\'s danger is Considerable — this is the level where most avalanche accidents happen."',
+	},
+};
+
+function findModeGapFlags(signalsMissing: string[], persona: Persona, dangerRating: string): FlaggedPhrase[] {
+	const travelMode = persona.travelMode ?? "human-powered";
+	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
+	const dangerLevel = parseDangerLevel(dangerRating);
+
+	if (trainingLevel > 2 || dangerLevel < 3) return [];
+
+	const modeSuggestions = MODE_GAP_SUGGESTIONS[travelMode] ?? {};
+	const sev: "blocker" | "warning" = travelMode === "motorized" ? "blocker" : "warning";
+
+	return signalsMissing
+		.filter((signal) => signal in modeSuggestions)
+		.map(
+			(signal): FlaggedPhrase => ({
+				text: "",
+				startIndex: 0,
+				endIndex: 0,
+				personaId: persona.id,
+				reason: `Missing ${signal} guidance for ${travelMode} travelers at ${dangerRating} danger`,
+				suggestion: modeSuggestions[signal],
+				flagCategory: "mode-gap",
+				severity: sev,
+			}),
+		);
+}
 
 // ---------------------------------------------------------------------------
 // Travel mode weights
@@ -844,7 +1497,14 @@ export function scoreForecast(
 			unknownTerms: getEffectiveUnknownTerms(persona),
 		};
 		const jargonFlags = findJargonFlags(fullText, adjustedPersona);
-		const allFlags = [...jargonFlags];
+		const allFlags = [
+			...jargonFlags,
+			...findTrainingGapFlags(fullText, adjustedPersona),
+			...findTerrainLanguageFlags(fullText, adjustedPersona),
+			...findWeatherScienceFlags(fullText, adjustedPersona),
+			...findActionClarityFlags(fullText, adjustedPersona, dangerRating),
+			...findModeGapFlags(signalsMissing, adjustedPersona, dangerRating),
+		];
 
 		// Overall score weighted by risk tolerance dimension
 		const { clarityW, jargonW, actionabilityW } = getOverallWeights(persona);

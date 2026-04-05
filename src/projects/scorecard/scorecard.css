@@ -315,10 +315,12 @@ mark.sc-highlight--hidden { background: transparent !important; border-bottom-co
 .sc-suggestions-title { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--sc-text-muted); margin-bottom: 12px; }
 
 .sc-suggestion-card { border: 1px solid var(--sc-border); border-radius: var(--sc-radius); padding: 12px; margin-bottom: 10px; background: var(--sc-surface2); }
-.sc-suggestion-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.sc-suggestion-persona { font-size: 0.75rem; font-weight: 700; }
+.sc-suggestion-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.sc-suggestion-personas { display: flex; flex-wrap: wrap; gap: 4px; }
+.sc-suggestion-persona-pill { font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; }
 .sc-suggestion-section { font-size: 0.72rem; color: var(--sc-text-dim); }
-.sc-suggestion-impact { margin-left: auto; font-size: 0.75rem; font-weight: 700; color: #16a34a; }
+.sc-suggestion-impact { margin-left: auto; font-size: 0.75rem; font-weight: 700; color: #16a34a; white-space: nowrap; cursor: help; }
+.sc-impact-hint { font-size: 0.68rem; font-weight: 400; color: #16a34a; opacity: 0.75; }
 .sc-suggestion-problem { font-size: 0.85rem; color: var(--sc-text); margin-bottom: 6px; }
 .sc-suggestion-original { font-size: 0.82rem; font-style: italic; color: var(--sc-text-muted); margin-bottom: 6px; padding: 6px 10px; background: var(--sc-surface); border-radius: 4px; }
 .sc-suggestion-text { font-size: 0.85rem; color: var(--sc-accent); margin-bottom: 10px; line-height: 1.5; }

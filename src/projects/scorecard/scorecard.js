@@ -351,7 +351,6 @@ function renderAll(data) {
     p.classList.toggle("active", tabId === activeTab);
   });
   renderReadability(data);
-  renderJourney(data);
   renderCoach(data);
 }
 
@@ -580,7 +579,7 @@ function openSuggestionDrawer(dataset) {
     <div class="sc-drawer-phrase">"${escHtml(dataset.phrase ?? "")}"</div>
     <div class="sc-drawer-reason">${escHtml(dataset.reason ?? "")}</div>
     <div class="sc-drawer-suggestion-label">Suggestion</div>
-    <div class="sc-drawer-suggestion">${escHtml(dataset.suggestion ?? "")}</div>
+    <div class="sc-drawer-suggestion">${escHtml(dataset.suggestion ?? "").replace(/\n/g, "<br>")}</div>
     <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(dataset.suggestion ?? "")}')">
       Copy suggestion
     </button>
@@ -590,7 +589,7 @@ function openSuggestionDrawer(dataset) {
 }
 
 // ---------------------------------------------------------------------------
-// Tab 2: Persona Journey
+// Tab 2: Forecaster Coach (section label helper shared)
 // ---------------------------------------------------------------------------
 
 function renderReportPreview(bodyId, data) {
@@ -599,76 +598,6 @@ function renderReportPreview(bodyId, data) {
   const text = getForecastDisplayText(data);
   if (!text) { el.textContent = "No report text available."; return; }
   el.innerHTML = escHtml(text).replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
-}
-
-function renderJourney(data) {
-  document.getElementById("journey-zone-title").textContent =
-    `${data.zoneName} — ${formatDate(data.dateIssued)}`;
-  renderReportPreview("journey-report-body", data);
-
-  const map = document.getElementById("journey-map");
-  if (!data.journeys?.length) {
-    map.innerHTML = "<p class='sc-no-data'>No journey data available.</p>";
-    return;
-  }
-
-  const sections = [...new Set(data.journeys.flatMap((j) => j.steps.map((s) => s.section)))];
-
-  map.innerHTML = `
-    <div class="sc-journey-grid" style="grid-template-columns: 160px repeat(${data.journeys.length}, 1fr)">
-      <div class="sc-journey-corner"></div>
-      ${data.journeys.map((j) => `
-        <div class="sc-journey-persona-header" style="border-top:3px solid ${j.color}">
-          <div class="sc-journey-persona-avatar" style="background:${j.color}20;color:${j.color}">${j.personaName[0]}</div>
-          <div class="sc-journey-persona-name">${j.personaName}</div>
-          <div class="sc-journey-decision sc-decision-${j.finalDecision}">
-            ${decisionLabel(j.finalDecision)}
-          </div>
-          <div class="sc-journey-depth">Read ${j.attentionDepth}/4 sections</div>
-        </div>`).join("")}
-
-      ${sections.map((section) => `
-        <div class="sc-journey-section-label">${sectionLabel(section)}</div>
-        ${data.journeys.map((j) => {
-          const step = j.steps.find((s) => s.section === section);
-          if (!step) return `<div class="sc-journey-cell sc-cell-skipped">—</div>`;
-          return `<div class="sc-journey-cell sc-cell-${step.state}"
-              role="button" tabindex="0"
-              data-journey-idx="${data.journeys.indexOf(j)}"
-              data-section="${section}"
-              data-interpretation="${escAttr(step.interpretation)}"
-              data-reasoning="${escAttr(step.reasoning)}"
-              data-persona-name="${escAttr(j.personaName)}"
-              data-color="${j.color}"
-              aria-label="${j.personaName}: ${step.state} at ${sectionLabel(section)}">
-            ${stateIcon(step.state)}
-          </div>`;
-        }).join("")}`
-      ).join("")}
-    </div>
-  `;
-
-  map.querySelectorAll(".sc-journey-cell[role=button]").forEach((cell) => {
-    cell.addEventListener("click", () => openJourneyDrawer(cell.dataset));
-    cell.addEventListener("keydown", (e) => { if (e.key === "Enter") openJourneyDrawer(cell.dataset); });
-  });
-}
-
-function openJourneyDrawer(dataset) {
-  const drawer = document.getElementById("journey-drawer");
-  const content = document.getElementById("journey-drawer-content");
-  content.innerHTML = `
-    <div class="sc-drawer-persona" style="color:${dataset.color}">${escHtml(dataset.personaName)}</div>
-    <div class="sc-drawer-section-label">${sectionLabel(dataset.section)}</div>
-    <div class="sc-drawer-interpretation">${escHtml(dataset.interpretation ?? "")}</div>
-    <div class="sc-drawer-reasoning-label">Why</div>
-    <div class="sc-drawer-reasoning">${escHtml(dataset.reasoning ?? "")}</div>
-  `;
-  drawer.classList.remove("hidden");
-}
-
-function decisionLabel(decision) {
-  return { correct: "Correct call", wrong: "Wrong call", abandoned: "Abandoned" }[decision] ?? decision;
 }
 
 function sectionLabel(section) {
@@ -883,39 +812,60 @@ function renderCoachSuggestions(data) {
     return;
   }
 
-  list.innerHTML = visible.map((s) => {
-    const persona = data.personas.find((p) => p.personaId === s.personaId);
-    const key = escAttr(suggestionKey(s));
+  // Group suggestions with identical problem+suggestion text into stacked cards
+  const groups = [];
+  const groupMap = new Map();
+  for (const s of visible) {
+    const groupKey = `${s.problem}|||${s.suggestion}`;
+    if (groupMap.has(groupKey)) {
+      groupMap.get(groupKey).members.push(s);
+    } else {
+      const g = { key: groupKey, representative: s, members: [s] };
+      groups.push(g);
+      groupMap.set(groupKey, g);
+    }
+  }
+
+  list.innerHTML = groups.map((g) => {
+    const s = g.representative;
+    const allMembers = g.members;
+    const firstKey = escAttr(suggestionKey(s));
+    const mode = suggestionTravelMode(s, data.personas);
+    const totalImpact = allMembers.reduce((sum, m) => sum + (m.scoreImpact ?? 0), 0);
+
     const dimBadge = s.drivingDimensionLabel
       ? `<span class="sc-dim-badge sc-dim-badge--${escAttr(s.drivingDimension)}">${escHtml(s.drivingDimensionLabel)}</span>`
       : '';
-
-    // Travel mode badge — only show when there are mixed modes, and only badge
-    // human-powered when there are also motorized/OOB personas for contrast
-    const mode = suggestionTravelMode(s, data.personas);
-    const showModeBadge = hasMixedModes && (mode !== 'human-powered' || modesPresent.has('motorized') || modesPresent.has('out-of-bounds'));
     const modeMeta = TRAVEL_MODE_META[mode] ?? TRAVEL_MODE_META['human-powered'];
-    const modeBadge = showModeBadge
+    const modeBadge = hasMixedModes
       ? `<span class="sc-dim-badge sc-dim-badge--${escAttr(modeMeta.cls)}">${modeMeta.icon} ${escHtml(modeMeta.label)}</span>`
       : '';
 
-    return `<div class="sc-suggestion-card" data-key="${key}" data-mode="${escAttr(mode)}">
+    // Persona pill row — one pill per affected persona
+    const personaPills = allMembers.map((m) => {
+      const p = data.personas.find((p) => p.personaId === m.personaId);
+      return `<span class="sc-suggestion-persona-pill" style="color:${p?.color ?? '#666'};border-color:${p?.color ?? '#ccc'}">${escHtml(m.personaName)}</span>`;
+    }).join('');
+
+    const impactTip = `Points this fix would add to the forecast score across affected personas`;
+    const impactHtml = `<span class="sc-suggestion-impact" title="${escAttr(impactTip)}">+${totalImpact} pts <span class="sc-impact-hint">score impact</span></span>`;
+
+    return `<div class="sc-suggestion-card" data-key="${firstKey}" data-mode="${escAttr(mode)}">
       <div class="sc-suggestion-header">
-        <span class="sc-suggestion-persona" style="color:${persona?.color ?? '#666'}">${s.personaName}</span>
-        ${dimBadge}
-        ${modeBadge}
+        <div class="sc-suggestion-personas">${personaPills}</div>
+        ${dimBadge}${modeBadge}
         <span class="sc-suggestion-section">${escHtml(sectionLabel(s.section))}</span>
-        <span class="sc-suggestion-impact">+${s.scoreImpact} pts</span>
+        ${impactHtml}
       </div>
       <div class="sc-suggestion-problem">${escHtml(s.problem)}</div>
-      ${s.originalText ? `<div class="sc-suggestion-original">"${escHtml(s.originalText)}"</div>` : ""}
+      ${s.originalText ? `<div class="sc-suggestion-original">"${escHtml(s.originalText)}"</div>` : ''}
       <div class="sc-suggestion-text">${escHtml(s.suggestion)}</div>
       <div class="sc-suggestion-actions">
         <button class="sc-copy-btn" onclick="copyToClipboard(this,'${escAttr(s.suggestion)}')">Copy</button>
-        <button class="sc-dismiss-btn" data-zone="${escAttr(zoneSlug)}" data-key="${key}">Not helpful</button>
+        <button class="sc-dismiss-btn" data-zone="${escAttr(zoneSlug)}" data-key="${firstKey}">Not helpful</button>
       </div>
     </div>`;
-  }).join("");
+  }).join('');
 
   if (hiddenCount) {
     const restore = document.createElement("button");
@@ -1024,13 +974,10 @@ function hideChipTooltip() {
 function wireDrawerClose() {
   document.getElementById("drawer-close").addEventListener("click", () =>
     document.getElementById("suggestion-drawer").classList.add("hidden"));
-  document.getElementById("journey-drawer-close").addEventListener("click", () =>
-    document.getElementById("journey-drawer").classList.add("hidden"));
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       document.getElementById("suggestion-drawer").classList.add("hidden");
-      document.getElementById("journey-drawer").classList.add("hidden");
     }
   });
 }
@@ -1066,7 +1013,7 @@ function escHtml(str) {
 }
 
 function escAttr(str) {
-  return String(str ?? "").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  return String(str ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/\n/g, "&#10;").replace(/\r/g, "&#13;");
 }
 
 function copyToClipboard(btn, text) {
@@ -1902,6 +1849,8 @@ async function deletePersona(key) {
       document.getElementById("trainer-detail-panel").classList.add("hidden");
     }
     showTrainerToast("Persona deleted");
+    // Refresh all scored data so deleted persona disappears from every tab
+    loadData();
   } catch (err) {
     showTrainerToast(`Failed to delete: ${err.message}`, true);
   }

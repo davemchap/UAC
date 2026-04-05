@@ -40,11 +40,7 @@
       <span class="sc-tab-icon">&#9685;</span>
       Readability Lens
     </button>
-    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-journey" id="btn-journey" data-tab="journey">
-      <span class="sc-tab-icon">&#8594;</span>
-      Persona Journey
-    </button>
-    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-coach" id="btn-coach" data-tab="coach">
+<button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-coach" id="btn-coach" data-tab="coach">
       <span class="sc-tab-icon">&#9733;</span>
       Forecaster Coach
     </button>
@@ -106,41 +102,7 @@
     </section>
 
     <!-- ------------------------------------------------------------------ -->
-    <!-- TAB 2: Persona Journey                                              -->
-    <!-- ------------------------------------------------------------------ -->
-    <section class="sc-tab-panel hidden" id="tab-journey" role="tabpanel" aria-labelledby="btn-journey">
-      <div class="sc-solution-meta">
-        <div class="sc-hypothesis">
-          <span class="sc-meta-label">Hypothesis</span>
-          <span class="sc-meta-text">We believe showing a simulated step-by-step decision path for each persona will improve structural clarity, which we will know is true when the % of persona journeys ending in a correct decision increases by 20 points within 60 days.</span>
-        </div>
-      </div>
-
-      <div class="sc-journey-header">
-        <h2 id="journey-zone-title">Select a zone</h2>
-        <p class="sc-journey-subtitle">How does each persona navigate today's forecast?</p>
-      </div>
-
-      <details class="sc-report-details" id="journey-report-details">
-        <summary class="sc-report-summary">Report Being Reviewed</summary>
-        <div class="sc-report-body" id="journey-report-body"></div>
-      </details>
-
-      <div class="sc-journey-map" id="journey-map">
-        <!-- Rendered by JS -->
-      </div>
-
-      <!-- Journey detail drawer -->
-      <div class="sc-drawer hidden" id="journey-drawer" role="dialog" aria-modal="true" aria-label="Journey detail">
-        <div class="sc-drawer-inner">
-          <button class="sc-drawer-close" id="journey-drawer-close" aria-label="Close">&times;</button>
-          <div class="sc-drawer-content" id="journey-drawer-content"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------ -->
-    <!-- TAB 3: Forecaster Coach                                             -->
+    <!-- TAB 2: Forecaster Coach                                             -->
     <!-- ------------------------------------------------------------------ -->
     <section class="sc-tab-panel hidden" id="tab-coach" role="tabpanel" aria-labelledby="btn-coach">
       <div class="sc-solution-meta">
