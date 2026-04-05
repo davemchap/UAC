@@ -1239,9 +1239,7 @@ function renderRoster() {
       ? `<div class="trainer-persona-card-tags">${(p.tags).map((t) => `<span class="trainer-persona-tag">${escHtml(t)}</span>`).join("")}</div>`
       : "";
     const inactiveBadge = p.active === false ? `<span class="trainer-persona-inactive-badge">⊘</span>` : "";
-    const deleteHintHtml = !p.isBuiltIn
-      ? `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`
-      : "";
+    const deleteHintHtml = `<button class="trainer-card-delete-btn" data-key="${escAttr(p.personaKey)}" aria-label="Delete ${escHtml(p.name)}" title="Delete ${escHtml(p.name)}">🗑</button>`;
 
     card.innerHTML = `
       ${inactiveBadge}
@@ -1748,9 +1746,7 @@ function renderDetailHeader(persona) {
     ? `<button class="trainer-active-toggle active" data-key="${escAttr(persona.personaKey)}" title="Click to deactivate">&#8857; Active</button>`
     : `<button class="trainer-active-toggle inactive" data-key="${escAttr(persona.personaKey)}" title="Click to activate">&#8856; Inactive</button>`;
 
-  const deleteBtn = !persona.isBuiltIn
-    ? `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`
-    : "";
+  const deleteBtn = `<button class="trainer-delete-btn" data-key="${escAttr(persona.personaKey)}" title="Delete persona">Delete</button>`;
 
   document.getElementById("trainer-detail-header").innerHTML = `
     <div class="trainer-detail-header-inner">
@@ -1888,7 +1884,7 @@ function closeCloneModal() {
 
 function confirmDeletePersona(key) {
   const persona = trainerPersonas.find((p) => p.personaKey === key);
-  if (!persona || persona.isBuiltIn) return;
+  if (!persona) return;
   deletePersona(key);
 }
 

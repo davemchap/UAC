@@ -72,7 +72,6 @@ personas.delete("/:key", async (c) => {
 
 	const record = await getPersonaByKey(key);
 	if (!record) return c.json({ error: PERSONA_NOT_FOUND }, 404);
-	if (record.isBuiltIn) return c.json({ error: "Built-in personas cannot be deleted" }, 403);
 
 	await deletePersona(key);
 	return c.json({ success: true });
