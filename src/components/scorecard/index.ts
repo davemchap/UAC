@@ -7,6 +7,7 @@ export type {
 	PersonaDimensions,
 	ScorecardResult,
 	FlaggedPhrase,
+	FlagCategory,
 	PersonaJourney,
 	JourneyStep,
 	CoachingSuggestion,

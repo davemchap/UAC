@@ -7,6 +7,14 @@ import { PERSONAS, PERSONA_IDS, type PersonaId, type Persona } from "./personas"
 
 export const TRAINING_LABELS = ["None", "Awareness", "AIARE 1", "AIARE 2", "Pro 1", "Pro 2+"] as const;
 
+export type FlagCategory =
+	| "jargon"
+	| "training-gap"
+	| "terrain-language"
+	| "weather-science"
+	| "action-clarity"
+	| "mode-gap";
+
 export interface FlaggedPhrase {
 	text: string;
 	startIndex: number;
@@ -14,6 +22,8 @@ export interface FlaggedPhrase {
 	personaId: PersonaId;
 	reason: string;
 	suggestion: string;
+	flagCategory: FlagCategory;
+	severity: "blocker" | "warning";
 }
 
 export interface PersonaDimensions {
@@ -203,26 +213,6 @@ function getEffectiveUnknownTerms(persona: Persona): readonly string[] {
 }
 
 /**
- * Combined field-experience score (0–1) from years in mountains + days per season.
- * Used to soften sentence-length and grade-level penalties for experienced personas.
- */
-function computeExperienceScore(persona: Persona): number {
-	const years = Math.min(persona.yearsOfMountainExperience ?? 0, 20) / 20;
-	const days = Math.min(persona.backcountryDaysPerSeason ?? 0, 60) / 60;
-	return years * 0.4 + days * 0.6;
-}
-
-/** Raises max sentence length for field-experienced personas (up to +10 words). */
-function getAdjustedMaxSentenceLength(persona: Persona): number {
-	return persona.maxSentenceLength + Math.round(computeExperienceScore(persona) * 10);
-}
-
-/** Reduces per-flag sentence penalty for experienced personas (1.0 → 0.6). */
-function getSentencePenaltyMultiplier(persona: Persona): number {
-	return 1.0 - computeExperienceScore(persona) * 0.4;
-}
-
-/**
  * Adjusts max grade level for conditions sections based on weather pattern recognition.
  * Skill 1 = -3 grade levels; skill 3 = no change; skill 5 = +2 grade levels.
  */
@@ -307,6 +297,8 @@ function findJargonFlags(text: string, persona: Persona): FlaggedPhrase[] {
 					personaId: persona.id,
 					reason: buildJargonReason(phrase, persona),
 					suggestion: getJargonSuggestion(term),
+					flagCategory: "jargon",
+					severity: persona.literacyLevel === "low" ? "blocker" : "warning",
 				});
 			}
 			searchFrom = idx + 1;
@@ -348,29 +340,6 @@ function getJargonSuggestion(term: string): string {
 // ---------------------------------------------------------------------------
 // Sentence length flags
 // ---------------------------------------------------------------------------
-
-function findLongSentenceFlags(text: string, persona: Persona): FlaggedPhrase[] {
-	const flags: FlaggedPhrase[] = [];
-	const sentences = getSentences(text);
-
-	for (const sentence of sentences) {
-		const wordCount = countWords(sentence);
-		if (wordCount > persona.maxSentenceLength) {
-			const idx = text.indexOf(sentence);
-			if (idx === -1) continue;
-			flags.push({
-				text: sentence.slice(0, 80) + (sentence.length > 80 ? "…" : ""),
-				startIndex: idx,
-				endIndex: idx + sentence.length,
-				personaId: persona.id,
-				reason: `Sentence is ${wordCount} words — over the ${persona.maxSentenceLength}-word limit for ${persona.name}`,
-				suggestion: "Break into two shorter sentences. Lead with the key hazard or action.",
-			});
-		}
-	}
-
-	return flags;
-}
 
 // ---------------------------------------------------------------------------
 // Travel mode weights
@@ -722,26 +691,6 @@ function buildCoachingSuggestions(
 	const persona = runtimePersona ?? PERSONAS[personaScore.personaId];
 	const trainingLevel = persona.avalancheTrainingLevel ?? 0;
 
-	// Suggest breaking long sentences
-	const sentences = getSentences(text);
-	const effectiveMaxSentence = getAdjustedMaxSentenceLength(persona);
-	for (const sentence of sentences.slice(0, 3)) {
-		if (countWords(sentence) > effectiveMaxSentence) {
-			suggestions.push({
-				section: "Forecast text",
-				personaId: personaScore.personaId,
-				personaName: persona.name,
-				originalText: sentence.slice(0, 120),
-				problem: `This sentence is too long for ${persona.name} (${countWords(sentence)} words)`,
-				suggestion: "Consider: break into two sentences. Lead with the hazard or action, then add context.",
-				scoreImpact: 8,
-				drivingDimension: "fieldExperience",
-				drivingDimensionLabel: "Complexity",
-			});
-			break;
-		}
-	}
-
 	// Suggest replacing jargon (top 2)
 	const jargonFlags = personaScore.flags.filter((f) => !f.reason.includes("words")).slice(0, 2);
 	for (const flag of jargonFlags) {
@@ -794,22 +743,17 @@ function scoreSectionForPersona(
 ): { clarity: number; jargonLoad: number; actionability: number } {
 	const gradeLevel = estimateGradeLevel(sectionText);
 	const effectiveMaxGrade = getAdjustedMaxGradeLevel(persona, isConditionsSection);
-	const effectiveMaxSentence = getAdjustedMaxSentenceLength(persona);
-	const sentencePenaltyMult = getSentencePenaltyMultiplier(persona);
 	const effectiveTerms = getEffectiveUnknownTerms(persona);
 
-	// Scoring proxy with dimension-adjusted thresholds
-	const adjustedPersona = { ...persona, unknownTerms: effectiveTerms, maxSentenceLength: effectiveMaxSentence };
+	const adjustedPersona = { ...persona, unknownTerms: effectiveTerms };
 
-	const sentenceFlags = findLongSentenceFlags(sectionText, adjustedPersona);
 	const jargonFlags = findJargonFlags(sectionText, adjustedPersona);
 	const rawActionability = scoreActionability(sectionText);
 	const groupBonus = getGroupPhraseBonus(sectionText, persona);
 	const actionability = Math.max(10, Math.min(100, rawActionability + groupBonus));
 
 	const gradePenalty = Math.max(0, (gradeLevel - effectiveMaxGrade) * 4);
-	const sentencePenalty = sentenceFlags.length * 5 * sentencePenaltyMult;
-	const clarity = Math.max(10, Math.min(100, 90 - gradePenalty - sentencePenalty));
+	const clarity = Math.max(10, Math.min(100, 90 - gradePenalty));
 	const jargonLoad = Math.max(10, Math.min(100, 100 - jargonFlags.length * 15));
 
 	return { clarity, jargonLoad, actionability };
@@ -898,11 +842,9 @@ export function scoreForecast(
 		const adjustedPersona = {
 			...persona,
 			unknownTerms: getEffectiveUnknownTerms(persona),
-			maxSentenceLength: getAdjustedMaxSentenceLength(persona),
 		};
 		const jargonFlags = findJargonFlags(fullText, adjustedPersona);
-		const sentenceFlags = findLongSentenceFlags(fullText, adjustedPersona);
-		const allFlags = [...jargonFlags, ...sentenceFlags];
+		const allFlags = [...jargonFlags];
 
 		// Overall score weighted by risk tolerance dimension
 		const { clarityW, jargonW, actionabilityW } = getOverallWeights(persona);
