@@ -3,7 +3,18 @@
  * Personas are synthetic scoring subjects — not tool users.
  */
 
-export type PersonaId = "jordan" | "priya" | "marcus" | "sasha" | "ryan_kowalczyk" | "colby_reyes";
+const HUMAN_POWERED = "human-powered" as const;
+
+export type PersonaId =
+	| "jordan"
+	| "priya"
+	| "marcus"
+	| "sasha"
+	| "ryan_kowalczyk"
+	| "colby_reyes"
+	| "stuart"
+	| "beth"
+	| "mike";
 
 export interface Persona {
 	id: PersonaId;
@@ -185,8 +196,8 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 		role: "Software developer, splitboarder",
 		color: "#7c3aed",
 		literacyLevel: "low",
-		travelMode: "human-powered",
-		tags: ["recreational", "human-powered"],
+		travelMode: HUMAN_POWERED,
+		tags: ["recreational", HUMAN_POWERED],
 		maxSentenceLength: 18,
 		maxGradeLevel: 7.5,
 		successCriteria:
@@ -212,6 +223,102 @@ export const PERSONAS: Record<PersonaId, Persona> = {
 			"HN72",
 		],
 	},
+	stuart: {
+		id: "stuart",
+		name: "Stuart Halloway",
+		role: "Physician, family group leader",
+		color: "#0ea5e9",
+		literacyLevel: "low",
+		travelMode: HUMAN_POWERED,
+		tags: ["recreational", HUMAN_POWERED],
+		maxSentenceLength: 22,
+		maxGradeLevel: 8,
+		successCriteria:
+			"Stuart reads the forecast, correctly assesses risk for his family group, and makes a conservative terrain choice or postpones. He can explain the key hazard to non-technical companions in plain terms.",
+		unknownTerms: [
+			"persistent weak layer",
+			"PWL",
+			"facets",
+			"depth hoar",
+			"ECTP",
+			"ECT",
+			"storm slab",
+			"wind slab",
+			"likelihood",
+			"D2",
+			"D3",
+			"aspect",
+			"propagation",
+			"spatial variability",
+			"isothermal",
+			"terrain trap",
+			"convexity",
+			"leeward",
+			"windward",
+			"cornice",
+			"crown",
+			"shooting cracks",
+			"whumpfing",
+		],
+		riskTolerance: 2,
+	},
+	beth: {
+		id: "beth",
+		name: "Beth Nakamura",
+		role: "Skimo racer, time-pressed athlete",
+		color: "#f43f5e",
+		literacyLevel: "high",
+		travelMode: HUMAN_POWERED,
+		tags: ["recreational", HUMAN_POWERED, "experienced"],
+		maxSentenceLength: 35,
+		maxGradeLevel: 11,
+		successCriteria:
+			"Beth quickly scans the forecast, identifies the primary hazard and affected terrain, and incorporates that into a fast route decision. She does not skip the avalanche problems section under time pressure.",
+		unknownTerms: ["snotel", "awdb", "forecaster notation", "internal layer naming", "loading rate", "hn72", "swe"],
+		riskTolerance: 3,
+		avalancheTrainingLevel: 1,
+	},
+	mike: {
+		id: "mike",
+		name: "Mike Okonkwo",
+		role: "Scientist, once-a-year backcountry visitor, no local knowledge",
+		color: "#8b5cf6",
+		literacyLevel: "high",
+		travelMode: HUMAN_POWERED,
+		tags: ["recreational", HUMAN_POWERED],
+		maxSentenceLength: 35,
+		maxGradeLevel: 11,
+		successCriteria:
+			"Mike reads the forecast carefully, correctly identifies the danger level and primary problem, and makes a sound go/no-go decision despite lacking local terrain knowledge. He does not substitute general risk tolerance for terrain-specific guidance.",
+		unknownTerms: [
+			"snotel",
+			"awdb",
+			"forecaster notation",
+			"internal layer naming",
+			"terrain trap",
+			"cornice",
+			"convexity",
+			"leeward",
+			"windward",
+			"cross-loaded",
+			"hn72",
+			"hn24",
+			"swe",
+			"loading rate",
+		],
+		riskTolerance: 2,
+		avalancheTrainingLevel: 1,
+	},
 } as const;
 
-export const PERSONA_IDS: PersonaId[] = ["jordan", "priya", "marcus", "sasha", "ryan_kowalczyk", "colby_reyes"];
+export const PERSONA_IDS: PersonaId[] = [
+	"jordan",
+	"priya",
+	"marcus",
+	"sasha",
+	"ryan_kowalczyk",
+	"colby_reyes",
+	"stuart",
+	"beth",
+	"mike",
+];
