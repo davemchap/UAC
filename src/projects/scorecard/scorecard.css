@@ -506,6 +506,17 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 }
 .sc-filter-empty .sc-empty-title { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
 .sc-filter-empty .sc-empty-hint { font-size: 0.85rem; color: var(--sc-text-muted); }
+.sc-date-empty { padding: 24px; text-align: center; }
+.sc-date-empty .sc-empty-title { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+.sc-date-empty .sc-empty-hint { font-size: 0.85rem; color: var(--sc-text-muted); margin-bottom: 14px; }
+.sc-date-empty-nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.sc-date-nav-alt {
+  padding: 7px 14px; border-radius: var(--sc-radius);
+  border: 1px solid var(--sc-border); background: var(--sc-surface);
+  color: var(--sc-accent); font-size: 0.82rem; font-weight: 500; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.sc-date-nav-alt:hover { border-color: var(--sc-accent); background: #f0f7fa; }
 
 /* ---- Score Distribution ---- */
 .sc-dist-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -1773,6 +1784,9 @@ details[open] .sc-report-summary::before { content: "▼ "; }
   .sc-report-kpi { flex: 1 1 100%; }
   .sc-about-modal-body { padding: 16px; gap: 20px; }
   .sc-header-text h1 { font-size: 0.88rem; }
+  .sc-demo-bar { flex-wrap: wrap; gap: 8px; }
+  .sc-demo-scenario { font-size: 0.78rem; flex: 1 1 100%; text-align: left; }
+  .sc-demo-nav { flex: 1; justify-content: flex-start; }
 }
 
 /* ---------------------------------------------------------------------------

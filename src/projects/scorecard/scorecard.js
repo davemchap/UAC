@@ -367,6 +367,13 @@ function setGlobalDate(date) {
   }
 }
 
+function offsetDate(iso, days) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
 function formatNavDate(iso) {
   if (!iso) return "Today";
   const [y, m, d] = iso.split("-").map(Number);
@@ -401,12 +408,28 @@ function showNoDataForDate(date) {
   if (!activePanel) return;
   const existing = activePanel.querySelector(".sc-date-empty");
   if (existing) existing.remove();
+  const today = getTodayIso();
+  const prevDate = offsetDate(date, -1);
+  const nextDate = offsetDate(date, 1);
+  const showNext = nextDate <= today;
   const el = document.createElement("div");
   el.className = "sc-date-empty sc-empty-state";
   el.innerHTML = `
     <p class="sc-empty-title">No forecast data for ${escHtml(date)}</p>
-    <p class="sc-empty-hint">UAC had not published a forecast for this zone on that date, or data was not ingested. Try an adjacent date.</p>`;
+    <p class="sc-empty-hint">UAC had not published a forecast for this zone on that date, or data was not ingested.</p>
+    <div class="sc-date-empty-nav">
+      <button class="sc-date-nav-alt" data-goto="${escAttr(prevDate)}">← ${escHtml(formatNavDate(prevDate))}</button>
+      ${showNext ? `<button class="sc-date-nav-alt" data-goto="${escAttr(nextDate)}">${escHtml(formatNavDate(nextDate))} →</button>` : ""}
+      <button class="sc-date-nav-alt" data-goto="today">Live / Today</button>
+    </div>`;
   activePanel.prepend(el);
+  // Wire recovery buttons
+  el.querySelectorAll(".sc-date-nav-alt[data-goto]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const goto = btn.dataset.goto;
+      setGlobalDate(goto === "today" ? null : goto);
+    });
+  });
   // Clear stale score displays so old numbers don't persist
   const titleEl = document.getElementById("readability-zone-title");
   if (titleEl) titleEl.textContent = "No forecast data for selected date";
@@ -1668,6 +1691,10 @@ function comprehensionColor(level) {
   return { HIGH: '#16a34a', MEDIUM: '#ca8a04', LOW: '#ea580c', MISREAD: '#dc2626' }[level] ?? '#8a9bac';
 }
 
+function comprehensionLabel(level) {
+  return { HIGH: 'Understood', MEDIUM: 'Partial', LOW: 'Missed key points', MISREAD: '⚠ Wrong Conclusion' }[level] ?? level;
+}
+
 function divergenceBracket(score) {
   if (score <= 20) return 'Aligned with forecast intent';
   if (score <= 50) return 'Partial alignment';
@@ -1692,9 +1719,7 @@ function renderLensContent(personaLens, personaId, stripEl, contentEl) {
   if (!pl) return;
 
   const compColor = comprehensionColor(pl.overallComprehension);
-  const compLabel = pl.overallComprehension === 'MISREAD'
-    ? '&#9888; MISREAD — Safety Risk'
-    : escHtml(pl.overallComprehension) + ' comprehension';
+  const compLabel = escHtml(comprehensionLabel(pl.overallComprehension));
   const divScore = pl.divergenceScore;
   const divColor = divScore <= 20 ? '#16a34a' : divScore <= 50 ? '#ca8a04' : divScore <= 75 ? '#ea580c' : '#dc2626';
 
@@ -1706,7 +1731,7 @@ function renderLensContent(personaLens, personaId, stripEl, contentEl) {
     return `<div class="sc-lens-section-card" style="border-top-color:${sc}">
       <div class="sc-lens-section-header">
         <span class="sc-lens-section-name">${escHtml(sh.sectionLabel)}</span>
-        <span class="sc-comprehension-badge sc-comprehension-${escAttr(sh.comprehensionLevel)}">${escHtml(sh.comprehensionLevel)}</span>
+        <span class="sc-comprehension-badge sc-comprehension-${escAttr(sh.comprehensionLevel)}">${escHtml(comprehensionLabel(sh.comprehensionLevel))}</span>
       </div>
       <div class="sc-lens-heard-as">${escHtml(sh.heardAs)}</div>
       ${missedHtml}
@@ -2612,8 +2637,8 @@ async function submitClone() {
       body: JSON.stringify({ name, role: role || undefined, personaKey }),
     });
     if (res.status === 409) {
-      const data = await res.json().catch(() => ({}));
-      errorEl.textContent = data.error ?? "A persona with that key already exists.";
+      const suggestions = [2, 3, 4].map((n) => `${personaKey}_${n}`).join(", ");
+      errorEl.textContent = `Key "${personaKey}" is already taken. Try: ${suggestions}`;
       errorEl.classList.remove("hidden");
       return;
     }
