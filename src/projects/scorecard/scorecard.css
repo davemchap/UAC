@@ -1235,8 +1235,16 @@ details[open] .sc-report-summary::before { content: "▼ "; }
     border-right: none; border-bottom: 1px solid var(--sc-border);
   }
   .trainer-roster.is-open { display: flex; }
-  .trainer-persona-card { min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
-  .trainer-card-delete-btn { opacity: 0.4; }
+  /* Simplified mobile cards — name + role only, no flex clutter */
+  .trainer-persona-card {
+    display: block; min-height: 48px;
+    padding: 10px 40px 10px 14px; /* right padding reserves space for delete btn */
+  }
+  .trainer-persona-avatar-wrap { display: none; }
+  .trainer-persona-card-literacy { display: none; }
+  .trainer-persona-travel-badge { display: none; }
+  .trainer-persona-card-tags { display: none; }
+  .trainer-card-delete-btn { opacity: 0.5; }
   .trainer-detail { overflow: visible; }
   .trainer-detail-panel { overflow: visible; flex: none; }
   .trainer-detail-empty { min-height: 120px; flex: none; }
