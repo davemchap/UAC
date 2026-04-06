@@ -1197,10 +1197,39 @@ details[open] .sc-report-summary::before { content: "▼ "; }
 .trainer-toast.error { background: #991b1b; }
 .trainer-toast.hidden { display: none; }
 
+/* Mobile persona selector button — hidden on desktop */
+.trainer-mobile-selector { display: none; }
+
 /* Responsive trainer */
 @media (max-width: 700px) {
-  .trainer-modal-body { grid-template-columns: 1fr; }
-  .trainer-roster { display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; flex-shrink: 0; border-right: none; border-bottom: 1px solid var(--sc-border); }
+  .trainer-modal-body { display: flex; flex-direction: column; overflow-y: auto; }
+  .trainer-mobile-selector {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 14px 16px; min-height: 52px;
+    background: var(--sc-surface2); border: none; border-bottom: 2px solid var(--sc-accent);
+    font-size: 0.9rem; font-weight: 600; color: var(--sc-text);
+    cursor: pointer; text-align: left; flex-shrink: 0; gap: 8px;
+  }
+  .trainer-mobile-selector:active { opacity: 0.8; }
+  .trainer-mobile-selector-chevron {
+    display: inline-block; font-size: 1.1rem; color: var(--sc-accent);
+    transition: transform 0.2s; flex-shrink: 0;
+  }
+  .trainer-mobile-selector[aria-expanded="true"] .trainer-mobile-selector-chevron {
+    transform: rotate(180deg);
+  }
+  .trainer-roster {
+    display: none; flex-direction: column;
+    overflow-y: auto; max-height: 45vh; flex-shrink: 0;
+    border-right: none; border-bottom: 1px solid var(--sc-border);
+  }
+  .trainer-roster.is-open { display: flex; }
+  .trainer-persona-card { min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
+  .trainer-card-delete-btn { opacity: 0.4; }
+  .trainer-detail { overflow: visible; }
+  .trainer-detail-panel { overflow: visible; flex: none; }
+  .trainer-detail-empty { min-height: 120px; flex: none; }
+  .trainer-tab-panel { overflow: visible; }
   .trainer-field-row { grid-template-columns: 1fr; }
 }
 

@@ -407,6 +407,19 @@ function showNoDataForDate(date) {
     <p class="sc-empty-title">No forecast data for ${escHtml(date)}</p>
     <p class="sc-empty-hint">UAC had not published a forecast for this zone on that date, or data was not ingested. Try an adjacent date.</p>`;
   activePanel.prepend(el);
+  // Clear stale score displays so old numbers don't persist
+  const titleEl = document.getElementById("readability-zone-title");
+  if (titleEl) titleEl.textContent = "No forecast data for selected date";
+  const legendEl = document.getElementById("readability-legend");
+  if (legendEl) legendEl.innerHTML = "";
+  const scoresEl = document.getElementById("readability-persona-scores");
+  if (scoresEl) scoresEl.innerHTML = `<span class="sc-no-data">N/A — no forecast for this date</span>`;
+  const cardsEl = document.getElementById("readability-cards");
+  if (cardsEl) cardsEl.innerHTML = "";
+  const trendEl = document.getElementById("readability-trend");
+  if (trendEl) trendEl.innerHTML = "";
+  const bodyEl = document.getElementById("readability-body");
+  if (bodyEl) bodyEl.innerHTML = "";
 }
 
 // ---------------------------------------------------------------------------
@@ -1858,6 +1871,13 @@ function wireTrainerModal() {
   cloneKeyInput.addEventListener("input", () => { cloneKeyManuallyEdited = true; });
   // Reset flag when clone modal opens (handled in openCloneModal)
   document.getElementById("trainer-clone-modal")._resetKeyFlag = () => { cloneKeyManuallyEdited = false; };
+
+  document.getElementById("trainer-mobile-selector")?.addEventListener("click", () => {
+    const roster = document.getElementById("trainer-roster");
+    const btn = document.getElementById("trainer-mobile-selector");
+    const isOpen = roster.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1875,6 +1895,17 @@ function closeTrainerModal() {
   document.body.style.overflow = "";
   trainerActiveKey = null;
   trainerUnsaved = {};
+}
+
+function updateMobileSelectorLabel(persona) {
+  const label = document.getElementById("trainer-mobile-selector-label");
+  if (label) label.textContent = persona ? `${persona.name} — ${persona.role}` : "Select a persona";
+}
+
+function closeMobileRoster() {
+  document.getElementById("trainer-roster")?.classList.remove("is-open");
+  const btn = document.getElementById("trainer-mobile-selector");
+  if (btn) btn.setAttribute("aria-expanded", "false");
 }
 
 // ---------------------------------------------------------------------------
@@ -2043,6 +2074,8 @@ function selectPersona(key) {
   clearInterrogateTab();
 
   wireDetailActions(key);
+  updateMobileSelectorLabel(persona);
+  closeMobileRoster();
 }
 
 // ---------------------------------------------------------------------------

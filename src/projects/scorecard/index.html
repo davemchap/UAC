@@ -409,6 +409,11 @@
         <button class="trainer-close-btn" id="trainer-close-btn" aria-label="Close trainer">&times;</button>
       </header>
       <div class="trainer-modal-body">
+        <!-- Mobile persona selector accordion (hidden on desktop) -->
+        <button id="trainer-mobile-selector" class="trainer-mobile-selector" aria-expanded="false" aria-controls="trainer-roster" aria-label="Change selected persona">
+          <span id="trainer-mobile-selector-label">Select a persona</span>
+          <span class="trainer-mobile-selector-chevron" aria-hidden="true">▾</span>
+        </button>
         <!-- Left: Persona roster -->
         <aside class="trainer-roster" id="trainer-roster">
           <!-- Rendered by JS -->
