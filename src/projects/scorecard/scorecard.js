@@ -104,6 +104,7 @@ async function loadData() {
     populateForecasterSelect(allData);
     populateZoneSelect(getFilteredData());
     renderSummaryOrZone();
+    refreshDailyDateSelect();
   } catch (err) {
     showError(`Failed to load scorecard data: ${err.message}`);
   } finally {
@@ -118,8 +119,14 @@ async function enterDemoMode() {
   activeForecaster = null;
   document.getElementById("sc-demo-bar").classList.add("active");
   document.getElementById("demo-mode-btn").classList.add("active");
+  const reportEl = document.getElementById("daily-report-content");
+  if (reportEl) reportEl.innerHTML = "";
   await loadData();
   renderDemoActiveScenario();
+  if (activeTab === "daily") {
+    const dateSelect = document.getElementById("daily-date-select");
+    loadDailyReport(dateSelect?.value || undefined);
+  }
 }
 
 function exitDemoMode() {
@@ -128,6 +135,8 @@ function exitDemoMode() {
   activeForecaster = null;
   document.getElementById("sc-demo-bar").classList.remove("active");
   document.getElementById("demo-mode-btn").classList.remove("active");
+  const reportEl = document.getElementById("daily-report-content");
+  if (reportEl) reportEl.innerHTML = "";
   loadData();
 }
 
@@ -2903,29 +2912,69 @@ function wireAboutModal() {
 // Daily Report (Tab 6)
 // ---------------------------------------------------------------------------
 
-async function wireDailyReport() {
+function refreshDailyDateSelect() {
   const dateSelect = document.getElementById("daily-date-select");
-  const loadBtn = document.getElementById("daily-load-btn");
-  if (!dateSelect || !loadBtn) return;
-
-  if (!isDemoMode) {
-    try {
-      const res = await fetch("/api/scorecard/report/available-dates");
-      if (res.ok) {
-        const json = await res.json();
+  if (!dateSelect) return;
+  if (isDemoMode) {
+    const dates = [...new Set(allData.map((d) => d.dateIssued))].filter(Boolean);
+    dateSelect.innerHTML = dates.length === 0
+      ? `<option value="">No demo data</option>`
+      : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
+    if (dates.length > 0) dateSelect.value = dates[0];
+  } else {
+    fetch("/api/scorecard/report/available-dates")
+      .then((r) => r.ok ? r.json() : Promise.resolve({ data: [] }))
+      .then((json) => {
         const dates = json.data ?? [];
         dateSelect.innerHTML = dates.length === 0
           ? `<option value="">No data available</option>`
           : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
-        if (dates.length > 0) {
-          dateSelect.value = dates[0];
-        }
-      }
-    } catch {
-      dateSelect.innerHTML = `<option value="">Could not load dates</option>`;
-    }
+        if (dates.length > 0) dateSelect.value = dates[0];
+      })
+      .catch(() => { dateSelect.innerHTML = `<option value="">Could not load dates</option>`; });
   }
+}
 
+function buildDemoReport(dateLabel) {
+  const zones = dateLabel ? allData.filter((d) => d.dateIssued === dateLabel) : allData;
+  if (!zones.length) return null;
+  const compPriority = { MISREAD: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+  const worstCompOf = (ps) => ps.reduce((w, p) =>
+    (compPriority[p.overallComprehension] ?? 4) < (compPriority[w] ?? 4) ? p.overallComprehension : w, "HIGH");
+  const zoneReports = zones.map((d) => {
+    const ps = d.personas ?? [];
+    const avgScore = ps.length ? Math.round(ps.reduce((s, p) => s + (p.overall ?? 0), 0) / ps.length) : 0;
+    const worstP = [...ps].sort((a, b) => (a.overall ?? 0) - (b.overall ?? 0))[0];
+    return { zoneName: d.zoneName, forecasterName: d.forecasterName ?? "—",
+      avgOverallScore: avgScore, comprehensionLevel: worstCompOf(ps), worstPersona: worstP?.personaName ?? "—" };
+  });
+  const allPs = zones.flatMap((d) => d.personas ?? []);
+  const avgOverall = allPs.length ? Math.round(allPs.reduce((s, p) => s + (p.overall ?? 0), 0) / allPs.length) : 0;
+  const byComp = [...zoneReports].sort((a, b) => (compPriority[a.comprehensionLevel] ?? 4) - (compPriority[b.comprehensionLevel] ?? 4));
+  const pAvgs = {};
+  for (const d of zones) for (const p of d.personas ?? []) {
+    if (!pAvgs[p.personaName]) pAvgs[p.personaName] = { total: 0, count: 0 };
+    pAvgs[p.personaName].total += p.overall ?? 0; pAvgs[p.personaName].count++;
+  }
+  const worstP = Object.entries(pAvgs).map(([n, { total, count }]) => ({ n, avg: total / count })).sort((a, b) => a.avg - b.avg)[0]?.n ?? "—";
+  const worstJargonZone = zones.map((d) => {
+    const ps = d.personas ?? [];
+    return { zoneName: d.zoneName, avg: ps.length ? ps.reduce((s, p) => s + (p.jargonLoad ?? 100), 0) / ps.length : 100 };
+  }).sort((a, b) => a.avg - b.avg)[0]?.zoneName ?? "—";
+  return {
+    date: dateLabel ?? "Demo Snapshot",
+    generatedAt: new Date().toISOString(),
+    summary: { avgOverallScore: avgOverall, totalForecastsScored: zones.length,
+      worstComprehensionZone: byComp[0]?.zoneName ?? "—", mostInvertedPersona: worstP,
+      highestAssumptionDensityZone: worstJargonZone },
+    zones: zoneReports,
+  };
+}
+
+function wireDailyReport() {
+  const dateSelect = document.getElementById("daily-date-select");
+  const loadBtn = document.getElementById("daily-load-btn");
+  if (!dateSelect || !loadBtn) return;
   loadBtn.addEventListener("click", () => loadDailyReport(dateSelect.value || undefined));
 }
 
@@ -2933,10 +2982,12 @@ async function loadDailyReport(date) {
   const el = document.getElementById("daily-report-content");
   if (!el) return;
   if (isDemoMode) {
-    el.innerHTML = `<div class="sc-report-demo-notice">
-      <p class="sc-empty-title">Daily report requires live data.</p>
-      <p class="sc-empty-hint">Exit demo mode and load today's live forecasts to see this report.</p>
-    </div>`;
+    const report = buildDemoReport(date);
+    if (report) {
+      renderDailyReport(report, el);
+    } else {
+      el.innerHTML = `<div class="sc-report-empty"><p class="sc-empty-title">No demo data for this date.</p></div>`;
+    }
     return;
   }
   el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading daily report…</p></div>`;
