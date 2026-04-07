@@ -499,6 +499,30 @@ This project uses **bd (beads)** as the single source of truth for all work. A s
 curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
 ```
 
+## Default Agent Workflow
+
+These workflows run automatically unless the user explicitly says "skip agents" or "no agents" before the request.
+
+### New Feature Requests
+
+Before writing any code for a new feature:
+
+1. **PM first** — Invoke the `pm` skill to research the problem domain, identify personas and scenarios, and create well-formed user stories with acceptance criteria.
+2. **Design second** — Invoke the `ux-designer` skill to design the interaction flows, states, transitions, and visual treatment.
+3. **Then implement** — Only after both agents complete, proceed with implementation against the resulting stories and design spec.
+
+### Bug Reports / "This isn't working"
+
+When the user reports something broken or confusing:
+
+1. **PM writes the bug** — Invoke the `pm` skill to create a properly structured bug report with repro steps, expected vs actual behavior, and impact.
+2. **Design weighs in** — Invoke the `ux-designer` skill to determine if this is a logic bug, a UX confusion issue, or both, and to recommend fixes for any experience problems.
+3. **Then diagnose and fix** — Proceed with root cause analysis and implementation after both agents have weighed in.
+
+### Exceptions
+
+Skip the agent workflow when the user says "skip agents", "no agents", "just fix it", or similar before their request.
+
 ## Rules
 
 - Fix all violations before asking for help
