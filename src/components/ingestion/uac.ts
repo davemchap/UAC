@@ -1,127 +1,98 @@
 import { getDb } from "../db";
 import { avalancheForecasts, avalancheProblems, forecastZones } from "../db/schema";
 
-// UAC does not publish forecaster names in their JSON API.
-// This mapping reflects actual zone assignments for the 2025-2026 season
-// based on published forecast bylines at utahavalanchecenter.org.
-const ZONE_FORECASTERS: Record<string, string> = {
-	"salt-lake": "Drew Hardesty",
-	logan: "Toby Weed",
-	ogden: "Brooke Maushund",
-	provo: "Trent Meisenheimer",
-	uintas: "Craig Gordon",
-	skyline: "Brett Kobernik",
-	moab: "Dave Garcia",
-	abajos: "Eric Trenbeath",
-	southwest: "Brett Kobernik",
-};
-
 // ---------------------------------------------------------------------------
-// UAC Native API types
+// UAC /api/forecasts API types
 // ---------------------------------------------------------------------------
 
-interface UacAdvisory {
-	date_issued?: string;
-	date_issued_timestamp?: string;
-	overall_danger_rating?: string;
-	overall_danger_rose?: string;
-	avalanche_problem_1?: string;
-	avalanche_problem_1_description?: string;
-	danger_rose_1?: string;
-	avalanche_problem_2?: string;
-	avalanche_problem_2_description?: string;
-	danger_rose_2?: string;
-	avalanche_problem_3?: string;
-	avalanche_problem_3_description?: string;
-	danger_rose_3?: string;
-	bottom_line?: string;
-	current_conditions?: string;
-	region?: string;
-	forecaster_name?: string;
+interface UacForecast {
+	Date?: string; // "2026/04/07"
+	Region?: string;
+	"Overall Danger Rating"?: string;
+	"Overall rose"?: string;
+	"Type 1"?: string;
+	"Description 1"?: string;
+	"Rose 1"?: string;
+	"Type 2"?: string;
+	"Description 2"?: string;
+	"Rose 2"?: string;
+	"Type 3"?: string;
+	"Description 3"?: string;
+	"Rose 3"?: string;
+	Summary?: string;
+	"Snow and Weather"?: string;
+	"Author name"?: string;
 	Nid?: string;
-	special_avalanche_bulletin?: string;
+	"Special Announcement"?: string;
 }
 
-interface UacResponse {
-	advisories?: { advisory: UacAdvisory }[];
+interface UacForecastsResponse {
+	forecasts?: { forecast: UacForecast }[];
 }
 
 // ---------------------------------------------------------------------------
 // Fetch
 // ---------------------------------------------------------------------------
 
-export async function fetchUacForecast(apiUrl: string): Promise<UacAdvisory | null> {
+export async function fetchUacForecast(apiUrl: string): Promise<UacForecast | null> {
 	const res = await fetch(apiUrl, { method: "GET" });
 	if (!res.ok) throw new Error(`UAC fetch failed: ${res.status} ${res.statusText}`);
-	const data = (await res.json()) as UacResponse;
-	return data.advisories?.at(0)?.advisory ?? null;
+	const data = (await res.json()) as UacForecastsResponse;
+	return data.forecasts?.at(0)?.forecast ?? null;
 }
 
 // ---------------------------------------------------------------------------
 // Persist
 // ---------------------------------------------------------------------------
 
-async function persistUacForecast(zoneId: number, zoneSlug: string, advisory: UacAdvisory): Promise<void> {
-	const nid = advisory.Nid;
-	const dateIssued = advisory.date_issued;
-	const dangerRating = advisory.overall_danger_rating;
+async function persistUacForecast(zoneId: number, forecast: UacForecast): Promise<void> {
+	const nid = forecast.Nid;
+	const dateRaw = forecast.Date;
+	const dangerRating = forecast["Overall Danger Rating"];
 
-	if (!nid || !dateIssued || !dangerRating) {
-		throw new Error(`UAC advisory for zone ${zoneId} missing required fields`);
+	if (!nid || !dateRaw || !dangerRating) {
+		throw new Error(`UAC forecast for zone ${zoneId} missing required fields`);
 	}
+
+	// "2026/04/07" → "2026-04-07"
+	const dateIssued = dateRaw.replace(/\//g, "-");
 
 	const db = getDb();
 
-	const [forecast] = await db
+	const [row] = await db
 		.insert(avalancheForecasts)
 		.values({
 			zoneId,
 			nid,
 			dateIssued,
-			dateIssuedTimestamp: advisory.date_issued_timestamp ?? null,
+			dateIssuedTimestamp: null,
 			overallDangerRating: dangerRating,
-			overallDangerRose: advisory.overall_danger_rose ?? null,
-			avalancheProblem1: advisory.avalanche_problem_1 ?? null,
-			avalancheProblem2: advisory.avalanche_problem_2 ?? null,
-			avalancheProblem3: advisory.avalanche_problem_3 ?? null,
-			bottomLine: advisory.bottom_line ?? null,
-			currentConditions: advisory.current_conditions ?? null,
-			region: advisory.region ?? null,
-			forecasterName:
-				(ZONE_FORECASTERS as Record<string, string | undefined>)[zoneSlug] ?? advisory.forecaster_name ?? null,
-			specialBulletin: advisory.special_avalanche_bulletin ?? null,
+			overallDangerRose: forecast["Overall rose"] ?? null,
+			avalancheProblem1: forecast["Type 1"] ?? null,
+			avalancheProblem2: forecast["Type 2"] ?? null,
+			avalancheProblem3: forecast["Type 3"] ?? null,
+			bottomLine: forecast.Summary ?? null,
+			currentConditions: forecast["Snow and Weather"] ?? null,
+			region: forecast.Region ?? null,
+			forecasterName: forecast["Author name"] ?? null,
+			specialBulletin: forecast["Special Announcement"] ?? null,
 		})
 		.onConflictDoUpdate({
 			target: [avalancheForecasts.zoneId, avalancheForecasts.nid],
 			set: {
 				overallDangerRating: dangerRating,
-				overallDangerRose: advisory.overall_danger_rose ?? null,
+				overallDangerRose: forecast["Overall rose"] ?? null,
 				updatedAt: new Date(),
 			},
 		})
 		.returning({ id: avalancheForecasts.id });
 
-	const forecastId = forecast.id;
+	const forecastId = row.id;
 
 	const problems = [
-		{
-			num: 1,
-			type: advisory.avalanche_problem_1,
-			desc: advisory.avalanche_problem_1_description,
-			rose: advisory.danger_rose_1,
-		},
-		{
-			num: 2,
-			type: advisory.avalanche_problem_2,
-			desc: advisory.avalanche_problem_2_description,
-			rose: advisory.danger_rose_2,
-		},
-		{
-			num: 3,
-			type: advisory.avalanche_problem_3,
-			desc: advisory.avalanche_problem_3_description,
-			rose: advisory.danger_rose_3,
-		},
+		{ num: 1, type: forecast["Type 1"], desc: forecast["Description 1"], rose: forecast["Rose 1"] },
+		{ num: 2, type: forecast["Type 2"], desc: forecast["Description 2"], rose: forecast["Rose 2"] },
+		{ num: 3, type: forecast["Type 3"], desc: forecast["Description 3"], rose: forecast["Rose 3"] },
 	].filter((p): p is typeof p & { type: string } => Boolean(p.type));
 
 	for (const p of problems) {
@@ -150,12 +121,12 @@ export async function ingestAllUacZones(): Promise<void> {
 
 	for (const zone of zones) {
 		try {
-			const advisory = await fetchUacForecast(zone.apiUrl);
-			if (!advisory) {
-				console.warn(`[uac] No advisory returned for zone ${zone.zoneId}`);
+			const forecast = await fetchUacForecast(zone.apiUrl);
+			if (!forecast) {
+				console.warn(`[uac] No forecast returned for zone ${zone.zoneId}`);
 				continue;
 			}
-			await persistUacForecast(zone.zoneId, zone.slug, advisory);
+			await persistUacForecast(zone.zoneId, forecast);
 			console.log(`[uac] Ingested zone ${zone.zoneId}`);
 		} catch (err) {
 			console.error(`[uac] Failed zone ${zone.zoneId}:`, err);

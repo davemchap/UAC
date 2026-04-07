@@ -10,8 +10,6 @@
 let allData = [];
 let activeZoneSlug = null;
 let activeForecaster = null;
-let isDemoMode = false;
-let demoActiveIndex = 0;
 
 // Dismissed suggestions: { [zoneSlug]: Set<string> } — persisted in sessionStorage
 function getDismissed(zoneSlug) {
@@ -74,10 +72,6 @@ function dimTooltipText(p) {
 document.addEventListener("DOMContentLoaded", () => {
   switchTab(location.hash.replace("#", "") || "readability");
   loadData();
-  document.getElementById("demo-mode-btn").addEventListener("click", enterDemoMode);
-  document.getElementById("sc-demo-exit").addEventListener("click", exitDemoMode);
-  document.getElementById("sc-demo-prev").addEventListener("click", () => { demoActiveIndex = Math.max(0, demoActiveIndex - 1); renderDemoActiveScenario(); });
-  document.getElementById("sc-demo-next").addEventListener("click", () => { demoActiveIndex = Math.min(allData.length - 1, demoActiveIndex + 1); renderDemoActiveScenario(); });
   wireTabButtons();
   wireForecasterSelect();
   wireZoneSelect();
@@ -96,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadData() {
   showLoading(true);
   try {
-    const url = isDemoMode ? "/api/scorecard/golden" : "/api/scorecard";
+    const url = "/api/scorecard";
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const json = await res.json();
@@ -112,53 +106,6 @@ async function loadData() {
   }
 }
 
-async function enterDemoMode() {
-  isDemoMode = true;
-  demoActiveIndex = 0;
-  activeZoneSlug = null;
-  activeForecaster = null;
-  document.getElementById("sc-demo-bar").classList.add("active");
-  document.getElementById("demo-mode-btn").classList.add("active");
-  const reportEl = document.getElementById("daily-report-content");
-  if (reportEl) reportEl.innerHTML = "";
-  await loadData();
-  renderDemoActiveScenario();
-  if (activeTab === "daily") {
-    const dateSelect = document.getElementById("daily-date-select");
-    loadDailyReport(dateSelect?.value || undefined);
-  }
-}
-
-function exitDemoMode() {
-  isDemoMode = false;
-  activeZoneSlug = null;
-  activeForecaster = null;
-  document.getElementById("sc-demo-bar").classList.remove("active");
-  document.getElementById("demo-mode-btn").classList.remove("active");
-  const reportEl = document.getElementById("daily-report-content");
-  if (reportEl) reportEl.innerHTML = "";
-  loadData();
-}
-
-function renderDemoActiveScenario() {
-  if (!isDemoMode || !allData.length) return;
-  const scenario = allData[demoActiveIndex];
-  if (!scenario) return;
-
-  // Update nav label
-  const DANGER_ICONS = { Low: '🟢', Moderate: '🟡', Considerable: '🟠', High: '🔴', Extreme: '⚫' };
-  const icon = DANGER_ICONS[scenario.overallDangerRating] ?? '❓';
-  const label = document.getElementById("sc-demo-scenario-label");
-  label.textContent = `${demoActiveIndex + 1} / ${allData.length} — ${scenario.zoneName} · ${icon} ${scenario.overallDangerRating} · ${formatDate(scenario.dateIssued)}`;
-
-  // Update prev/next disabled state
-  document.getElementById("sc-demo-prev").disabled = demoActiveIndex === 0;
-  document.getElementById("sc-demo-next").disabled = demoActiveIndex === allData.length - 1;
-
-  // Select this scenario as the active zone
-  activeZoneSlug = scenario.zoneSlug;
-  renderAll(scenario);
-}
 
 async function loadZone(slug) {
   // Respect the global date selection
@@ -265,12 +212,7 @@ function wireZoneSelect() {
   document.getElementById("zone-select").addEventListener("change", (e) => {
     activeZoneSlug = e.target.value || null;
     if (activeZoneSlug) {
-      if (isDemoMode) {
-        const zoneData = getZoneData(activeZoneSlug);
-        if (zoneData) { hideSummary(); renderAll(zoneData); }
-      } else {
-        loadZone(activeZoneSlug);
-      }
+      loadZone(activeZoneSlug);
     } else renderSummaryOrZone();
   });
 }
@@ -363,8 +305,16 @@ function setGlobalDate(date) {
 
   // Drive data loads — zone tabs and report tabs
   if (REPORT_TABS.has(activeTab)) {
-    if (activeTab === "daily") loadDailyReport(date ?? getTodayIso());
-    else if (activeTab === "weekly") loadWeeklyReport(date ?? getTodayIso());
+    const resolved = date ?? getTodayIso();
+    if (activeTab === "daily") {
+      const sel = document.getElementById("daily-date-select");
+      if (sel && sel.value !== resolved) sel.value = resolved;
+      loadDailyReport(resolved);
+    } else if (activeTab === "weekly") {
+      const inp = document.getElementById("weekly-date-input");
+      if (inp && inp.value !== resolved) inp.value = resolved;
+      loadWeeklyReport(resolved);
+    }
     return;
   }
   if (activeZoneSlug) {
@@ -583,13 +533,7 @@ function renderSummary(zones) {
     const select = () => {
       activeZoneSlug = row.dataset.slug;
       document.getElementById("zone-select").value = activeZoneSlug;
-      if (isDemoMode) {
-        // In demo mode, data is already loaded — find locally to avoid 404 on golden slugs
-        const zoneData = getZoneData(activeZoneSlug);
-        if (zoneData) { hideSummary(); renderAll(zoneData); }
-      } else {
-        loadZone(activeZoneSlug);
-      }
+      loadZone(activeZoneSlug);
     };
     row.addEventListener("click", select);
     row.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); } });
@@ -2915,81 +2859,40 @@ function wireAboutModal() {
 function refreshDailyDateSelect() {
   const dateSelect = document.getElementById("daily-date-select");
   if (!dateSelect) return;
-  if (isDemoMode) {
-    const dates = [...new Set(allData.map((d) => d.dateIssued))].filter(Boolean);
-    dateSelect.innerHTML = dates.length === 0
-      ? `<option value="">No demo data</option>`
-      : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
-    if (dates.length > 0) dateSelect.value = dates[0];
-  } else {
-    fetch("/api/scorecard/report/available-dates")
-      .then((r) => r.ok ? r.json() : Promise.resolve({ data: [] }))
-      .then((json) => {
-        const dates = json.data ?? [];
-        dateSelect.innerHTML = dates.length === 0
-          ? `<option value="">No data available</option>`
-          : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
-        if (dates.length > 0) dateSelect.value = dates[0];
-      })
-      .catch(() => { dateSelect.innerHTML = `<option value="">Could not load dates</option>`; });
-  }
-}
-
-function buildDemoReport(dateLabel) {
-  const zones = dateLabel ? allData.filter((d) => d.dateIssued === dateLabel) : allData;
-  if (!zones.length) return null;
-  const compPriority = { MISREAD: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
-  const worstCompOf = (ps) => ps.reduce((w, p) =>
-    (compPriority[p.overallComprehension] ?? 4) < (compPriority[w] ?? 4) ? p.overallComprehension : w, "HIGH");
-  const zoneReports = zones.map((d) => {
-    const ps = d.personas ?? [];
-    const avgScore = ps.length ? Math.round(ps.reduce((s, p) => s + (p.overall ?? 0), 0) / ps.length) : 0;
-    const worstP = [...ps].sort((a, b) => (a.overall ?? 0) - (b.overall ?? 0))[0];
-    return { zoneName: d.zoneName, forecasterName: d.forecasterName ?? "—",
-      avgOverallScore: avgScore, comprehensionLevel: worstCompOf(ps), worstPersona: worstP?.personaName ?? "—" };
-  });
-  const allPs = zones.flatMap((d) => d.personas ?? []);
-  const avgOverall = allPs.length ? Math.round(allPs.reduce((s, p) => s + (p.overall ?? 0), 0) / allPs.length) : 0;
-  const byComp = [...zoneReports].sort((a, b) => (compPriority[a.comprehensionLevel] ?? 4) - (compPriority[b.comprehensionLevel] ?? 4));
-  const pAvgs = {};
-  for (const d of zones) for (const p of d.personas ?? []) {
-    if (!pAvgs[p.personaName]) pAvgs[p.personaName] = { total: 0, count: 0 };
-    pAvgs[p.personaName].total += p.overall ?? 0; pAvgs[p.personaName].count++;
-  }
-  const worstP = Object.entries(pAvgs).map(([n, { total, count }]) => ({ n, avg: total / count })).sort((a, b) => a.avg - b.avg)[0]?.n ?? "—";
-  const worstJargonZone = zones.map((d) => {
-    const ps = d.personas ?? [];
-    return { zoneName: d.zoneName, avg: ps.length ? ps.reduce((s, p) => s + (p.jargonLoad ?? 100), 0) / ps.length : 100 };
-  }).sort((a, b) => a.avg - b.avg)[0]?.zoneName ?? "—";
-  return {
-    date: dateLabel ?? "Demo Snapshot",
-    generatedAt: new Date().toISOString(),
-    summary: { avgOverallScore: avgOverall, totalForecastsScored: zones.length,
-      worstComprehensionZone: byComp[0]?.zoneName ?? "—", mostInvertedPersona: worstP,
-      highestAssumptionDensityZone: worstJargonZone },
-    zones: zoneReports,
-  };
+  fetch("/api/scorecard/report/available-dates")
+    .then((r) => r.ok ? r.json() : Promise.resolve({ data: [] }))
+    .then((json) => {
+      const dates = json.data ?? [];
+      dateSelect.innerHTML = dates.length === 0
+        ? `<option value="">No data available</option>`
+        : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
+      // Sync to global date if one is selected and available
+      if (globalSelectedDate && dates.includes(globalSelectedDate)) {
+        dateSelect.value = globalSelectedDate;
+      } else if (dates.length > 0) {
+        dateSelect.value = dates[0];
+      }
+    })
+    .catch(() => { dateSelect.innerHTML = `<option value="">Could not load dates</option>`; });
 }
 
 function wireDailyReport() {
   const dateSelect = document.getElementById("daily-date-select");
   const loadBtn = document.getElementById("daily-load-btn");
   if (!dateSelect || !loadBtn) return;
-  loadBtn.addEventListener("click", () => loadDailyReport(dateSelect.value || undefined));
+  loadBtn.addEventListener("click", () => {
+    const date = dateSelect.value;
+    if (date) setGlobalDate(date === getTodayIso() ? null : date);
+    else loadDailyReport(undefined);
+  });
 }
 
 async function loadDailyReport(date) {
   const el = document.getElementById("daily-report-content");
   if (!el) return;
-  if (isDemoMode) {
-    const report = buildDemoReport(date);
-    if (report) {
-      renderDailyReport(report, el);
-    } else {
-      el.innerHTML = `<div class="sc-report-empty"><p class="sc-empty-title">No demo data for this date.</p></div>`;
-    }
-    return;
-  }
+  // Sync dropdown to match the requested date
+  const dateSelect = document.getElementById("daily-date-select");
+  if (dateSelect && date && dateSelect.value !== date) dateSelect.value = date;
   el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading daily report…</p></div>`;
   try {
     const url = date ? `/api/scorecard/report/daily?date=${encodeURIComponent(date)}` : "/api/scorecard/report/daily";
@@ -3064,19 +2967,19 @@ function wireWeeklyReport() {
   if (!dateInput || !loadBtn) return;
   dateInput.value = getTodayIso();
   dateInput.max = getTodayIso();
-  loadBtn.addEventListener("click", () => loadWeeklyReport(dateInput.value || undefined));
+  loadBtn.addEventListener("click", () => {
+    const date = dateInput.value;
+    if (date) setGlobalDate(date === getTodayIso() ? null : date);
+    else loadWeeklyReport(undefined);
+  });
 }
 
 async function loadWeeklyReport(weekOf) {
   const el = document.getElementById("weekly-report-content");
   if (!el) return;
-  if (isDemoMode) {
-    el.innerHTML = `<div class="sc-report-demo-notice">
-      <p class="sc-empty-title">Weekly report requires live data.</p>
-      <p class="sc-empty-hint">Exit demo mode and run the app for at least a week to see trend data here.</p>
-    </div>`;
-    return;
-  }
+  // Sync date input to match the requested date
+  const dateInput = document.getElementById("weekly-date-input");
+  if (dateInput && weekOf && dateInput.value !== weekOf) dateInput.value = weekOf;
   el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading weekly report…</p></div>`;
   try {
     const url = weekOf ? `/api/scorecard/report/weekly?week=${encodeURIComponent(weekOf)}` : "/api/scorecard/report/weekly";

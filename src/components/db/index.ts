@@ -116,7 +116,7 @@ export const queries = {
 			.select()
 			.from(avalancheForecasts)
 			.where(eq(avalancheForecasts.zoneId, zoneId))
-			.orderBy(avalancheForecasts.createdAt)
+			.orderBy(desc(avalancheForecasts.createdAt))
 			.limit(1),
 
 	getForecastProblems: (forecastId: number) =>

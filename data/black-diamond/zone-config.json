@@ -7,7 +7,7 @@
     "lon": -111.51,
     "snotel": ["766:UT:SNTL", "366:UT:SNTL"],
     "forecast_url": "https://utahavalanchecenter.org/forecast/salt-lake",
-    "api_url": "https://utahavalanchecenter.org/forecast/salt-lake/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/salt-lake"
   },
   {
     "zone_id": 1737,
@@ -17,7 +17,7 @@
     "lon": -111.80,
     "snotel": ["393:UT:SNTL"],
     "forecast_url": "https://utahavalanchecenter.org/forecast/ogden",
-    "api_url": "https://utahavalanchecenter.org/forecast/ogden/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/ogden"
   },
   {
     "zone_id": 1739,
@@ -27,7 +27,7 @@
     "lon": -111.60,
     "snotel": ["828:UT:SNTL"],
     "forecast_url": "https://utahavalanchecenter.org/forecast/provo",
-    "api_url": "https://utahavalanchecenter.org/forecast/provo/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/provo"
   },
   {
     "zone_id": 1736,
@@ -37,7 +37,7 @@
     "lon": -111.50,
     "snotel": ["1194:UT:SNTL"],
     "forecast_url": "https://utahavalanchecenter.org/forecast/logan",
-    "api_url": "https://utahavalanchecenter.org/forecast/logan/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/logan"
   },
   {
     "zone_id": 1740,
@@ -47,7 +47,7 @@
     "lon": -110.90,
     "snotel": ["1014:UT:SNTL"],
     "forecast_url": "https://utahavalanchecenter.org/forecast/uintas",
-    "api_url": "https://utahavalanchecenter.org/forecast/uintas/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/uintas"
   },
   {
     "zone_id": 1741,
@@ -57,7 +57,7 @@
     "lon": -111.30,
     "snotel": [],
     "forecast_url": "https://utahavalanchecenter.org/forecast/skyline",
-    "api_url": "https://utahavalanchecenter.org/forecast/skyline/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/skyline"
   },
   {
     "zone_id": 1742,
@@ -67,7 +67,7 @@
     "lon": -109.55,
     "snotel": [],
     "forecast_url": "https://utahavalanchecenter.org/forecast/moab",
-    "api_url": "https://utahavalanchecenter.org/forecast/moab/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/moab"
   },
   {
     "zone_id": 1743,
@@ -77,7 +77,7 @@
     "lon": -112.35,
     "snotel": [],
     "forecast_url": "https://utahavalanchecenter.org/forecast/southwest",
-    "api_url": "https://utahavalanchecenter.org/forecast/southwest/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/southwest"
   },
   {
     "zone_id": 1744,
@@ -87,6 +87,6 @@
     "lon": -109.45,
     "snotel": [],
     "forecast_url": "https://utahavalanchecenter.org/forecast/abajos",
-    "api_url": "https://utahavalanchecenter.org/forecast/abajos/json"
+    "api_url": "https://utahavalanchecenter.org/api/forecasts/abajos"
   }
 ]
