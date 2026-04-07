@@ -1,59 +1,196 @@
-# Your Team's App
+# UAC Avalanche Dashboard
 
-## New Here? Start Here
+A fullstack avalanche forecasting dashboard built with Bun, Hono, TypeScript, and PostgreSQL. Pulls data from the Utah Avalanche Center (UAC), National Weather Service (NWS), and SNOTEL APIs and presents it as an operational situational awareness tool.
 
-<details>
-<summary><strong>What is Coder?</strong></summary>
+---
 
-Coder is a platform that gives you a pre-configured computer in the cloud called a workspace. Instead of spending time installing tools and setting up your machine, your workspace comes ready to go with everything you need to start coding -- and it's the same setup for everyone on the team.
-</details>
+## Table of Contents
 
-<details>
-<summary><strong>What is Claude Code?</strong></summary>
+- [Tech Stack](#tech-stack)
+- [Setup Options](#setup-options)
+  - [Option A — Local (native)](#option-a--local-native)
+  - [Option B — Dev container with Podman or Docker](#option-b--dev-container-with-podman-or-docker)
+  - [Option C — Coder workspace](#option-c--coder-workspace)
+- [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
+- [Architecture](#architecture)
+- [API Endpoints](#api-endpoints)
+- [Project Structure](#project-structure)
+- [Quality Gates](#quality-gates)
 
-Claude Code is an AI coding assistant that lives in your terminal. You give it instructions in plain English and it reads, writes, and edits code for you. It's the primary way you'll interact with your codebase in this workspace.
-</details>
+---
 
-<details>
-<summary><strong>What is a terminal?</strong></summary>
+## Tech Stack
 
-A terminal is a text-based interface where you type commands instead of clicking buttons. Think of it as a chat window between you and your computer. In this workspace, your terminal opens automatically and Claude Code is ready to go inside it.
-</details>
+| Layer | Technology |
+|-------|-----------|
+| Runtime | [Bun](https://bun.sh/) v1.3+ |
+| Framework | [Hono](https://hono.dev/) |
+| Database | PostgreSQL 15+ via [Drizzle ORM](https://orm.drizzle.team/) |
+| Language | TypeScript (strict mode) |
+| Frontend | Vanilla JS / HTML / CSS |
+| Tests | bun:test |
 
-## What You Get
+---
 
-- **AI coding helper** -- Claude Code starts automatically to help you write and understand code.
-- **JavaScript engine** -- Bun runs your code, installs packages, and bundles your files.
-- **Version control** -- Git and GitLab CLI come pre-connected, so you can save and share your work.
-- **Command line** -- A full Linux terminal with all the standard developer tools.
-- **Persistent files** -- Your `/workspaces` folder survives restarts, so you won't lose anything.
+## Setup Options
 
-## What's Already Set Up
+### Option A — Local (native)
 
-- **GitLab** -- Your account is connected, so `git clone` and `git push` work right away.
-- **Team project** -- Your team's codebase is automatically downloaded to `~/workspaces/app` on first launch.
-- **Claude Code** -- The AI helper is ready to go, no API key setup needed.
-- **Auto-deploy** -- When you `git push`, it automatically builds and publishes to your team's URL.
+Install the required tools directly on your machine.
 
-## Get Started
+**Prerequisites**
 
-Each team member creates their own workspace. Coordinate with your team --
-each person picks a different number (1, 2, 3, etc.).
+- [Bun](https://bun.sh/docs/installation) v1.3+
+- PostgreSQL 15+ running locally
 
-1. **Create a GitLab personal access token** -- you'll need this for your workspace to clone and push code
-   - Go to [**GitLab -> Access Tokens**](https://gitlab.shipsummit.rise8.us/-/user_settings/personal_access_tokens)
-   - Name: anything (e.g. `shipsummit`)
-   - Scopes: check **`read_repository`** and **`write_repository`**
-   - Click **Create token** and copy it
-2. **[Launch your workspace ->](https://coder.shipsummit.rise8.us/templates/ai-assistant/workspace?param.team_name=black-3)**
-3. Pick a workspace number (1, 2, 3) -- one per person, coordinate with your team
-4. Paste your **GitLab Token** from step 1
-5. Enter the **Anthropic API Key** provided by event staff
-6. Click **Create Workspace** and wait for it to start
-7. Your code is already cloned -- open a terminal and say hello to Claude!
+**Steps**
 
-Your app deploys automatically when you push to main:
-**https://black-3.shipsummit.rise8.us**
+```bash
+# 1. Clone the repo
+git clone https://github.com/davemchap/UAC.git
+cd UAC
+
+# 2. Install dependencies
+bun install
+
+# 3. Create your local database
+createdb uac_dev
+
+# 4. Copy and configure environment
+cp .env.example .env
+# Edit .env and set:
+#   DATABASE_URL=postgresql://<your-user>@localhost:5432/uac_dev
+
+# 5. Run database migrations
+bun run db:migrate
+
+# 6. (Optional) Seed reference data
+bun run db:seed
+
+# 7. Start the dev server
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+### Option B — Dev container with Podman or Docker
+
+The repo includes a `Dockerfile` you can use to run the app in a container alongside a PostgreSQL container.
+
+> **Note:** The `Dockerfile` currently references a private base image (`cgr.dev/shipsummit/bun`). Replace the `FROM` lines with the public equivalent before building:
+>
+> ```dockerfile
+> FROM oven/bun:1.3.10 AS dependencies
+> FROM oven/bun:1.3.10 AS builder
+> FROM oven/bun:1.3.10 AS production
+> ```
+
+**Using Podman Compose**
+
+Create a `compose.yaml` in the project root:
+
+```yaml
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: uac
+      POSTGRES_PASSWORD: uac
+      POSTGRES_DB: uac_dev
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://uac:uac@db:5432/uac_dev
+      NODE_ENV: development
+    depends_on:
+      - db
+```
+
+Then run:
+
+```bash
+podman compose up --build
+# or: docker compose up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+**Run migrations inside the container**
+
+```bash
+podman compose exec app bun run db:migrate
+# or: docker compose exec app bun run db:migrate
+```
+
+---
+
+### Option C — Coder workspace
+
+If your team has access to a [Coder](https://coder.com/) deployment, you can run this project in a managed cloud workspace.
+
+**Prerequisites**
+
+- A Coder deployment with the `ai-assistant` template installed
+- A PostgreSQL service or sidecar available to the workspace
+- An Anthropic API key (for Claude Code integration, optional)
+
+**Steps**
+
+1. Create a new workspace from the `ai-assistant` template in your Coder instance.
+2. Set the following workspace parameters:
+   - **Git repo URL**: `https://github.com/davemchap/UAC.git`
+   - **Anthropic API Key**: your key (optional — only needed for AI assistant features)
+3. Once the workspace starts, open a terminal.
+4. The repo will be cloned to `~/workspaces/app`. Run:
+
+```bash
+cd ~/workspaces/app
+bun install
+cp .env.example .env
+# Edit .env with your DATABASE_URL
+bun run db:migrate
+bun run dev
+```
+
+5. Use Coder's port-forwarding to access the app at port `3000`.
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in the values.
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/uac_dev`) | Yes |
+| `PORT` | Server port | No (default: `3000`) |
+| `NODE_ENV` | `development` or `production` | No (default: `development`) |
+| `ANTHROPIC_API_KEY` | Anthropic API key for AI briefing features | Only for AI features |
+
+---
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `bun run dev` | Start dev server with hot reload |
+| `bun run start` | Start production server |
+| `bun run check` | Run all quality gates (lint + typecheck + tests) |
+| `bun run lint` | ESLint with strict TypeScript rules |
+| `bun run lint:fix` | Auto-fix lint issues |
+| `bun run typecheck` | TypeScript strict mode check |
+| `bun run circular` | Check for circular dependencies |
+| `bun run test` | Run unit tests |
+| `bun run db:migrate` | Run database migrations |
+| `bun run db:seed` | Seed reference data |
 
 ---
 
@@ -65,12 +202,12 @@ Your app deploys automatically when you push to main:
 |                                                         |
 |  +------------------+    +--------------------------+   |
 |  |   Static Files   |    |       API Routes         |   |
-|  |   (src/public/)  |    |        (/api/*)          |   |
+|  | (src/projects/)  |    |        (/api/*)          |   |
 |  |                  |    |                          |   |
 |  |  - index.html    |    |  - GET /health           |   |
 |  |  - styles.css    |    |  - GET /api              |   |
-|  |  - app.js        |    |  - /api/proxy/*          |   |
-|  |                  |    |    (CORS proxy routes)   |   |
+|  |  - app.js        |    |  - /api/forecasts        |   |
+|  |                  |    |  - /api/notifications    |   |
 |  +------------------+    +--------------------------+   |
 |           |                          |                  |
 |           +----------+---------------+                  |
@@ -78,190 +215,87 @@ Your app deploys automatically when you push to main:
 |                      v                                  |
 |              +---------------+                          |
 |              |   PostgreSQL  |                          |
-|              |   Database    |                          |
+|              |   (Drizzle)   |                          |
 |              +---------------+                          |
 +---------------------------------------------------------+
 ```
 
-## Local Development
+### Key Components
 
-PostgreSQL is pre-installed in your workspace and starts automatically when the workspace launches. You don't need Docker or any manual setup.
+| Path | Purpose |
+|------|---------|
+| `src/components/db/` | Drizzle schema, migrations, query helpers |
+| `src/components/ingestion/` | UAC, NWS, and SNOTEL data ingestion |
+| `src/components/notifications/` | Alert and notification logic |
+| `src/bases/http/` | Hono server entry point and route wiring |
+| `src/projects/` | Static frontend dashboards |
+| `data/black-diamond/` | Pre-seeded zone config, snapshots, alert rules |
 
-```bash
-# Install dependencies
-bun install
-
-# Copy environment file (done automatically on first launch, but run manually if needed)
-cp .env.example .env
-
-# Run the development server (with hot reload)
-bun run dev
-```
-
-Open http://localhost:3000 to see your app!
-
-> **Note**: `DATABASE_URL` is set automatically in your workspace. If the dev server can't connect to the database, check that `.env` exists (`cp .env.example .env`) and that PostgreSQL is running (`pg_isready -h localhost`).
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `bun run dev` | Start development server with hot reload |
-| `bun run start` | Start production server |
-| `bun run build` | Build for production (optional) |
-| `bun run check` | Run all quality gates |
-| `bun run lint` | Run ESLint |
-| `bun run lint:fix` | Run ESLint with auto-fix |
-| `bun run typecheck` | Run TypeScript type checking |
-| `bun run circular` | Check for circular dependencies |
-| `bun run test` | Run unit tests |
+---
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | Frontend (static HTML) |
-| GET | `/health` | Health check (required for deployment) |
+| GET | `/` | Main dashboard (static HTML) |
+| GET | `/health` | Health check |
 | GET | `/api` | API documentation |
-| GET | `/api/proxy/avalanche/forecast?zone=<id>` | Avalanche forecast proxy |
-| GET | `/api/proxy/avalanche/zones` | Avalanche zones proxy |
-| GET | `/api/proxy/snotel/station/:triplet` | SNOTEL station proxy |
+| GET | `/api/forecasts` | Avalanche forecasts |
+| GET | `/api/notifications` | Active alerts and notifications |
+| POST | `/api/notifications/:id/acknowledge` | Acknowledge a notification |
+
+---
 
 ## Project Structure
 
 ```
 .
 ├── src/
-│   ├── index.ts          # Main entry point, server setup
-│   ├── db.ts             # Database connection and utilities
-│   ├── api/
-│   │   └── proxy.ts      # CORS proxy routes for external APIs
-│   ├── __tests__/
-│   │   └── app.test.ts   # Unit tests for app routes
-│   └── public/           # Static frontend files
-│       ├── index.html    # Main HTML page
-│       ├── styles.css    # CSS styles
-│       └── app.js        # Frontend JavaScript
-├── eslint.config.mjs     # ESLint 9 flat config
-├── .gitlab-ci.yml        # CI/CD pipeline configuration
-├── Dockerfile            # Container build instructions
-├── package.json          # Dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-├── data/                 # Pre-seeded avalanche data by track — see data/README.md
-├── CLAUDE.md             # AI assistant instructions
-├── .env.example          # Environment variable template
-└── README.md             # This file
+│   ├── index.ts                  # Entry point
+│   ├── bases/http/               # Hono server setup
+│   ├── components/
+│   │   ├── db/                   # Schema, migrations, query helpers
+│   │   ├── ingestion/            # UAC / NWS / SNOTEL data fetchers
+│   │   └── notifications/        # Alert logic
+│   ├── projects/                 # Static frontend dashboards
+│   └── __tests__/                # Unit tests
+├── data/
+│   ├── black-diamond/            # Zone config, snapshots, alert rules
+│   ├── shared/                   # Danger scale, SNOTEL reference data
+│   └── apis/                     # External API documentation
+├── Dockerfile
+├── .env.example
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
-## Adding a New API Resource
-
-1. Create a new file in `src/api/`:
-
-```typescript
-// src/api/items.ts
-import { Hono } from "hono";
-import { getSql } from "../db";
-
-const items = new Hono();
-
-items.get("/", async (c) => {
-  const sql = getSql();
-  const result = await sql`SELECT * FROM items`;
-  return c.json({ success: true, data: result });
-});
-
-// Add more routes...
-
-export default items;
-```
-
-2. Add the table to `src/db.ts` inside `initializeDatabase()`.
-
-3. Mount the route in `src/index.ts`:
-
-```typescript
-import items from "./api/items";
-app.route("/api/items", items);
-```
-
-4. Update the frontend in `src/public/` to use the new API.
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Set automatically in workspace; required for deployment |
-| `PORT` | Server port | `3000` |
-| `NODE_ENV` | Environment mode | `development` |
+---
 
 ## Quality Gates
-
-Run all checks with a single command:
 
 ```bash
 bun run check
 ```
 
-This runs lint, typecheck, circular dependency detection, and tests in sequence. All gates must pass with zero errors and zero warnings.
+All gates must pass with zero errors and zero warnings before committing.
 
-| Command | What it checks |
-|---------|---------------|
-| `bun run lint` | ESLint with strict TypeScript rules, SonarJS, unused imports |
-| `bun run lint:fix` | Auto-fix lint issues where possible |
+| Gate | What it checks |
+|------|---------------|
+| `bun run lint:biome` | Formatting and fast lint |
+| `bun run lint` | ESLint strict TypeScript + SonarJS |
 | `bun run typecheck` | TypeScript strict mode |
-| `bun run circular` | No circular dependencies between modules |
-| `bun run test` | Unit tests via bun:test |
-| `bun run check` | All of the above in sequence |
+| `bun run circular` | No circular dependencies |
+| `bun run test` | Unit tests |
 
-## Deployment
+Auto-fix formatting:
 
-### How It Works
+```bash
+bun x --bun @biomejs/biome@1.9.4 format --write .
+bun run lint:fix
+```
 
-1. **Push to GitLab** - Pipeline triggers automatically on the main branch
-2. **Database Provisioning** - Creates your database in shared PostgreSQL
-3. **Docker Build** - Builds and pushes image to Amazon ECR
-4. **ECS Deployment** - Deploys to Fargate via CloudFormation
-
-### Troubleshooting
-
-**Pipeline fails at "provision-database"**
-- Check that `APP_NAME` is set and unique
-- Ensure the format is lowercase with hyphens (e.g., `jsmith-app`)
-
-**Pipeline fails at "build"**
-- Check your Dockerfile for syntax errors
-- Ensure all required files are committed
-
-**App not accessible after deploy**
-- Wait 2-3 minutes for ECS to start the container
-- Check the health endpoint by appending `/health` to your deployed app URL
-
-**Frontend not loading**
-- Ensure `src/public/` directory contains your frontend files
-- Check that file paths in HTML use absolute paths (e.g., `/styles.css`)
-
-## Tech Stack
-
-- **Runtime**: [Bun](https://bun.sh/) - Fast JavaScript runtime
-- **Framework**: [Hono](https://hono.dev/) - Lightweight web framework
-- **Database**: [PostgreSQL](https://www.postgresql.org/) via [postgres](https://github.com/porsager/postgres)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Frontend**: Vanilla JavaScript (easily replaceable)
-- **Container**: Docker with multi-stage builds
-- **CI/CD**: GitLab CI with AWS CodeBuild
-- **Hosting**: AWS ECS Fargate
-
-## Need Help?
-
-Start with Claude. If you're stuck or unsure about something, ask Claude first -- that's what it's here for. You don't need to use technical language. Describe what you're trying to do like you're explaining it to a five-year-old, and Claude will figure out the rest.
-
-If you've gone back and forth with Claude a few times and you're still not making progress, reach out to [event staff / Slack channel / point of contact]. They're here to help you get unstuck.
-
-## Support
-
-- **Infrastructure Issues**: Contact the Ship Summit platform team
-- **Template Questions**: See the workshop documentation
-- **Bug Reports**: Open an issue in the Ship Summit repository
+---
 
 ## License
 
