@@ -6,18 +6,8 @@ import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
 import { seedReferenceData, seedSnapshotData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
 import { startScorecardScheduler } from "../../components/scorecard-scheduler";
-import aiAlerts from "./routes/ai-alerts";
-import alertConfig from "./routes/alert-config";
-import notifications from "./routes/notifications";
-import observations from "./routes/observations";
 import personasRoute from "./routes/personas";
-import proxy from "./routes/proxy";
-import reports from "./routes/reports";
-import reviews from "./routes/reviews";
 import scorecard from "./routes/scorecard";
-import zones from "./routes/zones";
-import map from "./routes/map";
-import { getZoneBoundaries } from "../../components/zone-lookup";
 
 export const app = new Hono();
 
@@ -57,54 +47,27 @@ app.get("/health", async (c) => {
 
 app.get("/api", (c) =>
 	c.json({
-		message: "Utah Avalanche Forecast Analysis & Alerting Engine",
+		message: "UAC Avalanche Scorecard API",
 		version: "1.0.0",
 		endpoints: {
 			health: "GET /health",
-			zones: {
-				allZones: "GET /api/zones",
-				zoneDetail: "GET /api/zones/:slug",
-			},
-			notifications: {
-				list: "GET /api/notifications",
-				acknowledge: "POST /api/notifications/:id/acknowledge",
-			},
-			proxy: {
-				avalancheForecast: "GET /api/proxy/avalanche/forecast?zone=<zone_id>",
-				avalancheZones: "GET /api/proxy/avalanche/zones",
-				snotelStation: "GET /api/proxy/snotel/station/:triplet",
+			personas: "GET /api/personas",
+			scorecard: {
+				run: "POST /api/scorecard/run",
+				history: "GET /api/scorecard/history",
 			},
 		},
 	}),
 );
 
-app.route("/api/zones", zones);
 app.route("/api/personas", personasRoute);
 app.route("/api/scorecard", scorecard);
-app.route("/api/ai-alerts", aiAlerts);
-app.route("/api/notifications", notifications);
-app.route("/api/observations", observations);
-app.route("/api/reports", reports);
-app.route("/api/reviews", reviews);
-app.route("/api/alert-config", alertConfig);
-app.route("/api/proxy", proxy);
-app.route("/api", map);
-
-app.get("/api/zone-boundaries", (c) => c.json(getZoneBoundaries()));
 
 // ---------------------------------------------------------------------------
 // Static files
 // ---------------------------------------------------------------------------
 
 const INDEX_HTML = "/index.html";
-
-app.use(
-	"/command-center/*",
-	serveStatic({
-		root: "./src/projects/command-center",
-		rewriteRequestPath: (path) => path.replace(/^\/command-center/, "") || INDEX_HTML,
-	}),
-);
 
 app.use(
 	"/scorecard/*",
@@ -122,22 +85,6 @@ app.use(
 	serveStatic({
 		root: "./src/projects/public",
 		rewriteRequestPath: () => INDEX_HTML,
-	}),
-);
-
-app.use(
-	"/dashboard/*",
-	serveStatic({
-		root: "./src/projects/dashboard",
-		rewriteRequestPath: (path) => {
-			const stripped = path.replace(/^\/dashboard/, "") || "/";
-			if (stripped === "/observe") return "/observe.html";
-			if (stripped === "/report") return "/report.html";
-			if (stripped === "/" || (!stripped.includes(".") && !stripped.startsWith("/api"))) {
-				return INDEX_HTML;
-			}
-			return stripped;
-		},
 	}),
 );
 
