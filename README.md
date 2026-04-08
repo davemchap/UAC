@@ -171,9 +171,11 @@ Copy `.env.example` to `.env` and fill in the values.
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/uac_dev`) | Yes |
+| `ANTHROPIC_API_KEY` | Anthropic API key — used by the persona trainer, observation triage, and AI alert briefing features | Yes (core features won't work without it) |
 | `PORT` | Server port | No (default: `3000`) |
 | `NODE_ENV` | `development` or `production` | No (default: `development`) |
-| `ANTHROPIC_API_KEY` | Anthropic API key for AI briefing features | Only for AI features |
+
+> Get an API key at [console.anthropic.com](https://console.anthropic.com). The app uses `claude-sonnet-4-6` by default.
 
 ---
 
