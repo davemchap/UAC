@@ -6,7 +6,7 @@ import { avalancheForecasts, avalancheProblems, forecastZones } from "../db/sche
 // ---------------------------------------------------------------------------
 
 interface UacForecast {
-	Date?: string; // "2026/04/07"
+	Date?: string; // "2026/04/07" or "Thursday, April 2, 2026 - 7:42am"
 	Region?: string;
 	"Overall Danger Rating"?: string;
 	"Overall rose"?: string;
@@ -42,6 +42,36 @@ export async function fetchUacForecast(apiUrl: string): Promise<UacForecast | nu
 }
 
 // ---------------------------------------------------------------------------
+// Date normalization
+// ---------------------------------------------------------------------------
+
+/**
+ * Normalize any UAC date string to YYYY-MM-DD.
+ * Handles:
+ *   "2026/04/07"                       → "2026-04-07"
+ *   "Thursday, April 2, 2026 - 7:42am" → "2026-04-02"
+ */
+function normalizeUacDate(raw: string): string {
+	// Already YYYY-MM-DD
+	if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+	// YYYY/MM/DD
+	if (/^\d{4}\/\d{2}\/\d{2}$/.test(raw)) return raw.replace(/\//g, "-");
+
+	// Verbose: "Thursday, April 2, 2026 - 7:42am" — try parsing directly
+	const parsed = new Date(raw);
+	if (!Number.isNaN(parsed.getTime())) {
+		const y = parsed.getFullYear();
+		const m = String(parsed.getMonth() + 1).padStart(2, "0");
+		const d = String(parsed.getDate()).padStart(2, "0");
+		return `${y}-${m}-${d}`;
+	}
+
+	// Fallback: slash-to-dash
+	return raw.replace(/\//g, "-");
+}
+
+// ---------------------------------------------------------------------------
 // Persist
 // ---------------------------------------------------------------------------
 
@@ -54,8 +84,10 @@ async function persistUacForecast(zoneId: number, forecast: UacForecast): Promis
 		throw new Error(`UAC forecast for zone ${zoneId} missing required fields`);
 	}
 
-	// "2026/04/07" → "2026-04-07"
-	const dateIssued = dateRaw.replace(/\//g, "-");
+	// Normalize to YYYY-MM-DD regardless of UAC format:
+	//   "2026/04/07"                      → "2026-04-07"
+	//   "Thursday, April 2, 2026 - 7:42am" → "2026-04-02"
+	const dateIssued = normalizeUacDate(dateRaw);
 
 	const db = getDb();
 
