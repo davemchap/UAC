@@ -228,9 +228,9 @@ function getTodayIso() {
 }
 
 
-function getTwoWeeksAgoIso() {
+function getSixtyDaysAgoIso() {
   const d = new Date();
-  d.setDate(d.getDate() - 14);
+  d.setDate(d.getDate() - 60);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
@@ -254,7 +254,7 @@ function wireDatePicker() {
     if (hiddenInput) {
       hiddenInput.value = globalSelectedDate ?? getTodayIso();
       hiddenInput.max = getTodayIso();
-      hiddenInput.min = getTwoWeeksAgoIso();
+      hiddenInput.min = getSixtyDaysAgoIso();
       try { hiddenInput.showPicker(); } catch { hiddenInput.click(); }
     }
   });
@@ -269,7 +269,7 @@ function stepGlobalDate(delta) {
   const d = new Date(`${base}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() + delta);
   const next = d.toISOString().slice(0, 10);
-  const min = getTwoWeeksAgoIso();
+  const min = getSixtyDaysAgoIso();
   const today = getTodayIso();
   if (next < min || next > today) return;
   setGlobalDate(next === today ? null : next);
