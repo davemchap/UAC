@@ -6,7 +6,9 @@ export {
 	getForecastForScoringByZone,
 	getForecastForScoringByZoneAndDate,
 	getForecastsForScoringByDate,
+	getAvailableDatesForZone,
 } from "./queries";
+export { fetchForecastLive } from "./live-fetch";
 export { PERSONAS, PERSONA_IDS } from "./personas";
 export { loadGoldenScenarios } from "./golden";
 export { TRAINING_LABELS } from "./scoring";

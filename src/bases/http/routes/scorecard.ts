@@ -14,6 +14,8 @@ import {
 	buildDailyReport,
 	getAvailableReportDates,
 	getForecastForScoringByZoneAndDate,
+	getAvailableDatesForZone,
+	fetchForecastLive,
 	generateWeeklyReport,
 	reviewDraft,
 	type Persona,
@@ -203,8 +205,19 @@ scorecard.get("/report/weekly", async (c) => {
 });
 
 /**
+ * GET /api/scorecard/:zoneSlug/available-dates
+ * Returns ISO dates (YYYY-MM-DD) with forecast data for a zone, newest first.
+ */
+scorecard.get("/:zoneSlug/available-dates", async (c) => {
+	const zoneSlug = c.req.param("zoneSlug");
+	const dates = await getAvailableDatesForZone(zoneSlug, 60);
+	return c.json({ success: true, data: dates });
+});
+
+/**
  * GET /api/scorecard/:zoneSlug/:date
  * Returns scored forecast for a single zone on a specific date (YYYY-MM-DD).
+ * Falls back to a live UAC API fetch if the date is not in the local DB.
  */
 scorecard.get("/:zoneSlug/:date", async (c) => {
 	const zoneSlug = c.req.param("zoneSlug");
@@ -214,10 +227,11 @@ scorecard.get("/:zoneSlug/:date", async (c) => {
 		return c.json({ success: false, error: "Invalid date format. Expected YYYY-MM-DD" }, 400);
 	}
 
-	const [forecast, personas] = await Promise.all([
-		getForecastForScoringByZoneAndDate(zoneSlug, date),
-		loadScoringPersonas(),
-	]);
+	// Try DB first; fall back to live UAC fetch and cache result
+	let forecast = await getForecastForScoringByZoneAndDate(zoneSlug, date);
+	forecast ??= await fetchForecastLive(zoneSlug, date);
+
+	const personas = await loadScoringPersonas();
 
 	if (!forecast) {
 		return c.json({ success: false, error: "No forecast found for zone on date" }, 404);

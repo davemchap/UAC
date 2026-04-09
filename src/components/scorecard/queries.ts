@@ -3,7 +3,7 @@
  * Returns typed forecast data for scoring.
  */
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { avalancheForecasts, forecastZones } from "../db/schema";
 
@@ -122,6 +122,35 @@ export async function getForecastForScoringByZoneAndDate(
 		avalancheProblem2: f.avalancheProblem2,
 		avalancheProblem3: f.avalancheProblem3,
 	};
+}
+
+/**
+ * Returns distinct ISO dates (YYYY-MM-DD) that have forecast data for a zone,
+ * most recent first, up to `daysBack` days ago.
+ */
+export async function getAvailableDatesForZone(zoneSlug: string, daysBack = 60): Promise<string[]> {
+	const db = getDb();
+	const cutoff = new Date();
+	cutoff.setUTCDate(cutoff.getUTCDate() - daysBack);
+	const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+	const zoneRows = await db.select().from(forecastZones).where(eq(forecastZones.slug, zoneSlug)).limit(1);
+	if (zoneRows.length === 0) return [];
+	const zone = zoneRows[0];
+
+	const rows = await db
+		.select({ dateIssued: avalancheForecasts.dateIssued })
+		.from(avalancheForecasts)
+		.where(
+			and(
+				eq(avalancheForecasts.zoneId, zone.zoneId),
+				gte(avalancheForecasts.dateIssued, cutoffStr),
+				sql`date_issued ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'`,
+			),
+		)
+		.orderBy(desc(avalancheForecasts.dateIssued));
+
+	return rows.map((r) => r.dateIssued).filter(Boolean);
 }
 
 /** Returns all zones' latest forecast for a specific date (YYYY-MM-DD). */

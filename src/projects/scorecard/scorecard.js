@@ -109,6 +109,8 @@ async function loadData() {
 
 
 async function loadZone(slug) {
+  // Load available dates for smart date navigation (fire-and-forget)
+  loadAvailableDatesForZone(slug);
   // Respect the global date selection
   if (globalSelectedDate) {
     return loadZoneByDate(slug, globalSelectedDate);
@@ -236,6 +238,18 @@ function getSixtyDaysAgoIso() {
 
 // Global selected date — drives all zone-based tabs. null = today (live).
 let globalSelectedDate = null;
+// Sorted newest-first list of ISO dates with data for the active zone.
+let availableDatesForZone = [];
+
+async function loadAvailableDatesForZone(slug) {
+  try {
+    const res = await fetch(`/api/scorecard/${encodeURIComponent(slug)}/available-dates`);
+    const json = await res.json();
+    availableDatesForZone = Array.isArray(json.data) ? json.data : [];
+  } catch {
+    availableDatesForZone = [];
+  }
+}
 
 function wireDatePicker() {
   const prevBtn = document.getElementById("sc-date-prev");
@@ -266,11 +280,29 @@ function wireDatePicker() {
 
 function stepGlobalDate(delta) {
   const base = globalSelectedDate ?? getTodayIso();
+  const min = getSixtyDaysAgoIso();
+  const today = getTodayIso();
+
+  // If we have available dates for this zone, jump to the nearest one with data
+  if (availableDatesForZone.length > 0) {
+    let next;
+    if (delta < 0) {
+      // Going back in time — find nearest date older than base
+      next = availableDatesForZone.find((d) => d < base) ?? null;
+    } else {
+      // Going forward in time — find nearest date newer than base
+      const newer = availableDatesForZone.filter((d) => d > base);
+      next = newer.length > 0 ? newer[newer.length - 1] : null;
+    }
+    if (!next || next < min || next > today) return;
+    setGlobalDate(next === today ? null : next);
+    return;
+  }
+
+  // Fallback: step one calendar day
   const d = new Date(`${base}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() + delta);
   const next = d.toISOString().slice(0, 10);
-  const min = getSixtyDaysAgoIso();
-  const today = getTodayIso();
   if (next < min || next > today) return;
   setGlobalDate(next === today ? null : next);
 }
