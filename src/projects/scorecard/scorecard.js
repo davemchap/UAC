@@ -3083,6 +3083,11 @@ function wirePreForecastReview() {
     const words = textarea.value.trim().split(/\s+/).filter(Boolean).length;
     wordCount.textContent = words + ' word' + (words === 1 ? '' : 's');
     clearBtn.classList.toggle('hidden', !textarea.value.trim());
+    // Reset empty-state hint if user starts typing
+    const hint = document.querySelector('#pfr-empty .pfr-empty-hint');
+    if (hint && hint.textContent.startsWith('Please add')) {
+      hint.textContent = 'Paste a draft above and click Analyze';
+    }
   });
 
   // File upload — parse server-side for .docx, direct read for .txt
@@ -3140,8 +3145,13 @@ function wirePreForecastReview() {
   async function runAnalysis() {
     const text = textarea.value.trim();
     if (!text) {
-      textarea.classList.add('pfr-textarea--shake');
-      textarea.addEventListener('animationend', () => textarea.classList.remove('pfr-textarea--shake'), { once: true });
+      const empty = document.getElementById('pfr-empty');
+      const results = document.getElementById('pfr-results');
+      if (empty) {
+        empty.classList.remove('hidden');
+        empty.querySelector('.pfr-empty-hint').textContent = 'Please add text or attachments to analyze for persona feedback.';
+      }
+      if (results) results.classList.add('hidden');
       textarea.focus();
       return;
     }

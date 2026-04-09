@@ -847,6 +847,12 @@ function findSoftRecFlags(
 	});
 }
 
+function locateDangerRating(text: string, lower: string, dangerRating: string): [string, number, number] {
+	const idx = lower.indexOf(dangerRating.toLowerCase());
+	if (idx < 0) return [dangerRating, 0, 0];
+	return [text.slice(idx, idx + dangerRating.length), idx, idx + dangerRating.length];
+}
+
 function findActionClarityFlags(text: string, persona: Persona, dangerRating: string): FlaggedPhrase[] {
 	const flags: FlaggedPhrase[] = [];
 	const id = persona.id;
@@ -924,11 +930,12 @@ function findActionClarityFlags(text: string, persona: Persona, dangerRating: st
 			lower.includes(a),
 		);
 		if (!hasBehaviorAnchor) {
+			const [drText, drStart, drEnd] = locateDangerRating(text, lower, dangerRating);
 			flags.push(
 				makeFlag(
-					dangerRating,
-					0,
-					dangerRating.length,
+					drText,
+					drStart,
+					drEnd,
 					id,
 					"Danger rating stated without a behavioral consequence for an inexperienced reader",
 					'PROBLEM: Inexperienced readers need a "what this means for you" sentence paired with the danger rating.\nCONSIDER: "Considerable danger means human-triggered avalanches are likely on steep slopes — most backcountry accidents happen on Considerable days."',
