@@ -74,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadData();
   wireTabButtons();
   wireForecasterSelect();
-  wireZoneSelect();
   wireDatePicker();
   wireDrawerClose();
   wireTrainerModal();
@@ -88,16 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
 // Data loading
 // ---------------------------------------------------------------------------
 
-async function loadData() {
+async function loadData(date) {
   showLoading(true);
   try {
-    const url = "/api/scorecard";
+    const url = date ? `/api/scorecard?date=${encodeURIComponent(date)}` : "/api/scorecard";
     const res = await fetch(url);
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const json = await res.json();
     allData = json.data ?? [];
     populateForecasterSelect(allData);
-    populateZoneSelect(getFilteredData());
     renderSummaryOrZone();
     refreshDailyDateSelect();
   } catch (err) {
@@ -161,9 +159,6 @@ function wireForecasterSelect() {
   document.getElementById("forecaster-select").addEventListener("change", (e) => {
     activeForecaster = e.target.value || null;
     activeZoneSlug = null;
-    const filtered = getFilteredData();
-    populateZoneSelect(filtered);
-    document.getElementById("zone-select").value = "";
     updateActiveFilterPill();
     renderSummaryOrZone();
   });
@@ -185,9 +180,6 @@ function updateActiveFilterPill() {
   const clearFilter = () => {
     activeForecaster = null;
     document.getElementById("forecaster-select").value = "";
-    const filtered = getFilteredData();
-    populateZoneSelect(filtered);
-    document.getElementById("zone-select").value = "";
     updateActiveFilterPill();
     renderSummaryOrZone();
   };
@@ -356,6 +348,9 @@ function setGlobalDate(date) {
     } else {
       loadZone(activeZoneSlug);
     }
+  } else {
+    // Summary view — reload all zones for the selected date
+    loadData(date ?? undefined);
   }
 }
 
@@ -513,8 +508,8 @@ function renderSummary(zones) {
 
   summaryEl.innerHTML = `
     <div class="sc-summary-header">
-      <h2 class="sc-summary-title">${activeForecaster ? `${escHtml(activeForecaster)}'s Zones` : "All Zones"} — Today's Scores</h2>
-      <p class="sc-summary-hint">Select a zone for detailed analysis</p>
+      <h2 class="sc-summary-title">${activeForecaster ? `${escHtml(activeForecaster)}'s Zones` : "All Zones"} — ${globalSelectedDate ? formatNavDate(globalSelectedDate) : "Today"}</h2>
+      <p class="sc-summary-hint">Click a zone to see its full scorecard</p>
     </div>
     <div class="sc-summary-table-wrap">
       <table class="sc-summary-table">
@@ -565,7 +560,6 @@ function renderSummary(zones) {
   summaryEl.querySelectorAll(".sc-summary-row").forEach((row) => {
     const select = () => {
       activeZoneSlug = row.dataset.slug;
-      document.getElementById("zone-select").value = activeZoneSlug;
       loadZone(activeZoneSlug);
     };
     row.addEventListener("click", select);

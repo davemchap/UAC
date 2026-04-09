@@ -7,6 +7,7 @@ import {
 	normalizeText,
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,
+	getForecastsForScoringByDate,
 	loadGoldenScenarios,
 	computePersonaLens,
 	computeDecisionMirror,
@@ -64,9 +65,13 @@ const scorecard = new Hono();
 /**
  * GET /api/scorecard
  * Returns scored forecasts for all zones (latest per zone).
+ * Optional ?date=YYYY-MM-DD returns forecasts for all zones on that specific date.
  */
 scorecard.get("/", async (c) => {
-	const [forecasts, personas] = await Promise.all([getLatestForecastsForScoring(), loadScoringPersonas()]);
+	const date = c.req.query("date");
+	const forecastLoader =
+		date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? getForecastsForScoringByDate(date) : getLatestForecastsForScoring();
+	const [forecasts, personas] = await Promise.all([forecastLoader, loadScoringPersonas()]);
 
 	const results = forecasts.map((f) => {
 		const bottomLine = normalizeText(f.bottomLine);
