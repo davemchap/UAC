@@ -3,7 +3,7 @@ import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { checkDatabaseHealth, initializeDatabase } from "../../components/db";
-import { seedReferenceData, seedSnapshotData } from "../../components/db/seed-reference";
+import { seedHistoricalData, seedReferenceData, seedSnapshotData } from "../../components/db/seed-reference";
 import { startScheduler } from "../../components/ingestion";
 import { startScorecardScheduler } from "../../components/scorecard-scheduler";
 import personasRoute from "./routes/personas";
@@ -147,6 +147,7 @@ export async function initApp(): Promise<void> {
 		await initializeDatabase();
 		await seedReferenceData();
 		await seedSnapshotData();
+		await seedHistoricalData();
 	} catch (error) {
 		console.error("Failed to initialize database:", error);
 		console.log("Continuing without database...");
