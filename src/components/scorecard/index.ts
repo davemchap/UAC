@@ -1,4 +1,6 @@
 export { scoreForecast, simulateJourney, buildCoachingSuggestions, normalizeText } from "./scoring";
+export { reviewDraft } from "./review";
+export type { DraftReviewInput, DraftReviewResult } from "./review";
 export {
 	getLatestForecastsForScoring,
 	getForecastForScoringByZone,

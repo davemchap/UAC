@@ -41,9 +41,9 @@ personas.put("/:key", async (c) => {
 // POST /api/personas/:key/clone
 personas.post("/:key/clone", async (c) => {
 	const sourceKey = c.req.param("key");
-	const body = await c.req.json<{ newKey?: string; name?: string; role?: string }>();
+	const body = await c.req.json<{ newKey?: string; name?: string; role?: string; avatarSeed?: string }>();
 
-	const { newKey, name, role } = body;
+	const { newKey, name, role, avatarSeed } = body;
 
 	if (!newKey) return c.json({ error: "newKey is required" }, 400);
 	if (!/^[a-z0-9_-]+$/.test(newKey)) {
@@ -60,7 +60,7 @@ personas.post("/:key/clone", async (c) => {
 		return c.json({ error: "A persona with that key already exists" }, 409);
 	}
 
-	const cloned = await clonePersona(sourceKey, newKey, name.trim(), role);
+	const cloned = await clonePersona(sourceKey, newKey, name.trim(), role, avatarSeed);
 	if (!cloned) return c.json({ error: "Source persona not found" }, 404);
 
 	return c.json(cloned, 201);

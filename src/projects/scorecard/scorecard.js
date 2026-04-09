@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wireAboutModal();
   wireDailyReport();
   wireWeeklyReport();
+  wirePreForecastReview();
 });
 
 // ---------------------------------------------------------------------------
@@ -363,7 +364,7 @@ async function loadZoneByDate(slug, date) {
 
 function showNoDataForDate(date) {
   // Hide all tab panels and show a friendly empty state in the active one
-  const activePanel = document.querySelector(`.sc-tab-panel[data-tab="${activeTab}"]`);
+  const activePanel = document.getElementById(`tab-${activeTab}`);
   if (!activePanel) return;
   const existing = activePanel.querySelector(".sc-date-empty");
   if (existing) existing.remove();
@@ -2584,10 +2585,11 @@ async function submitClone() {
   if (!personaKey) { showTrainerToast("Key is required.", true); return; }
 
   try {
+    const avatarSeed = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     const res = await fetch(`/api/personas/${sourceKey}/clone`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, role: role || undefined, personaKey }),
+      body: JSON.stringify({ name, role: role || undefined, newKey: personaKey, avatarSeed }),
     });
     if (res.status === 409) {
       const suggestions = [2, 3, 4].map((n) => `${personaKey}_${n}`).join(", ");
@@ -3073,4 +3075,368 @@ function renderWeeklyReport(report, el) {
       </table>
     </div>`;
   wireHelpTips(el);
+}
+
+// ---------------------------------------------------------------------------
+// Pre-Forecast Review — fetch + render only
+// ---------------------------------------------------------------------------
+
+function wirePreForecastReview() {
+  const textarea   = document.getElementById('pfr-draft-textarea');
+  const wordCount  = document.getElementById('pfr-word-count');
+  const fileInput  = document.getElementById('pfr-file-input');
+  const fileName   = document.getElementById('pfr-file-name');
+  const clearBtn   = document.getElementById('pfr-clear-btn');
+  const analyzeBtn = document.getElementById('pfr-analyze-btn');
+  const expandBtn  = document.getElementById('pfr-heard-expand');
+
+  // Live word count
+  textarea.addEventListener('input', () => {
+    const words = textarea.value.trim().split(/\s+/).filter(Boolean).length;
+    wordCount.textContent = words + ' word' + (words === 1 ? '' : 's');
+    clearBtn.classList.toggle('hidden', !textarea.value.trim());
+  });
+
+  // File upload — parse server-side for .docx, direct read for .txt
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const form = new FormData();
+    form.append('file', file);
+    try {
+      const res = await fetch('/api/scorecard/review/parse', { method: 'POST', body: form });
+      const json = await res.json();
+      if (!json.success) { alert(json.error || 'Could not read file'); return; }
+      textarea.value = json.text;
+      textarea.dispatchEvent(new Event('input'));
+      fileName.textContent = '📄 ' + file.name;
+      fileName.classList.remove('hidden');
+    } catch (e) {
+      alert('Upload failed: ' + e.message);
+    }
+    fileInput.value = '';
+  });
+
+  // Clear
+  clearBtn.addEventListener('click', () => {
+    textarea.value = '';
+    fileName.textContent = '';
+    fileName.classList.add('hidden');
+    clearBtn.classList.add('hidden');
+    wordCount.textContent = '0 words';
+    document.getElementById('pfr-results').classList.add('hidden');
+    document.getElementById('pfr-empty').classList.remove('hidden');
+    textarea.focus();
+  });
+
+  // Keyboard shortcut
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) runAnalysis();
+  });
+
+  analyzeBtn.addEventListener('click', runAnalysis);
+
+  // Expand/collapse What They Heard
+  if (expandBtn) {
+    expandBtn.addEventListener('click', () => {
+      const expanded = expandBtn.getAttribute('aria-expanded') === 'true';
+      expandBtn.setAttribute('aria-expanded', String(!expanded));
+      expandBtn.textContent = expanded ? 'Show all personas ▼' : 'Show fewer ▲';
+      document.querySelectorAll('#pfr-list-heard .pfr-heard-row.is-hidden').forEach(r => {
+        r.classList.toggle('is-hidden');
+        r.classList.toggle('is-visible');
+      });
+    });
+  }
+
+  async function runAnalysis() {
+    const text = textarea.value.trim();
+    if (!text) {
+      textarea.classList.add('pfr-textarea--shake');
+      textarea.addEventListener('animationend', () => textarea.classList.remove('pfr-textarea--shake'), { once: true });
+      textarea.focus();
+      return;
+    }
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = '<span class="pfr-btn-spinner"></span> Analyzing…';
+    const results = document.getElementById('pfr-results');
+    results.classList.add('pfr-results--loading');
+    try {
+      const danger = document.getElementById('pfr-danger-select').value;
+      const res = await fetch('/api/scorecard/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ draftText: text, dangerRating: danger, problems: [] }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Analysis failed');
+      renderReviewResults(json.data, text);
+    } catch (e) {
+      alert('Analysis failed: ' + e.message);
+    } finally {
+      analyzeBtn.disabled = false;
+      analyzeBtn.textContent = '⚡ Re-analyze';
+      results.classList.remove('pfr-results--loading');
+    }
+  }
+}
+
+function renderReviewResults(data, forecastText) {
+  document.getElementById('pfr-empty').classList.add('hidden');
+  document.getElementById('pfr-results').classList.remove('hidden');
+
+  renderPfrBanner(data.personas);
+  renderPfrVoice(data.personaLens, data.personas, forecastText);
+  renderPfrReadability(data.personas);
+  renderPfrGaps(data.assumptionAudit);
+  renderPfrCoach(data.coaching);
+  renderPfrDecisions(data.decisionMirror);
+  renderPfrHeard(data.personaLens);
+  renderPfrFixes(data.coaching, data.assumptionAudit, data.personas);
+}
+
+// ---- Persona voice quote ----
+function renderPfrVoice(lens, personas, forecastText) {
+  const container = document.getElementById('pfr-voice');
+  const avatarEl  = document.getElementById('pfr-voice-avatar');
+  const nameEl    = document.getElementById('pfr-voice-name');
+  const quoteEl   = document.getElementById('pfr-voice-quote');
+  if (!container || !lens || !lens.length) return;
+
+  // Pick worst comprehension persona
+  const order = { MISREAD: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+  const worst = [...lens].sort((a, b) => (order[a.overallComprehension] ?? 4) - (order[b.overallComprehension] ?? 4))[0];
+  if (!worst || worst.overallComprehension === 'HIGH') { container.classList.add('hidden'); return; }
+
+  // Show avatar — use DiceBear with personaId as seed
+  const seed = encodeURIComponent(worst.personaId ?? worst.personaName);
+  avatarEl.innerHTML = `<img src="https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&size=72" alt="${escHtml(worst.personaName)}" onerror="this.style.display='none'">`;
+
+  nameEl.textContent = `${worst.personaName} wonders…`;
+  quoteEl.innerHTML = '<span class="pfr-voice-loading">Thinking as this reader…</span>';
+  container.classList.remove('hidden');
+
+  // Fire AI quote async — non-blocking
+  const snippet = (forecastText || '').slice(0, 1200);
+  const question = `Here is an avalanche forecast I'm reading:\n\n"${snippet}"\n\nWhat is the ONE thing in this forecast that confuses you most? Reply as a single simple question you'd actually ask — no more than two sentences, in your own plain words.`;
+
+  fetch(`/api/personas/${encodeURIComponent(worst.personaId)}/interrogate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
+  })
+    .then(r => r.json())
+    .then(json => {
+      quoteEl.textContent = json.response || 'No response.';
+    })
+    .catch(() => {
+      quoteEl.textContent = 'Could not generate quote.';
+    });
+}
+
+// ---- Helpers ----
+function pfrItemHtml(cls, iconChar, text, badge) {
+  return `<li class="${escAttr(cls)}"><span class="pfr-item-icon" aria-hidden="true">${escHtml(iconChar)}</span><span>${escHtml(text)}</span>${badge ? `<span class="pfr-count-badge">${escHtml(badge)}</span>` : ''}</li>`;
+}
+function pfrIcon(cls) { return cls === 'is-ok' ? '✓' : cls === 'is-bad' ? '✗' : '!'; }
+
+// ---- Readiness banner ----
+function renderPfrBanner(personas) {
+  const avg    = personas.reduce((s, p) => s + p.overall, 0) / (personas.length || 1);
+  const fill   = document.getElementById('pfr-banner-fill');
+  const label  = document.getElementById('pfr-banner-label');
+  const icon   = document.getElementById('pfr-banner-icon');
+  const banner = document.getElementById('pfr-banner');
+  fill.style.width = avg.toFixed(0) + '%';
+  banner.classList.remove('is-red', 'is-yellow', 'is-green');
+  if (avg < 50) {
+    banner.classList.add('is-red');
+    icon.textContent = '🔴';
+    label.textContent = 'Not ready — review issues below';
+  } else if (avg < 75) {
+    banner.classList.add('is-yellow');
+    icon.textContent = '🟡';
+    label.textContent = 'Almost ready — address items below';
+  } else {
+    banner.classList.add('is-green');
+    icon.textContent = '🟢';
+    label.textContent = 'Publish-ready — minor suggestions only';
+  }
+}
+
+// ---- Readability panel ----
+function renderPfrReadability(personas) {
+  const dot  = document.getElementById('pfr-dot-readability');
+  const list = document.getElementById('pfr-list-readability');
+  const avg         = personas.reduce((s, p) => s + p.overall, 0) / (personas.length || 1);
+  const avgClarity  = personas.reduce((s, p) => s + p.clarity, 0) / (personas.length || 1);
+  const avgJargon   = personas.reduce((s, p) => s + p.jargonLoad, 0) / (personas.length || 1);
+  const jargonFlags = personas.reduce((s, p) => s + (p.flags ? p.flags.filter(f => f.flagCategory === 'jargon').length : 0), 0);
+
+  const status = avg >= 75 ? 'green' : avg >= 50 ? 'yellow' : 'red';
+  dot.className = 'pfr-status-dot is-' + status;
+
+  const items = [
+    { cls: avgClarity >= 70 ? 'is-ok' : avgClarity >= 50 ? 'is-warn' : 'is-bad',
+      text: 'Clarity score: ' + avgClarity.toFixed(0) + '/100 avg across personas' },
+    { cls: avgJargon >= 70 ? 'is-ok' : avgJargon >= 45 ? 'is-warn' : 'is-bad',
+      text: 'Jargon score: ' + avgJargon.toFixed(0) + '/100 avg across personas' },
+    { cls: jargonFlags === 0 ? 'is-ok' : jargonFlags < 5 ? 'is-warn' : 'is-bad',
+      text: jargonFlags + ' unknown term' + (jargonFlags === 1 ? '' : 's') + ' flagged' },
+  ];
+  list.innerHTML = items.map(i => pfrItemHtml(i.cls, pfrIcon(i.cls), i.text)).join('');
+}
+
+// ---- Knowledge Gaps panel ----
+function renderPfrGaps(audit) {
+  const dot  = document.getElementById('pfr-dot-gaps');
+  const list = document.getElementById('pfr-list-gaps');
+  if (!audit || !audit.detectedConcepts || !audit.personaGaps) {
+    dot.className = 'pfr-status-dot is-green';
+    list.innerHTML = pfrItemHtml('is-ok', '✓', 'No significant knowledge gaps detected');
+    return;
+  }
+  const gapsByPersona = audit.personaGaps || [];
+  const highGap = gapsByPersona.filter(g => g.misreadRisk > 50).length;
+  dot.className = 'pfr-status-dot is-' + (highGap === 0 ? 'green' : highGap < 3 ? 'yellow' : 'red');
+
+  const concepts = (audit.detectedConcepts || []).slice(0, 4);
+  if (concepts.length === 0) {
+    list.innerHTML = pfrItemHtml('is-ok', '✓', 'No assumed concepts detected');
+    return;
+  }
+  list.innerHTML = concepts.map(c => {
+    const n = gapsByPersona.filter(g => g.conceptsUnknown && g.conceptsUnknown.includes(c.concept)).length;
+    const cls = n === 0 ? 'is-ok' : n < 3 ? 'is-warn' : 'is-bad';
+    return pfrItemHtml(cls, pfrIcon(cls), c.concept, n + ' persona' + (n === 1 ? '' : 's') + ' will miss this');
+  }).join('');
+}
+
+// ---- Coach panel ----
+function dedupeCoaching(coaching) {
+  const map = new Map();
+  for (const c of (coaching || [])) {
+    const key = c.suggestion || c.reason || '';
+    if (map.has(key)) {
+      map.get(key).personas.push(c.personaName);
+    } else {
+      map.set(key, { ...c, personas: [c.personaName] });
+    }
+  }
+  return [...map.values()];
+}
+
+function renderPfrCoach(coaching) {
+  const dot  = document.getElementById('pfr-dot-coach');
+  const list = document.getElementById('pfr-list-coach');
+  const deduped = dedupeCoaching(coaching);
+  const top  = deduped.slice(0, 4);
+  dot.className = 'pfr-status-dot is-' + (top.length === 0 ? 'green' : top.length < 3 ? 'yellow' : 'red');
+  if (top.length === 0) {
+    list.innerHTML = pfrItemHtml('is-ok', '✓', 'No coaching issues found');
+    return;
+  }
+  list.innerHTML = top.map(c => {
+    const cls = c.severity === 'blocker' ? 'is-bad' : 'is-warn';
+    const section = c.section ? `<span class="pfr-coach-section">${escHtml(c.section)}</span>` : '';
+    // Show suggestion truncated to ~80 chars
+    const raw = c.suggestion || c.reason || '';
+    const short = raw.length > 80 ? raw.slice(0, 78) + '…' : raw;
+    const pills = c.personas.map(n =>
+      `<span class="pfr-coach-pill">${escHtml(n)}</span>`
+    ).join('');
+    return `<li class="${escAttr(cls)}">
+      <span class="pfr-item-icon" aria-hidden="true">${escHtml(pfrIcon(cls))}</span>
+      <span class="pfr-coach-body">
+        ${section}<span class="pfr-coach-text">${escHtml(short)}</span>
+        <span class="pfr-coach-pills">${pills}</span>
+      </span>
+    </li>`;
+  }).join('');
+}
+
+// ---- Decision Check panel ----
+function renderPfrDecisions(mirror) {
+  const dot  = document.getElementById('pfr-dot-decisions');
+  const list = document.getElementById('pfr-list-decisions');
+  if (!mirror || mirror.length === 0) {
+    dot.className = 'pfr-status-dot is-green';
+    list.innerHTML = pfrItemHtml('is-ok', '✓', 'No decision data available');
+    return;
+  }
+  const inverted  = mirror.filter(m => m.confidence === 'INVERTED').length;
+  const uncertain = mirror.filter(m => m.confidence === 'UNCERTAIN').length;
+  const correct   = mirror.filter(m => m.confidence === 'HIGH').length;
+  dot.className = 'pfr-status-dot is-' + (inverted > 0 ? 'red' : uncertain > 2 ? 'yellow' : 'green');
+
+  list.innerHTML = [
+    pfrItemHtml('is-ok',                               '✓', correct   + ' persona' + (correct   === 1 ? '' : 's') + ' will make the right call'),
+    pfrItemHtml(uncertain === 0 ? 'is-ok' : 'is-warn', pfrIcon(uncertain === 0 ? 'is-ok' : 'is-warn'), uncertain + ' uncertain — decision may be wrong'),
+    pfrItemHtml(inverted  === 0 ? 'is-ok' : 'is-bad',  pfrIcon(inverted  === 0 ? 'is-ok' : 'is-bad'),  inverted  + ' will reach the OPPOSITE conclusion'),
+  ].join('');
+}
+
+// ---- What They Heard panel ----
+function renderPfrHeard(lens) {
+  const dot  = document.getElementById('pfr-dot-heard');
+  const list = document.getElementById('pfr-list-heard');
+  if (!lens || lens.length === 0) {
+    dot.className = 'pfr-status-dot';
+    list.innerHTML = '<li>No persona data available</li>';
+    return;
+  }
+  const misreads = lens.filter(l => l.overallComprehension === 'MISREAD').length;
+  const low      = lens.filter(l => l.overallComprehension === 'LOW').length;
+  dot.className = 'pfr-status-dot is-' + (misreads > 0 ? 'red' : low > 2 ? 'yellow' : 'green');
+
+  const order = { MISREAD: 0, LOW: 1, MEDIUM: 2, HIGH: 3 };
+  const sorted = [...lens].sort((a, b) => (order[a.overallComprehension] ?? 4) - (order[b.overallComprehension] ?? 4));
+
+  const badgeCls = { MISREAD: 'is-misread', LOW: 'is-low', MEDIUM: 'is-medium', HIGH: 'is-high' };
+  list.innerHTML = sorted.map((l, i) => {
+    const extra = i >= 3 ? ' is-hidden' : '';
+    const bc = badgeCls[l.overallComprehension] ?? 'is-medium';
+    return `<li class="pfr-heard-row${escAttr(extra)}">
+      <span class="pfr-heard-avatar" style="background:${escAttr(l.color || '#ccc')};" aria-hidden="true"></span>
+      <span class="pfr-heard-name">${escHtml(l.personaName)}</span>
+      <span class="pfr-heard-arrow">→</span>
+      <span class="pfr-heard-desc">${escHtml(l.whatTheyWillDo || '')}</span>
+      <span class="pfr-heard-badge ${escAttr(bc)}">${escHtml(l.overallComprehension)}</span>
+    </li>`;
+  }).join('');
+
+  const expandBtn = document.getElementById('pfr-heard-expand');
+  if (expandBtn) expandBtn.classList.toggle('hidden', sorted.length <= 3);
+}
+
+// ---- Top Fixes ----
+function renderPfrFixes(coaching, audit, personas) {
+  const list  = document.getElementById('pfr-fixes-list');
+  const fixes = [];
+
+  dedupeCoaching(coaching).slice(0, 5).forEach(c => {
+    const text = (c.section ? c.section + ': ' : '') + (c.suggestion || c.reason || '');
+    const who = c.personas.length > 1 ? ` (${c.personas.join(', ')})` : '';
+    if (text.trim()) fixes.push(text + who);
+  });
+
+  if (fixes.length < 3 && audit && audit.detectedConcepts) {
+    const gaps = audit.personaGaps || [];
+    (audit.detectedConcepts || []).forEach(c => {
+      if (fixes.length >= 5) return;
+      const n = gaps.filter(g => g.conceptsUnknown && g.conceptsUnknown.includes(c.concept)).length;
+      if (n >= 2) fixes.push(`Define "${c.concept}" — ${n} personas will miss it`);
+    });
+  }
+
+  if (fixes.length < 2 && personas && personas.length > 0) {
+    const worst = [...personas].sort((a, b) => a.overall - b.overall)[0];
+    fixes.push(`Improve clarity for ${worst.personaName} (${worst.overall.toFixed(0)}/100) — ${worst.role}`);
+  }
+
+  if (fixes.length === 0) {
+    list.innerHTML = '<li>No critical issues — forecast looks good.</li>';
+    return;
+  }
+  list.innerHTML = fixes.slice(0, 5).map(f => `<li>${escHtml(f)}</li>`).join('');
 }

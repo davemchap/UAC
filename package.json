@@ -19,6 +19,7 @@
 		"prepare": "git config core.hooksPath .githooks",
 		"db:migrate": "bun run --env-file .env src/components/db/migrate.ts",
 		"db:seed": "bun run --env-file .env src/components/db/seed.ts",
+		"db:seed:historical": "DATABASE_URL=postgresql://aiAssistant@localhost:5432/shipsummit_dev bun run src/components/db/seed-historical.ts",
 		"db:studio": "bunx drizzle-kit studio --config=drizzle.config.ts"
 	},
 	"dependencies": {
@@ -27,6 +28,7 @@
 		"beads": "^0.2.1",
 		"drizzle-orm": "^0.45.2",
 		"hono": "^4.4.0",
+		"mammoth": "^1.12.0",
 		"postgres": "^3.4.4",
 		"puppeteer-core": "^24.40.0"
 	},

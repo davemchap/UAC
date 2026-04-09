@@ -77,6 +77,10 @@
       <span class="sc-tab-icon">&#128200;</span>
       Weekly Report
     </button>
+    <button class="sc-tab" role="tab" aria-selected="false" aria-controls="tab-preforecast" id="btn-preforecast" data-tab="preforecast">
+      <span class="sc-tab-icon">&#9889;</span>
+      Pre-Forecast Review
+    </button>
   </nav>
 
   <main class="sc-main">
@@ -282,6 +286,153 @@
       <div id="weekly-report-content"></div>
     </section>
 
+    <!-- ------------------------------------------------------------------ -->
+    <!-- TAB 8: Pre-Forecast Review                                        -->
+    <!-- ------------------------------------------------------------------ -->
+    <section class="sc-tab-panel hidden" id="tab-preforecast" role="tabpanel" aria-labelledby="btn-preforecast">
+      <div class="sc-tab-intro-block">
+        <div class="sc-tab-intro-label">Solution 8 of 8 &mdash; Pre-Publication Tool</div>
+        <strong class="sc-tab-intro-name">Pre-Forecast Review</strong>
+        <span class="sc-tab-intro-desc">Paste or upload your draft forecast before publishing. Get instant feedback from every persona — readability, knowledge gaps, decision accuracy, and top fixes in one view.</span>
+      </div>
+
+      <!-- Sticky input strip -->
+      <div class="pfr-input-strip" id="pfr-input-strip">
+        <div class="pfr-input-inner">
+          <div class="pfr-input-main">
+            <textarea
+              id="pfr-draft-textarea"
+              class="pfr-textarea"
+              aria-label="Draft forecast text"
+              placeholder="Paste your draft forecast here, then click Analyze (or press Ctrl+Enter)"
+              rows="5"
+            ></textarea>
+            <div class="pfr-input-meta">
+              <span class="pfr-word-count" id="pfr-word-count">0 words</span>
+              <span class="pfr-file-name hidden" id="pfr-file-name"></span>
+            </div>
+          </div>
+          <div class="pfr-input-controls">
+            <div>
+              <label for="pfr-danger-select" class="pfr-danger-label">Danger Rating</label>
+              <select id="pfr-danger-select" class="pfr-select">
+                <option value="">Not specified</option>
+                <option value="Low">Low</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Considerable">Considerable</option>
+                <option value="High">High</option>
+                <option value="Extreme">Extreme</option>
+              </select>
+            </div>
+            <div class="pfr-btn-row">
+              <label class="pfr-upload-btn" for="pfr-file-input" title="Upload .docx or .txt file">
+                &#128196; Upload
+                <input type="file" id="pfr-file-input" accept=".txt,.docx" class="pfr-file-hidden" />
+              </label>
+              <button id="pfr-clear-btn" class="pfr-clear-btn hidden" aria-label="Clear">&#10005;</button>
+              <button id="pfr-analyze-btn" class="pfr-analyze-btn">&#9889; Analyze</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content wrapper (max-width container) -->
+      <div class="pfr-wrap">
+
+        <!-- Empty state -->
+        <div class="pfr-empty" id="pfr-empty">
+          <div class="pfr-empty-icon">&#9889;</div>
+          <p class="pfr-empty-hint">Paste a draft above and click Analyze</p>
+          <ul class="pfr-empty-list">
+            <li>Readability scored against a Grade&nbsp;8 target</li>
+            <li>Knowledge gaps across all 9 personas</li>
+            <li>Decision accuracy — will readers make the right call?</li>
+            <li>Prioritized fixes, max 5, before you publish</li>
+          </ul>
+        </div>
+
+        <!-- Results -->
+        <div class="pfr-results hidden" id="pfr-results">
+
+          <!-- Readiness banner -->
+          <div class="pfr-banner" id="pfr-banner" role="status" aria-live="polite">
+            <span class="pfr-banner-icon" id="pfr-banner-icon"></span>
+            <div class="pfr-banner-track"><div class="pfr-banner-fill" id="pfr-banner-fill"></div></div>
+            <span class="pfr-banner-label" id="pfr-banner-label"></span>
+          </div>
+
+          <!-- Persona voice quote -->
+          <div class="pfr-voice hidden" id="pfr-voice" aria-live="polite">
+            <div class="pfr-voice-avatar" id="pfr-voice-avatar"></div>
+            <div class="pfr-voice-bubble">
+              <div class="pfr-voice-name" id="pfr-voice-name"></div>
+              <div class="pfr-voice-quote" id="pfr-voice-quote">
+                <span class="pfr-voice-loading">Thinking as this reader…</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2×2 synthesis grid -->
+          <div class="pfr-grid">
+
+            <div class="pfr-panel">
+              <div class="pfr-panel-header">
+                <span class="pfr-status-dot" id="pfr-dot-readability"></span>
+                <strong>Readability</strong>
+              </div>
+              <ul class="pfr-panel-list" id="pfr-list-readability"></ul>
+            </div>
+
+            <div class="pfr-panel">
+              <div class="pfr-panel-header">
+                <span class="pfr-status-dot" id="pfr-dot-gaps"></span>
+                <strong>Knowledge Gaps</strong>
+              </div>
+              <ul class="pfr-panel-list" id="pfr-list-gaps"></ul>
+            </div>
+
+            <div class="pfr-panel">
+              <div class="pfr-panel-header">
+                <span class="pfr-status-dot" id="pfr-dot-coach"></span>
+                <strong>Coach Notes</strong>
+              </div>
+              <ul class="pfr-panel-list" id="pfr-list-coach"></ul>
+            </div>
+
+            <div class="pfr-panel">
+              <div class="pfr-panel-header">
+                <span class="pfr-status-dot" id="pfr-dot-decisions"></span>
+                <strong>Decision Check</strong>
+              </div>
+              <ul class="pfr-panel-list" id="pfr-list-decisions"></ul>
+            </div>
+
+          </div>
+
+          <!-- What They Heard — full width -->
+          <div class="pfr-panel pfr-panel-wide">
+            <div class="pfr-panel-header">
+              <span class="pfr-status-dot" id="pfr-dot-heard"></span>
+              <strong>What They Heard</strong>
+              <button class="pfr-expand-btn" id="pfr-heard-expand" aria-expanded="false">Show all &#9660;</button>
+            </div>
+            <ul class="pfr-panel-list" id="pfr-list-heard"></ul>
+          </div>
+
+          <!-- Top fixes — full width -->
+          <div class="pfr-panel pfr-panel-wide pfr-panel-fixes">
+            <div class="pfr-panel-header">
+              <span>&#9889;</span>
+              <strong>Do these before you publish</strong>
+            </div>
+            <ul class="pfr-fixes-list" id="pfr-fixes-list"></ul>
+          </div>
+
+        </div><!-- /pfr-results -->
+      </div><!-- /pfr-wrap -->
+
+    </section>
+
   <!-- -------------------------------------------------------------------- -->
   <!-- About This App Modal                                                 -->
   <!-- -------------------------------------------------------------------- -->
@@ -299,7 +450,7 @@
         </section>
 
         <section class="sc-about-section">
-          <h3>The 7 Solutions</h3>
+          <h3>The 8 Solutions</h3>
           <dl class="sc-about-tabs-list">
             <dt>&#9685; Readability Lens</dt>
             <dd>Scores each forecast for clarity, jargon load, and actionability across all personas. Colored underlines show phrases that may confuse a specific reader. Click persona chips to toggle highlights on/off.</dd>
@@ -321,6 +472,9 @@
 
             <dt>&#128200; Weekly Report</dt>
             <dd>Aggregated quality trends over a calendar week, broken down by forecaster and zone. Shows improving/declining/stable trends vs. the prior 3-week average. Requires at least one week of live data.</dd>
+
+            <dt>&#9889; Pre-Forecast Review</dt>
+            <dd>Pre-publication draft review for forecasters. Paste or upload a draft forecast before publishing and get instant persona-based feedback: readability score, knowledge gaps, predicted decision accuracy, and prioritized coaching notes — all synthesized into one glanceable view optimized for the pre-dawn publishing window.</dd>
           </dl>
         </section>
 

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import mammoth from "mammoth";
 import {
 	scoreForecast,
 	simulateJourney,
@@ -14,6 +15,7 @@ import {
 	getAvailableReportDates,
 	getForecastForScoringByZoneAndDate,
 	generateWeeklyReport,
+	reviewDraft,
 	type Persona,
 	type PersonaId,
 } from "../../../components/scorecard";
@@ -318,6 +320,66 @@ scorecard.get("/:zoneSlug", async (c) => {
 			scoredAt: new Date().toISOString(),
 		},
 	});
+});
+
+/**
+ * POST /api/scorecard/review
+ * Runs full persona analysis on a draft forecast text (no DB required).
+ * Body: { draftText: string, dangerRating: string, problems: string[], bottomLine?: string }
+ */
+scorecard.post("/review", async (c) => {
+	const body = await c.req.json<{
+		draftText: string;
+		dangerRating?: string;
+		problems?: string[];
+		bottomLine?: string;
+	}>();
+
+	if (!body.draftText.trim()) {
+		return c.json({ success: false, error: "draftText is required" }, 400);
+	}
+
+	const personas = await loadScoringPersonas();
+	const result = reviewDraft(
+		{
+			draftText: body.draftText,
+			dangerRating: body.dangerRating ?? "",
+			problems: body.problems ?? [],
+			bottomLine: body.bottomLine,
+		},
+		personas,
+	);
+
+	return c.json({ success: true, data: result });
+});
+
+/**
+ * POST /api/scorecard/review/parse
+ * Extracts plain text from an uploaded .docx or .txt file.
+ * Returns { text: string } — client displays text in the draft textarea.
+ */
+scorecard.post("/review/parse", async (c) => {
+	const formData = await c.req.formData();
+	const file = formData.get("file");
+
+	if (!(file instanceof File)) {
+		return c.json({ success: false, error: "No file uploaded" }, 400);
+	}
+
+	const name = file.name.toLowerCase();
+	const bytes = await file.arrayBuffer();
+
+	if (name.endsWith(".txt")) {
+		const text = new TextDecoder().decode(bytes);
+		return c.json({ success: true, text });
+	}
+
+	if (name.endsWith(".docx")) {
+		const result = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
+		return c.json({ success: true, text: result.value });
+	}
+
+	return c.json({ success: false, error: "Unsupported file type. Upload a .docx or .txt file." }, 400);
 });
 
 export default scorecard;

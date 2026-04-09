@@ -82,15 +82,20 @@ export interface ScorecardResult {
  */
 export function normalizeText(text: string | null | undefined): string {
 	if (!text) return "";
-	return text
-		.replace(/&nbsp;/g, " ")
-		.replace(/&amp;/g, "&")
-		.replace(/&lt;/g, "<")
-		.replace(/&gt;/g, ">")
-		.replace(/&[a-z]+;/gi, " ")
-		.replace(/\r/g, "")
-		.replace(/[ \t]{2,}/g, " ")
-		.trim();
+	return (
+		text
+			.replace(/&nbsp;/g, " ")
+			.replace(/&amp;/g, "&")
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&[a-z]+;/gi, " ")
+			// Strip HTML tags — the UAC API returns HTML-formatted text for newer forecasts.
+			// Bounded quantifier {0,2000} avoids catastrophic backtracking on unterminated tags.
+			.replace(/<[^>]{0,2000}>/g, " ")
+			.replace(/\r/g, "")
+			.replace(/[ \t]{2,}/g, " ")
+			.trim()
+	);
 }
 
 function countWords(text: string): number {

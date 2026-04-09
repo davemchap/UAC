@@ -334,6 +334,7 @@ export async function clonePersona(
 	newKey: string,
 	name: string,
 	role: string,
+	newAvatarSeed?: string,
 ): Promise<PersonaRecord | null> {
 	const source = await getPersonaByKey(sourceKey);
 	if (!source) return null;
@@ -364,7 +365,7 @@ export async function clonePersona(
 			active: source.active,
 			tags: [...source.tags],
 			isBuiltIn: false,
-			avatarSeed: source.avatarSeed,
+			avatarSeed: newAvatarSeed ?? source.avatarSeed,
 			avatarStyle: source.avatarStyle,
 		})
 		.returning();
