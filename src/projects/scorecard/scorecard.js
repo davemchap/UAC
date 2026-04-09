@@ -78,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
   wireDrawerClose();
   wireTrainerModal();
   wireAboutModal();
-  wireDailyReport();
   wireWeeklyReport();
   wirePreForecastReview();
 });
@@ -97,7 +96,6 @@ async function loadData(date) {
     allData = json.data ?? [];
     populateForecasterSelect(allData);
     renderSummaryOrZone();
-    refreshDailyDateSelect();
   } catch (err) {
     showError(`Failed to load scorecard data: ${err.message}`);
   } finally {
@@ -332,8 +330,6 @@ function setGlobalDate(date) {
   if (REPORT_TABS.has(activeTab)) {
     const resolved = date ?? getTodayIso();
     if (activeTab === "daily") {
-      const sel = document.getElementById("daily-date-select");
-      if (sel && sel.value !== resolved) sel.value = resolved;
       loadDailyReport(resolved);
     } else if (activeTab === "weekly") {
       const inp = document.getElementById("weekly-date-input");
@@ -465,8 +461,7 @@ function switchTab(tab) {
   if (tab === "daily") {
     const el = document.getElementById("daily-report-content");
     if (el && el.innerHTML === "") {
-      const dateSelect = document.getElementById("daily-date-select");
-      loadDailyReport(dateSelect?.value || undefined);
+      loadDailyReport(globalSelectedDate ?? getTodayIso());
     }
   }
   if (tab === "weekly") {
@@ -2884,43 +2879,10 @@ function wireAboutModal() {
 // Daily Report (Tab 6)
 // ---------------------------------------------------------------------------
 
-function refreshDailyDateSelect() {
-  const dateSelect = document.getElementById("daily-date-select");
-  if (!dateSelect) return;
-  fetch("/api/scorecard/report/available-dates")
-    .then((r) => r.ok ? r.json() : Promise.resolve({ data: [] }))
-    .then((json) => {
-      const dates = json.data ?? [];
-      dateSelect.innerHTML = dates.length === 0
-        ? `<option value="">No data available</option>`
-        : dates.map((d) => `<option value="${escHtml(d)}">${escHtml(d)}</option>`).join("");
-      // Sync to global date if one is selected and available
-      if (globalSelectedDate && dates.includes(globalSelectedDate)) {
-        dateSelect.value = globalSelectedDate;
-      } else if (dates.length > 0) {
-        dateSelect.value = dates[0];
-      }
-    })
-    .catch(() => { dateSelect.innerHTML = `<option value="">Could not load dates</option>`; });
-}
-
-function wireDailyReport() {
-  const dateSelect = document.getElementById("daily-date-select");
-  const loadBtn = document.getElementById("daily-load-btn");
-  if (!dateSelect || !loadBtn) return;
-  loadBtn.addEventListener("click", () => {
-    const date = dateSelect.value;
-    if (date) setGlobalDate(date === getTodayIso() ? null : date);
-    else loadDailyReport(undefined);
-  });
-}
 
 async function loadDailyReport(date) {
   const el = document.getElementById("daily-report-content");
   if (!el) return;
-  // Sync dropdown to match the requested date
-  const dateSelect = document.getElementById("daily-date-select");
-  if (dateSelect && date && dateSelect.value !== date) dateSelect.value = date;
   el.innerHTML = `<div class="sc-report-loading"><div class="sc-spinner"></div><p>Loading daily report…</p></div>`;
   try {
     const url = date ? `/api/scorecard/report/daily?date=${encodeURIComponent(date)}` : "/api/scorecard/report/daily";
